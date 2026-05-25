@@ -24,7 +24,7 @@ Benchmarks run on the AMD Ryzen Strix Halo APU (128 GB system memory, 96 GB allo
 
 | Benchmark Category | Scored Performance Metrics | Status / Target |
 |---|---|---|
-| **Planning Quality** | **82 / 84** (Scorecard Rubric) | Clear, rigorous structure; zero hallucinations |
+| **Planning Quality** | **82 / 84** (Scorecard Rubric) | Clear, rigorous structure; one minor regulatory-date miss |
 | **Tool Execution** | **3 / 3 Passed** (Nonce Gate Validation) | Reliable autonomous tool calling; no code printing |
 | **Coding Reliability** | **3 / 3 E2E Passed** (State-carrying 4-step Grader) | Messy CSV telemetry QA & hex decoding |
 | **Inference Speed** | **44.2 tok/s** (ROCm) / **52.1 tok/s** (Vulkan RADV) | High-speed Mixture-of-Experts (MoE) generation |

@@ -55,7 +55,10 @@ While 128 GB of RAM is the ideal "workhorse" setup, you can adapt these settings
 | System RAM | Optimal GTT Size | Recommended GTT Setting | Recommended Model |
 |---|---|---|---|
 | **128 GB** | **96 GB** | `gttsize=98304` | Qwen 3.6 35B MoE (MXFP4) |
-| **64 GB** | **48 GB** | `gttsize=49152` | Qwen 3.6 27B Dense (Q4_K_M) |
-| **32 GB** | **20 GB** | `gttsize=20480` | Qwen 3.6 7B Dense (Q6_K) |
+| **64 GB** | **48 GB** | `gttsize=49152` | Qwen 3.6 27B Dense (Q4_K_M) *— projected* |
+| **32 GB** | **20 GB** | `gttsize=20480` | Qwen 3.6 7B Dense (Q6_K) *— projected* |
+
+> [!NOTE]
+> * **Projected Models:** The 27B and 7B dense configurations are theoretical suggestions for smaller memory footprints and have not been benchmarked on this hardware yet.
 
 In the next chapter, we will walk through the development journey—the mistakes made, the dead ends hit, and how we arrived at this simple setup.

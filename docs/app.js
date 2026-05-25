@@ -168,37 +168,37 @@ function initModelFinder() {
     },
     // === 64 GB Setup (Dense models only) ===
     '64-code': {
-      name: "Qwen3-Coder-Next (Q4_K_M Quant)",
-      mode: "Coding Active",
-      file: "Qwen3-Coder-Next-Q4_K_M.gguf",
-      size: "18.2 GB",
-      speed: "~41.0 tokens/sec",
+      name: "Qwen3.6-27B (Q6_K, Dense) — projected",
+      mode: "Coding (projected, not yet benchmarked)",
+      file: "Qwen3.6-27B-Q6_K.gguf",
+      size: "24.4 GB (projected)",
+      speed: "~41.0 tokens/sec (projected)",
       reasoning: "Gated reasoning cap (256)",
-      command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3-Coder-Next-Q4_K_M.gguf",
+      command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.6-27B-Q6_K.gguf",
       hermes: "thinking_budget_tokens: 256\nmax_tokens: 8192",
-      rationale: "A 64GB RAM system has insufficient context buffer headroom for large MoE models. The Qwen3-Coder-Next model fits easily and provides solid multi-step tool-calling capability."
+      rationale: "A 64GB RAM system (≈48GB GTT) cannot hold the large MoE models. The validated CODE challenger, Qwen3-Coder-Next (UD-Q4_K_XL, 3/3 gate), is ~49.6GB and therefore a 128GB-class model — it does NOT fit 64GB. For a 64GB host, a dense ~27B is the realistic coding option, but note this configuration has not yet been benchmarked on this hardware."
     },
     '64-extract': {
-      name: "Qwen3.6-7B (Q6_K Quant)",
-      mode: "Fast Check & Extraction",
+      name: "Qwen3.6-7B (Q6_K) — projected",
+      mode: "Fast Check & Extraction (projected)",
       file: "Qwen3.6-7B-Q6_K.gguf",
-      size: "5.8 GB",
-      speed: "~72.0 tokens/sec",
+      size: "5.8 GB (projected)",
+      speed: "~72.0 tokens/sec (projected)",
       reasoning: "Disabled",
       command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.6-7B-Q6_K.gguf --ctx-size 16384",
       hermes: "thinking_budget_tokens: 0\nmax_tokens: 2048",
-      rationale: "A lightweight, extremely fast model for simple data mapping and format validation. Running at 7B footprint leaves ample RAM for other host processes."
+      rationale: "A lightweight, fast model for simple data mapping and format validation, leaving ample RAM for other host processes. Note: this small-model configuration has not yet been benchmarked on this hardware — figures are estimates."
     },
     '64-synthesis': {
-      name: "Qwen3.6-27B (Q6_K Quant)",
-      mode: "Standard Dense Synthesis",
+      name: "Qwen3.6-27B (Q6_K, Dense) — projected",
+      mode: "Standard Dense Synthesis (projected)",
       file: "Qwen3.6-27B-Q6_K.gguf",
-      size: "24.4 GB",
-      speed: "~35.0 tokens/sec",
+      size: "24.4 GB (projected)",
+      speed: "~35.0 tokens/sec (projected)",
       reasoning: "Reasoning active",
       command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.6-27B-Q6_K.gguf --ctx-size 16384",
       hermes: "thinking_budget_tokens: 512\nmax_tokens: 4096",
-      rationale: "For report synthesis on a 64GB RAM system, the dense Qwen3.6-27B Q6 quant provides high semantic accuracy without risking GTT memory crashes."
+      rationale: "For report synthesis on a 64GB RAM system, a dense ~27B Q6 quant is the realistic option without risking GTT memory crashes. Note: this configuration has not yet been benchmarked on this hardware — figures are estimates."
     }
   };
 
@@ -254,17 +254,17 @@ function initBenchmarkChart() {
           { x: 44.2, y: 82, label: 'Qwen 3.6 35B MoE (Think-On)' },
           { x: 43.7, y: 82, label: 'Qwen 3.6 35B MoE (Think-Off)' },
           { x: 47.3, y: 79, label: 'Qwen 3.5 35B MoE (Think-On)' },
-          { x: 16.5, y: 84, label: 'Qwen 3.5 122B MoE (Think-On)' }
+          { x: 16.5, y: 80, label: 'Qwen 3.5 122B MoE (Think-On)' }
         ],
         backgroundColor: '#06b6d4', // Cyan
         pointRadius: 8,
         pointHoverRadius: 10
       },
       {
-        label: 'Dense Models / Competitors',
+        label: 'Other Models',
         data: [
-          { x: 42.5, y: 76, label: 'Qwen 3 Coder 30B (Failed Gate)' },
-          { x: 41.0, y: 77, label: 'Standard Coder 27B' }
+          { x: 42.5, y: 76, label: 'Qwen3-Coder-Next (3/3 Pass, CODE challenger)' },
+          { x: 41.0, y: 77, label: 'Qwen3.6-27B Dense (projected)' }
         ],
         backgroundColor: '#9ca3af', // Gray
         pointRadius: 6,

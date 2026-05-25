@@ -14,7 +14,7 @@ Below is the benchmark matrix plotted from our testing runs:
 
 ### **Key Takeaways from the Benchmarks:**
 1. **The MoE Workhorse (Qwen 3.6 35B):** Achieves a high quality score (82/84) while maintaining a fast speed of ~44 tokens/second. This is the optimal default model for local agent workflows.
-2. **The Quality Escalation (Qwen 3.5 122B):** Delivers the highest quality score (84/84) for complex, high-stakes report writing, but runs slower (~16 tokens/second) and requires 70 GB of VRAM pool.
+2. **The Quality Escalation (Qwen 3.5 122B):** Delivers the highest quality score (80/84) for complex, high-stakes report writing, but runs slower (~16 tokens/second) and requires 70 GB of VRAM pool.
 3. **The Dense Competitors:** Are generally outperformed by the Mixture-of-Experts (MoE) models at equivalent sizes, as MoE layers route calculations dynamically, keeping token generation speeds high.
 
 ---
