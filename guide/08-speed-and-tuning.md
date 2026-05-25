@@ -47,10 +47,10 @@ AMD APUs can run models faster using the open-source **Vulkan (RADV)** driver in
 
 ### **How to build llama-server with Vulkan support:**
 ```bash
-# Clone the llama.cpp project matching the stable release (b9247)
+# Clone the llama.cpp project matching the stable release (<LEMONADE_BUILD_TAG>)
 git clone https://github.com/ggerganov/llama.cpp
 cd llama.cpp
-git checkout b9247
+git checkout <LEMONADE_BUILD_TAG>
 
 # Build using Vulkan cmake flags
 cmake -B build-vulkan -DGGML_VULKAN=ON

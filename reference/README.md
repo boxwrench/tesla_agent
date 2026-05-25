@@ -25,17 +25,17 @@ To reproduce these results, use the exact pinned versions below:
 
 ### **Model GGUF File**
 * **Model ID:** Qwen 3.6 35B Mixture-of-Experts (MXFP4 Quant)
-* **Download Repository:** [unsloth/Qwen3.6-35B-A3B-GGUF](https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF)
-* **Filename:** `Qwen3.6-35B-A3B-MXFP4_MOE.gguf`
+* **Download Repository:** `<MODEL_HF_REPO>`
+* **Filename:** `<MODEL_FILENAME>`
 * **Download Command:**
   ```bash
-  huggingface-cli download unsloth/Qwen3.6-35B-A3B-GGUF Qwen3.6-35B-A3B-MXFP4_MOE.gguf --local-dir ~/models/qwen3.6-35b-a3b
+  huggingface-cli download <MODEL_HF_REPO> <MODEL_FILENAME> --local-dir ~/models/qwen3.6-35b-a3b
   ```
-* **SHA256 Checksum:** `a8e99fe4bcf5a0eeb0d6e0a8e99fe43cda05eb6077857f11821503054a20a057`
+* **SHA256 Checksum:** `<SHA256_TBD>`
 
 ### **Inference Server Backend**
-* **Inference Engine:** `llama.cpp` (b9247 Stable Release)
-* **Git Commit Hash:** `57ebaf4edbf6c4cace2deaf650195b28d4dfa91`
+* **Inference Engine:** `llama.cpp` (<LEMONADE_BUILD_TAG> Stable Release)
+* **Git Commit Hash:** `<LEMONADE_COMMIT_HASH_TBD>`
 * **ROCm Stable Binary Package:** Downloaded via Lemonade backend manager:
   ```bash
   lemonade backends install llamacpp:rocm
