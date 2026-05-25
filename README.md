@@ -80,10 +80,12 @@ To get started, follow the guide chapters in order, or execute these quick setup
 
 ---
 
-## 4. Web-Based Dashboard
-This repository includes a gorgeous, local-first interactive guide and log verifier dashboard. To open it:
-* Simply open `web/index.html` in your web browser.
-* Use it to select recommended models, track your setup steps, and paste log responses to test them against the verification checks.
+## 4. Interactive Web Dashboard
+This repository includes a gorgeous interactive guide and log verifier dashboard. You can access it in two ways:
+* **Online:** Visit the live deployment at [boxwrench.github.io/tesla_agent](https://boxwrench.github.io/tesla_agent/)
+* **Offline/Local:** Simply open the [docs/index.html](docs/index.html) file in any web browser.
+
+Use the dashboard to select recommended models, follow interactive setup steps with troubleshooting assistance, and paste log outputs to test them against the Nonce Gate verifier.
 
 ---
 
