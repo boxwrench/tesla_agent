@@ -1,5 +1,5 @@
 /* ==============================================================================
-   style.css — Premium Dark Mode Theme for teslaagent Web Dashboard
+   style.css — Premium Dark Mode Theme for tesla_agent Web Dashboard
    ============================================================================== */
 
 :root {
@@ -1165,3 +1165,35 @@ body {
   50% { transform: scale(1.15); opacity: 0.6; }
   100% { transform: scale(1); opacity: 1; }
 }
+
+/* Disclaimer Banner Styling */
+.disclaimer-banner {
+  border-left: 4px solid var(--color-danger) !important;
+  background-color: var(--color-danger-bg) !important;
+  margin-bottom: 24px;
+  animation: fadeIn 0.4s ease-out;
+}
+.disclaimer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.disclaimer-header h3 {
+  margin: 0;
+  color: var(--color-danger);
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+}
+.disclaimer-icon {
+  color: var(--color-danger);
+  font-size: 18px;
+}
+.disclaimer-banner p {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+

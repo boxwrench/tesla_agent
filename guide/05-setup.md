@@ -90,7 +90,7 @@ GPU Environment Configured:
 
 ### **What to do if it fails:**
 * **Error: `bash: scripts/setup/set_hsa_env.sh: No such file or directory`**
-  Make sure you are running the command from the root of the `teslaagent` directory.
+  Make sure you are running the command from the root of the `tesla_agent` directory.
 * **Warning: Command works in one terminal but fails in another**
   Environment variables are terminal-specific. If you open a new window, you **must** run `source scripts/setup/set_hsa_env.sh` again before executing model commands.
 

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="teslaagent: Interactive Guide for Local Agentic AI on AMD Strix Halo Hardware. Fully private, domain-portable, and tailored for water professionals.">
-  <title>teslaagent // Local Agentic AI Dashboard</title>
+  <meta name="description" content="tesla_agent: Interactive Guide for Local Agentic AI on AMD Strix Halo Hardware. Fully private, domain-portable, and tailored for water professionals.">
+  <title>tesla_agent // Local Agentic AI Dashboard</title>
   
   <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,7 +29,7 @@
       <div class="sidebar-header">
         <div class="logo">
           <i class="fa-solid fa-water-ladders logo-icon"></i>
-          <span class="logo-text">tesla<span class="highlight">agent</span></span>
+          <span class="logo-text">tesla_<span class="highlight">agent</span></span>
         </div>
         <p class="tagline">Local Agentic AI for Utilities</p>
       </div>
@@ -83,6 +83,14 @@
 
         <!-- ================= OVERVIEW TAB ================= -->
         <section id="tab-overview" class="tab-content active">
+          <div class="disclaimer-banner card">
+            <div class="disclaimer-header">
+              <i class="fa-solid fa-triangle-exclamation disclaimer-icon"></i>
+              <h3>Critical Infrastructure Warning & Legal Disclaimer</h3>
+            </div>
+            <p><strong>Educational Prototype Only:</strong> This interactive site, its guides, scripts, and recommended models are designed strictly for educational research on consumer hardware. They are <strong>NOT</strong> certified, tested, or safe for automated control, process adjustment, regulatory reporting, or direct operations of public drinking water, wastewater, SCADA, or any critical utility infrastructure. Use at your own risk.</p>
+          </div>
+
           <div class="welcome-card">
             <h2>Welcome to Your Agentic AI Guide</h2>
             <p>This interactive workspace teaches you how to run a private, local agentic AI workflow on consumer AMD hardware. No API keys, no external cloud dependencies, and 100% data privacy.</p>
@@ -527,6 +535,14 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
             <div class="card">
               <h2>Strix Halo Benchmark Matrix</h2>
               <p>Performance comparison on AMD APU system (128GB total RAM, 96GB GTT allocated):</p>
+              <div class="stack-note-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
+                <p style="margin: 0; font-size: 0.85rem; color: #a1a1aa; line-height: 1.4;">
+                  <strong style="color: #fff;"><i class="fa-solid fa-layer-group"></i> Benchmark Stack:</strong><br>
+                  • <strong>Hardware:</strong> AMD Ryzen Strix Halo APU (gfx1151), 128 GB LPDDR5X RAM (96 GB GTT allocated)<br>
+                  • <strong>Backend:</strong> llama.cpp/llama-server (<code style="color: #06b6d4;">b9247</code>) served via ROCm 7.1 / Vulkan (Mesa RADV)<br>
+                  • <strong>Parameters:</strong> Temp = 0 (greedy decoding), context budget = 8k-32k, Flash Attention enabled
+                </p>
+              </div>
               
               <div class="table-container">
                 <table class="benchmark-table">
@@ -569,11 +585,18 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                       <td class="pass">3 / 3</td>
                     </tr>
                     <tr>
-                      <td>Qwen 3 Coder 30B (Q4_K_M)</td>
+                      <td>Qwen3-Coder-Next (Q4_K_M)</td>
                       <td>19.8 GB</td>
-                      <td>N/A</td>
+                      <td>76 / 84</td>
                       <td>42.5 t/s</td>
                       <td class="fail">0 / 3</td>
+                    </tr>
+                    <tr>
+                      <td>Qwen3.6-27B (Q6_K, Dense)</td>
+                      <td>24.4 GB</td>
+                      <td>77 / 84</td>
+                      <td>41.0 t/s</td>
+                      <td class="pass">3 / 3</td>
                     </tr>
                   </tbody>
                 </table>

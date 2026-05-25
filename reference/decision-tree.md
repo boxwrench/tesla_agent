@@ -20,11 +20,11 @@ graph TD
     %% 64 GB Branch
     RAM64 --> Goal64["What is the primary task?"]
     
-    Goal64 -->|Coding & Multi-Step Logic| Code64["Qwen 3.6 27B Coder (Q4_K_M)<br/>• Lower context footprint<br/>• thinking_budget_tokens: 256"]
+    Goal64 -->|Coding & Multi-Step Logic| Code64["Qwen3-Coder-Next (Q4_K_M)<br/>• Lower context footprint<br/>• thinking_budget_tokens: 256"]
     
-    Goal64 -->|Formal Report Synthesis| Synth64["Qwen 3.6 27B Coder (Q6_K)<br/>• Higher semantic quality<br/>• max_tokens: 4096"]
+    Goal64 -->|Formal Report Synthesis| Synth64["Qwen3.6-27B (Q6_K, dense non-coder)<br/>• Higher semantic quality<br/>• max_tokens: 4096"]
     
-    Goal64 -->|Fast QA & Extraction| Ext64["Qwen 3.6 7B Coder (Q6_K)<br/>• Extremely fast decode<br/>• minimal CPU overhead"]
+    Goal64 -->|Fast QA & Extraction| Ext64["Qwen3.6-7B (Q6_K)<br/>• Extremely fast decode<br/>• minimal CPU overhead"]
 ```
 
 ---

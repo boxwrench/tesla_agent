@@ -1,6 +1,6 @@
 # Glossary
 
-This glossary defines the machine learning, system driver, and hardware terms used throughout the `teslaagent` guide in plain language.
+This glossary defines the machine learning, system driver, and hardware terms used throughout the `tesla_agent` guide in plain language.
 
 ---
 

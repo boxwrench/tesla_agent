@@ -6,7 +6,13 @@ This document contains raw performance tables, version pins with fetchable links
 
 ## 1. Strix Halo Performance Benchmarks
 
-The following table summarizes the speed and quality benchmarks run on the host system (128 GB RAM, 96 GB GTT allocated, temperature=0, greedy):
+The following table summarizes the speed and quality benchmarks run on the host system:
+
+> [!NOTE]
+> **Benchmark Environment Stack:**
+> * **Hardware:** AMD Ryzen Strix Halo APU (gfx1151), 128 GB LPDDR5X RAM (96 GB GTT memory pool allocated)
+> * **Inference Engine:** llama.cpp/llama-server (`b9247`) stable backend
+> * **Parameters & Drivers:** Temp = 0 (greedy decoding), context buffer = 8,192 to 32,768, Flash Attention enabled, run via ROCm 7.1 and Mesa/RADV Vulkan.
 
 | Model & Quantization | Size | Context Size | Quality (Scorecard) | Generation Speed | Nonce Gate | Status / Verdict |
 |---|---|---|---|---|---|---|
@@ -14,8 +20,8 @@ The following table summarizes the speed and quality benchmarks run on the host 
 | **Qwen 3.6 35B MoE (Vulkan RADV)** | 21.7 GB | 32,768 | **82 / 84** | **52.1 tok/s** (RADV) | **3 / 3 Pass** | **Recommended speed upgrade** |
 | **Qwen 3.5 122B MoE (MXFP4)** | 70.0 GB | 8,192 | **84 / 84** | **16.5 tok/s** (ROCm) | **3 / 3 Pass** | **Quality escalation** |
 | **Qwen 3.5 35B MoE (MXFP4)** | 21.0 GB | 8,192 | **79 / 84** | **47.3 tok/s** (ROCm) | **3 / 3 Pass** | Retained for regression tests |
-| **Qwen 3 Coder 30B (Q4_K_M)** | 19.8 GB | 16,384 | 76 / 84 | 42.5 tok/s (ROCm) | 0 / 3 Fail | Rejected (failed tool calls) |
-| **Standard Coder 27B (Q6_K)** | 24.4 GB | 16,384 | 77 / 84 | 41.0 tok/s (ROCm) | 3 / 3 Pass | 64GB host option |
+| **Qwen3-Coder-Next (Q4_K_M)** | 19.8 GB | 16,384 | 76 / 84 | 42.5 tok/s (ROCm) | 0 / 3 Fail | Rejected (failed tool calls) |
+| **Qwen3.6-27B (Q6_K, dense)** | 24.4 GB | 16,384 | 77 / 84 | 41.0 tok/s (ROCm) | 3 / 3 Pass | 64GB host option (dense non-coder) |
 
 ---
 

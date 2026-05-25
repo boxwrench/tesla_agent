@@ -1,8 +1,34 @@
-# teslaagent // Local Agentic AI for Utilities
+# tesla_agent // Local Agentic AI for Utilities
 
-Welcome to **teslaagent**! This repository is a clean-room, plug-and-play template designed to teach **water treatment operators and utility professionals** how to build and run local, private agentic AI workflows on consumer AMD hardware.
+> [!IMPORTANT]
+> **Explore the Interactive Guide & Dashboard Live at:**  
+> 👉 **[boxwrench.github.io/tesla_agent](https://boxwrench.github.io/tesla_agent/)**
+
+Welcome to **tesla_agent**! This repository is a clean-room, plug-and-play template designed to teach **water treatment operators and utility professionals** how to build and run local, private agentic AI workflows on consumer AMD hardware.
 
 This is the guide we wish we had when we started: verbose, explanatory, data-driven, and honest about what didn't work.
+
+---
+
+## ⚠️ Legal Disclaimer & Warning
+
+> [!CAUTION]
+> **CRITICAL INFRASTRUCTURE WARNING:** This repository and its associated scripts, guides, and models are educational resources and research prototypes only. They are **NOT** certified, approved, or designed for use in real-time control, automated process adjustment, regulatory reporting, or direct operations of public drinking water systems, wastewater treatment facilities, municipal SCADA systems, or any other critical infrastructure.
+> 
+> The code, data, and models are provided **"AS IS"** without warranties of any kind, express or implied. Under no circumstances shall the authors or copyright holders be liable for any operational failures, water quality compliance violations, health hazards, equipment damage, or legal penalties resulting from the use of this software.
+
+---
+
+## 📊 Headline Performance Statistics
+Benchmarks run on the AMD Ryzen Strix Halo APU (128 GB system memory, 96 GB allocated VRAM pool):
+
+| Benchmark Category | Scored Performance Metrics | Status / Target |
+|---|---|---|
+| **Planning Quality** | **82 / 84** (Scorecard Rubric) | Clear, rigorous structure; zero hallucinations |
+| **Tool Execution** | **3 / 3 Passed** (Nonce Gate Validation) | Reliable autonomous tool calling; no code printing |
+| **Coding Reliability** | **3 / 3 E2E Passed** (State-carrying 4-step Grader) | Messy CSV telemetry QA & hex decoding |
+| **Inference Speed** | **44.2 tok/s** (ROCm) / **52.1 tok/s** (Vulkan RADV) | High-speed Mixture-of-Experts (MoE) generation |
+| **Memory Footprint** | **21.7 GB** loaded weight profile | Fits in Strix Halo GTT pool with 32k context |
 
 ---
 
@@ -16,9 +42,10 @@ This is the guide we wish we had when we started: verbose, explanatory, data-dri
 ## 2. Directory Structure
 
 ```text
-teslaagent/
+tesla_agent/
 │
 ├── README.md                      # Front door: what, who, and reading order
+├── LICENSE                        # CC BY-NC 4.0 (Attribution Required, Non-Commercial)
 │
 ├── guide/                         # THE TEACHING GUIDE (Read in order)
 │   ├── 01-what-is-agentic-ai.md   # Core concepts (agents, tool use)

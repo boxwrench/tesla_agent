@@ -1,5 +1,5 @@
 /* ==============================================================================
-   app.js — Interactive Client Logic for teslaagent Web Dashboard
+   app.js — Interactive Client Logic for tesla_agent Web Dashboard
    ============================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -168,18 +168,18 @@ function initModelFinder() {
     },
     // === 64 GB Setup (Dense models only) ===
     '64-code': {
-      name: "Qwen 3.6 27B Coder (Q4_K_M Quant)",
+      name: "Qwen3-Coder-Next (Q4_K_M Quant)",
       mode: "Coding Active",
-      file: "Qwen3.6-27B-Q4_K_M.gguf",
+      file: "Qwen3-Coder-Next-Q4_K_M.gguf",
       size: "18.2 GB",
       speed: "~41.0 tokens/sec",
       reasoning: "Gated reasoning cap (256)",
-      command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.6-27B-Q4_K_M.gguf",
+      command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3-Coder-Next-Q4_K_M.gguf",
       hermes: "thinking_budget_tokens: 256\nmax_tokens: 8192",
-      rationale: "A 64GB RAM system has insufficient context buffer headroom for large MoE models. The 27B dense model fits easily and provides solid multi-step tool-calling capability."
+      rationale: "A 64GB RAM system has insufficient context buffer headroom for large MoE models. The Qwen3-Coder-Next model fits easily and provides solid multi-step tool-calling capability."
     },
     '64-extract': {
-      name: "Qwen 3.6 7B Coder (Q6_K Quant)",
+      name: "Qwen3.6-7B (Q6_K Quant)",
       mode: "Fast Check & Extraction",
       file: "Qwen3.6-7B-Q6_K.gguf",
       size: "5.8 GB",
@@ -190,7 +190,7 @@ function initModelFinder() {
       rationale: "A lightweight, extremely fast model for simple data mapping and format validation. Running at 7B footprint leaves ample RAM for other host processes."
     },
     '64-synthesis': {
-      name: "Qwen 3.6 27B Coder (Q6_K Quant)",
+      name: "Qwen3.6-27B (Q6_K Quant)",
       mode: "Standard Dense Synthesis",
       file: "Qwen3.6-27B-Q6_K.gguf",
       size: "24.4 GB",
@@ -198,7 +198,7 @@ function initModelFinder() {
       reasoning: "Reasoning active",
       command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.6-27B-Q6_K.gguf --ctx-size 16384",
       hermes: "thinking_budget_tokens: 512\nmax_tokens: 4096",
-      rationale: "For report synthesis on a 64GB RAM system, the 27B Q6 quant provides high semantic accuracy without risking GTT memory crashes."
+      rationale: "For report synthesis on a 64GB RAM system, the dense Qwen3.6-27B Q6 quant provides high semantic accuracy without risking GTT memory crashes."
     }
   };
 
