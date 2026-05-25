@@ -1,0 +1,6 @@
+{
+  "step1": {"exceedances": ["Nitrate", "PFOS"], "count": 2},
+  "step2": {"turbidity_max": 0.45, "turbidity_max_ts": "2026-05-02 02:00:00", "ntu_breaches": 1, "turbidity_err_rows": 2, "missing_chlorine": 3},
+  "step3": {"statuses": ["ON", "OFF", "ERR", "RUN"], "err_ts": "2026-05-20 08:25:10", "malformed_skipped": 1},
+  "step4": {"exceedance_count": 2, "exceedances": ["Nitrate", "PFOS"], "turbidity_breach": true, "pump_error": true, "claims_correlation": false}
+}

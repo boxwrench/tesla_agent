@@ -1,0 +1,14 @@
+# User Configurations
+config.env
+
+# Execution Logs and Transcripts
+*.log
+eval/coding/results/*
+!eval/coding/results/.gitkeep
+
+# Python Cache
+__pycache__/
+*.pyc
+
+# System Files
+.DS_Store

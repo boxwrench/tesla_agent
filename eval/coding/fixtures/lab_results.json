@@ -1,0 +1,10 @@
+{
+  "sample_date": "2026-05-15",
+  "results": [
+    {"parameter": "PFOA", "value": 3.8, "unit": "ppt"},
+    {"parameter": "PFOS", "value": 4.2, "unit": "ppt"},
+    {"parameter": "Arsenic", "value": 0.008, "unit": "mg/L"},
+    {"parameter": "Nitrate", "value": 12.5, "unit": "mg/L"},
+    {"parameter": "Lead", "value": 0.012, "unit": "mg/L"}
+  ]
+}

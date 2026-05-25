@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="teslaagent: Interactive Guide for Local Agentic AI on AMD Strix Halo Hardware. Fully private, domain-portable, and tailored for water professionals.">
+  <title>teslaagent // Local Agentic AI Dashboard</title>
+  
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js for beautiful interactive benchmarks -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- App Container -->
+  <div id="app" class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fa-solid fa-water-ladders logo-icon"></i>
+          <span class="logo-text">tesla<span class="highlight">agent</span></span>
+        </div>
+        <p class="tagline">Local Agentic AI for Utilities</p>
+      </div>
+      
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="overview" id="btn-tab-overview">
+          <i class="fa-solid fa-gauge-high"></i> Overview
+        </button>
+        <button class="nav-item" data-tab="setup" id="btn-tab-setup">
+          <i class="fa-solid fa-list-check"></i> Interactive Setup
+        </button>
+        <button class="nav-item" data-tab="finder" id="btn-tab-finder">
+          <i class="fa-solid fa-magnifying-glass-chart"></i> Model Finder
+        </button>
+        <button class="nav-item" data-tab="benchmarks" id="btn-tab-benchmarks">
+          <i class="fa-solid fa-chart-line"></i> Benchmarks
+        </button>
+        <button class="nav-item" data-tab="verifier" id="btn-tab-verifier">
+          <i class="fa-solid fa-spell-check"></i> Log Verifier
+        </button>
+        <button class="nav-item" data-tab="glossary" id="btn-tab-glossary">
+          <i class="fa-solid fa-book"></i> Glossary
+        </button>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="hw-badge">
+          <i class="fa-solid fa-microchip"></i>
+          <div>
+            <p class="hw-title">AMD APU Target</p>
+            <p class="hw-spec">Strix Halo (gfx1151)</p>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Top Bar -->
+      <header class="topbar">
+        <h1 class="page-title" id="main-title">Dashboard Overview</h1>
+        <div class="status-indicator">
+          <span class="status-dot green"></span>
+          <span class="status-label">Local Inference Ready</span>
+        </div>
+      </header>
+
+      <!-- Content Container -->
+      <div class="content-body">
+
+        <!-- ================= OVERVIEW TAB ================= -->
+        <section id="tab-overview" class="tab-content active">
+          <div class="welcome-card">
+            <h2>Welcome to Your Agentic AI Guide</h2>
+            <p>This interactive workspace teaches you how to run a private, local agentic AI workflow on consumer AMD hardware. No API keys, no external cloud dependencies, and 100% data privacy.</p>
+          </div>
+
+          <div class="grid-2col">
+            <div class="card">
+              <h3><i class="fa-solid fa-bullseye card-icon blue"></i> What is Agentic AI?</h3>
+              <p>Standard chatbots just answer questions. An <strong>agent</strong> uses <strong>tools</strong>—it can write and execute code, inspect CSV logs, check compliance databases, and verify its own work. It works until a goal is completed, rather than just generating a single text response.</p>
+              <ul class="clean-list">
+                <li><i class="fa-solid fa-circle-check green"></i> <strong>Private SCADA Checks</strong>: Analyze pump logs locally.</li>
+                <li><i class="fa-solid fa-circle-check green"></i> <strong>Automated Compliance</strong>: Check EPA lab data against limits.</li>
+                <li><i class="fa-solid fa-circle-check green"></i> <strong>Incident Reporting</strong>: Draft structured reports from errors.</li>
+              </ul>
+            </div>
+            
+            <div class="card">
+              <h3><i class="fa-solid fa-shield-halved card-icon green"></i> Why Local?</h3>
+              <p>For municipal water treatment and critical infrastructure operations, sending telemetry, SCADA patterns, or log data to public cloud APIs carries massive privacy and security risks. Running a local LLM ensures data stays in your building.</p>
+              <div class="stats-row">
+                <div class="stat-box">
+                  <span class="stat-num">$0</span>
+                  <span class="stat-lbl">API Fees</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-num">100%</span>
+                  <span class="stat-lbl">Data Privacy</span>
+                </div>
+                <div class="stat-box">
+                  <span class="stat-num">APU</span>
+                  <span class="stat-lbl">RDNA3.5 Shared VRAM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <h3><i class="fa-solid fa-network-wired card-icon teal"></i> Local Architecture Stack</h3>
+            <p class="sub-text">How your system interacts without the cloud:</p>
+            <div class="stack-visual">
+              <div class="stack-layer" data-desc="AMD Strix Halo APU with up to 96 GB shared graphics translation memory (GTT).">
+                <span class="layer-title">Hardware Layer</span>
+                <span class="layer-details">AMD RDNA3.5 (gfx1151) / Shared Unified Memory (UMA)</span>
+              </div>
+              <div class="stack-arrow"><i class="fa-solid fa-arrow-down-long"></i></div>
+              <div class="stack-layer" data-desc="Kernel space optimization that allocates the shared system RAM pool as GPU memory.">
+                <span class="layer-title">Driver Layer</span>
+                <span class="layer-details">ROCm 7.x Open Driver (amdgpu with custom GTT limits)</span>
+              </div>
+              <div class="stack-arrow"><i class="fa-solid fa-arrow-down-long"></i></div>
+              <div class="stack-layer" data-desc="Fast model-serving engine. Receives OpenAI-compatible API calls and serves GGUF models.">
+                <span class="layer-title">Inference Server</span>
+                <span class="layer-details">Lemonade llama.cpp backend (serving Qwen 3.6 MoE)</span>
+              </div>
+              <div class="stack-arrow"><i class="fa-solid fa-arrow-down-long"></i></div>
+              <div class="stack-layer main-layer" data-desc="Agent executor framework. Receives user goals, selects tools, reads execution outputs, and loops.">
+                <span class="layer-title">Agent Engine</span>
+                <span class="layer-details">Nous Research Hermes (driving Terminal & File Tools)</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= INTERACTIVE SETUP TAB ================= -->
+        <section id="tab-setup" class="tab-content">
+          <div class="setup-layout">
+            
+            <!-- Sidebar checklist -->
+            <div class="setup-nav">
+              <div class="setup-nav-header">
+                <h4>Setup Steps</h4>
+                <span id="setup-progress">0% Done</span>
+              </div>
+              <div class="setup-nav-items">
+                <button class="setup-step-btn active" data-step="1" id="step-btn-1">
+                  <span class="step-num">1</span> Host Validation
+                </button>
+                <button class="setup-step-btn" data-step="2" id="step-btn-2">
+                  <span class="step-num">2</span> GTT Memory Allocation
+                </button>
+                <button class="setup-step-btn" data-step="3" id="step-btn-3">
+                  <span class="step-num">3</span> Driver Environment
+                </button>
+                <button class="setup-step-btn" data-step="4" id="step-btn-4">
+                  <span class="step-num">4</span> Server Install
+                </button>
+                <button class="setup-step-btn" data-step="5" id="step-btn-5">
+                  <span class="step-num">5</span> Model Download
+                </button>
+                <button class="setup-step-btn" data-step="6" id="step-btn-6">
+                  <span class="step-num">6</span> Server Start
+                </button>
+                <button class="setup-step-btn" data-step="7" id="step-btn-7">
+                  <span class="step-num">7</span> Agent Profile
+                </button>
+              </div>
+            </div>
+
+            <!-- Active Step Instructions -->
+            <div class="setup-body">
+              
+              <!-- STEP 1 -->
+              <div class="setup-step-content active" id="setup-step-1">
+                <h2>Step 1: Host Requirements & Verification</h2>
+                <p class="step-intro">Before running local models, verify your hardware, user groups, and kernel settings. Strix Halo requires active APU visibility.</p>
+                
+                <div class="console-box">
+                  <div class="console-header">
+                    <span>Terminal</span>
+                  </div>
+                  <pre><code># Check if your user is in the render and video groups
+groups
+
+# Run the host diagnostic script
+bash scripts/setup/check_host.sh</code></pre>
+                </div>
+                
+                <div class="explainer-box">
+                  <h4><i class="fa-solid fa-circle-question"></i> What just happened?</h4>
+                  <p>The diagnostic script checks if your system is running Linux, verifies that your graphics chip is detected as <code>gfx1151</code> (RDNA3.5), and checks if the kernel loader is configured to access the shared RAM pool.</p>
+                </div>
+
+                <div class="success-box">
+                  <h4><i class="fa-solid fa-circle-check"></i> What success looks like</h4>
+                  <pre><code>[PASS] Kernel Config (gttsize): Found gttsize=98304
+[PASS] Active Kernel Parameter: no_system_mem_limit is enabled (1)
+[PASS] ROCm GPU Architecture: gfx1151 visible to ROCm (Radeon APU)
+Check complete: 5 passing, 0 failing, 0 warnings.</code></pre>
+                </div>
+
+                <div class="failure-box">
+                  <h4><i class="fa-solid fa-triangle-exclamation"></i> What if it fails?</h4>
+                  <p><strong>Common issue: GPU not visible or driver missing.</strong><br>
+                  If <code>rocminfo</code> fails to report your GPU architecture, run <code>dmesg | grep amdgpu</code>. Ensure secure boot is disabled if the driver fails to load, and verify your user is in the <code>render</code> group (run <code>sudo usermod -aG render,video $USER</code> then log out and back in).</p>
+                </div>
+              </div>
+
+              <!-- STEP 2 -->
+              <div class="setup-step-content" id="setup-step-2">
+                <h2>Step 2: Allocate Unified VRAM (GTT size)</h2>
+                <p class="step-intro">Unlike discrete graphics cards with dedicated VRAM, the Strix Halo APU shares system RAM. By default, Linux limits graphics allocations to 25%-50% of memory. We need to override this to allow the GPU to access up to 75% of RAM (96 GB on a 128 GB system).</p>
+                
+                <div class="console-box">
+                  <div class="console-header">
+                    <span>Terminal</span>
+                  </div>
+                  <pre><code># Apply optimal allocations (requires root privileges)
+# Defaults to 75% of your total system RAM.
+sudo bash scripts/setup/apply_gtt.sh
+
+# Reboot is required to apply the kernel parameters
+sudo reboot</code></pre>
+                </div>
+                
+                <div class="explainer-box">
+                  <h4><i class="fa-solid fa-circle-question"></i> What just happened?</h4>
+                  <p>The script creates a configuration file in <code>/etc/modprobe.d/amdgpu_llm_optimized.conf</code> setting <code>gttsize</code> (in MB), <code>no_system_mem_limit=1</code> (which prevents layers from silently spilling to CPU memory, stalling latency), and ttm limits, then updates the kernel boot image (initramfs).</p>
+                </div>
+
+                <div class="success-box">
+                  <h4><i class="fa-solid fa-circle-check"></i> What success looks like</h4>
+                  <p>After reboot, checking GTT memory parameters reports the correct allocated size:</p>
+                  <pre><code>cat /sys/module/amdgpu/parameters/gttsize
+# Output on a 128 GB system: 98304 (96 GB in MB)</code></pre>
+                </div>
+
+                <div class="failure-box">
+                  <h4><i class="fa-solid fa-triangle-exclamation"></i> What if it fails?</h4>
+                  <p><strong>Common issue: initramfs build fails or parameters ignore on boot.</strong><br>
+                  Verify that you ran the script with <code>sudo</code>. If parameters are not active after reboot, verify if your system uses a boot loader (e.g. systemd-boot) that requires kernel command line overrides instead of modprobe files.</p>
+                </div>
+              </div>
+
+              <!-- STEP 3 -->
+              <div class="setup-step-content" id="setup-step-3">
+                <h2>Step 3: Source Driver Environment Variables</h2>
+                <p class="step-intro">ROCm does not officially support the Strix Halo gfx1151 APU out of the box. We must inject environment flags to override the runtime architecture and configure memory parameters.</p>
+                
+                <div class="console-box">
+                  <div class="console-header">
+                    <span>Terminal</span>
+                  </div>
+                  <pre><code># Source the environment variables in your active shell
+source scripts/setup/set_hsa_env.sh</code></pre>
+                </div>
+                
+                <div class="explainer-box">
+                  <h4><i class="fa-solid fa-circle-question"></i> What just happened?</h4>
+                  <p>This script exports critical variables like <code>HSA_OVERRIDE_GFX_VERSION=11.5.1</code> (tells ROCm to treat our graphics engine as gfx1150/gfx1100, which are supported), and <code>HSA_ENABLE_SDMA=0</code> (disables System DMA which causes kernel hangs on APUs during large model routing).</p>
+                </div>
+
+                <div class="success-box">
+                  <h4><i class="fa-solid fa-circle-check"></i> What success looks like</h4>
+                  <pre><code>GPU Environment Configured:
+  HSA_OVERRIDE_GFX_VERSION = 11.5.1
+  HSA_ENABLE_SDMA          = 0
+  HIP_VISIBLE_DEVICES      = 0</code></pre>
+                </div>
+
+                <div class="failure-box">
+                  <h4><i class="fa-solid fa-triangle-exclamation"></i> What if it fails?</h4>
+                  <p><strong>Common issue: Variables disappear in new terminal.</strong><br>
+                  Environment variables set with <code>export</code> or <code>source</code> only exist in the active terminal window. You must source this file in every new terminal you open before starting model servers or agents. (For convenience, you can append <code>source /path/to/set_hsa_env.sh</code> to your <code>~/.bashrc</code> file).</p>
+                </div>
+              </div>
+
+              <!-- STEP 4 -->
+              <div class="setup-step-content" id="setup-step-4">
+                <h2>Step 4: Install Lemonade Server</h2>
+                <p class="step-intro">We serve our models using a custom stable version of llama.cpp packaged by Lemonade, which provides pre-compiled ROCm support for unified graphics setups.</p>
+                
+                <div class="console-box">
+                  <div class="console-header">
+                    <span>Terminal</span>
+                  </div>
+                  <pre><code># Install the ROCm stable backend via Lemonade
+# (This downloads the server binaries and supporting HIP libraries)
+lemonade backends install llamacpp:rocm</code></pre>
+                </div>
+                
+                <div class="explainer-box">
+                  <h4><i class="fa-solid fa-circle-question"></i> What just happened?</h4>
+                  <p>Lemonade fetches the compiled ROCm-compatible <code>llama-server</code> and caches it inside <code>~/.cache/lemonade/bin/llamacpp/rocm-stable/</code>, ready to run.</p>
+                </div>
+
+                <div class="success-box">
+                  <h4><i class="fa-solid fa-circle-check"></i> What success looks like</h4>
+                  <pre><code>ls -l ~/.cache/lemonade/bin/llamacpp/rocm-stable/llama-server
+# Outputs details showing the file is present and executable.</code></pre>
+                </div>
+
+                <div class="failure-box">
+                  <h4><i class="fa-solid fa-triangle-exclamation"></i> What if it fails?</h4>
+                  <p><strong>Common issue: network connection timeouts or dependency blocks.</strong><br>
+                  Ensure your internet connection is active. If python dependency conflicts occur, ensure Lemonade is running in an isolated environment (or run it via <code>pipx run lemonade</code>).</p>
+                </div>
+              </div>
+
+              <!-- STEP 5 -->
+              <div class="setup-step-content" id="setup-step-5">
+                <h2>Step 5: Download the Recommended Model</h2>
+                <p class="step-intro">We use the 21.7 GB Qwen 3.6 35B Mixture-of-Experts (MoE) model. Quantized in MXFP4 format, it fits comfortably in Strix Halo unified memory while matching the reasoning quality of larger models.</p>
+                
+                <div class="console-box">
+                  <div class="console-header">
+                    <span>Terminal</span>
+                  </div>
+                  <pre><code># Install the Hugging Face CLI if needed
+pip install huggingface_hub
+
+# Download the model GGUF from the verified Unsloth repository
+mkdir -p ~/models/qwen3.6-35b-a3b
+huggingface-cli download unsloth/Qwen3.6-35B-A3B-GGUF \
+  Qwen3.6-35B-A3B-MXFP4_MOE.gguf \
+  --local-dir ~/models/qwen3.6-35b-a3b</code></pre>
+                </div>
+                
+                <div class="explainer-box">
+                  <h4><i class="fa-solid fa-circle-question"></i> What just happened?</h4>
+                  <p>The Hugging Face client downloads the model segments and reconstructs the single <code>Qwen3.6-35B-A3B-MXFP4_MOE.gguf</code> file on your local drive.</p>
+                </div>
+
+                <div class="success-box">
+                  <h4><i class="fa-solid fa-circle-check"></i> What success looks like</h4>
+                  <pre><code>ls -lh ~/models/qwen3.6-35b-a3b/Qwen3.6-35B-A3B-MXFP4_MOE.gguf
+# Outputs showing file size: ~22 GB</code></pre>
+                </div>
+
+                <div class="failure-box">
+                  <h4><i class="fa-solid fa-triangle-exclamation"></i> What if it fails?</h4>
+                  <p><strong>Common issue: Disk space exhausted.</strong><br>
+                  The download requires at least 25 GB of free disk space. Ensure your target directory has sufficient room. If the download is interrupted, re-running the command will resume the download from where it stopped.</p>
+                </div>
+              </div>
+
+              <!-- STEP 6 -->
+              <div class="setup-step-content" id="setup-step-6">
+                <h2>Step 6: Start the Model Server</h2>
+                <p class="step-intro">With the GTT configuration applied and environment sourced, launch the server using ROCm. We run it with a 32,768 context window and optimized memory parameters.</p>
+                
+                <div class="console-box">
+                  <div class="console-header">
+                    <span>Terminal</span>
+                  </div>
+                  <pre><code># Start serving in the foreground
+bash scripts/serving/serve_rocm.sh</code></pre>
+                </div>
+                
+                <div class="explainer-box">
+                  <h4><i class="fa-solid fa-circle-question"></i> What just happened?</h4>
+                  <p>The script launches `llama-server` on port 8095. It binds memory layers to the GPU, enables Flash Attention, and loads the active context space.</p>
+                </div>
+
+                <div class="success-box">
+                  <h4><i class="fa-solid fa-circle-check"></i> What success looks like</h4>
+                  <p>Look for lines indicating successful model compilation and socket binds in the server log:</p>
+                  <pre><code>llama_new_context_with_model: n_ctx = 32768, total VRAM = 21.7 GB
+llama_server_listening: http://127.0.0.1:8095</code></pre>
+                </div>
+
+                <div class="failure-box">
+                  <h4><i class="fa-solid fa-triangle-exclamation"></i> What if it fails?</h4>
+                  <p><strong>Common issue: ROCm allocation failed / Segment core dump.</strong><br>
+                  Ensure you sourced <code>set_hsa_env.sh</code> in the active terminal. If you get a kernel memory allocation error, verify that your GTT size has been adjusted and applied (Step 2).</p>
+                </div>
+              </div>
+
+              <!-- STEP 7 -->
+              <div class="setup-step-content" id="setup-step-7">
+                <h2>Step 7: Configure the Hermes Profile</h2>
+                <p class="step-intro">Now that the model API is running, configure the Hermes agent engine to communicate with it.</p>
+                
+                <div class="console-box">
+                  <div class="console-header">
+                    <span>Terminal</span>
+                  </div>
+                  <pre><code># Generate the Hermes config files and system launcher
+bash scripts/serving/create_hermes_profile.sh</code></pre>
+                </div>
+                
+                <div class="explainer-box">
+                  <h4><i class="fa-solid fa-circle-question"></i> What just happened?</h4>
+                  <p>The script creates a configuration file in <code>~/.hermes/profiles/qwen36_mxfp4/config.yaml</code> mapping the correct API URL, local model details, and max tokens. It also compiles a quick launcher executable at <code>~/.local/bin/qwen36_mxfp4</code>.</p>
+                </div>
+
+                <div class="success-box">
+                  <h4><i class="fa-solid fa-circle-check"></i> What success looks like</h4>
+                  <pre><code>created Hermes profile: ~/.hermes/profiles/qwen36_mxfp4
+created launcher:       ~/.local/bin/qwen36_mxfp4
+To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
+                </div>
+
+                <div class="failure-box">
+                  <h4><i class="fa-solid fa-triangle-exclamation"></i> What if it fails?</h4>
+                  <p><strong>Common issue: command not found (qwen36_mxfp4).</strong><br>
+                  Your system PATH may not check <code>~/.local/bin/</code> by default. Check if the directory exists, or add <code>export PATH="$HOME/.local/bin:$PATH"</code> to your <code>~/.bashrc</code> and source it.</p>
+                </div>
+              </div>
+
+              <!-- Step Navigation Control -->
+              <div class="setup-footer">
+                <button class="btn btn-secondary" id="btn-prev-step" disabled>Previous Step</button>
+                <button class="btn btn-primary" id="btn-next-step">Next Step</button>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= MODEL FINDER TAB ================= -->
+        <section id="tab-finder" class="tab-content">
+          <div class="card">
+            <h2>Interactive Model Recommendation</h2>
+            <p>Answer a few questions about your hardware configuration and active goals to select the best model settings.</p>
+            
+            <div class="finder-form">
+              <div class="form-group">
+                <label>1. System RAM Installed</label>
+                <div class="radio-group">
+                  <label class="radio-card">
+                    <input type="radio" name="finder-ram" value="128" checked>
+                    <span class="radio-title">128 GB RAM</span>
+                    <span class="radio-desc">Full 96GB GTT headroom. Run any MoE model.</span>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="finder-ram" value="64">
+                    <span class="radio-title">64 GB RAM</span>
+                    <span class="radio-desc">48GB GTT headroom. Limited to smaller models.</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>2. Primary Task Priority</label>
+                <div class="radio-group">
+                  <label class="radio-card">
+                    <input type="radio" name="finder-priority" value="code" checked>
+                    <span class="radio-title">Coding & Multi-Step Logic</span>
+                    <span class="radio-desc">Analyzing SCADA logs, writing python checks. Requires reasoning.</span>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="finder-priority" value="extract">
+                    <span class="radio-title">Fast Extraction / QA</span>
+                    <span class="radio-desc">Reading lab results and checking limits. Simple logic.</span>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="finder-priority" value="synthesis">
+                    <span class="radio-title">Complex Quality Planning</span>
+                    <span class="radio-desc">Writing EPA reports. Requires deep synthesis and review.</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="finder-result" id="finder-output">
+              <h3>Recommended Configuration</h3>
+              <div class="result-box">
+                <div class="result-header">
+                  <h4 id="rec-model-name">Qwen 3.6 35B MoE (MXFP4 Quant)</h4>
+                  <span class="badge badge-blue" id="rec-mode">Think-On Enabled</span>
+                </div>
+                <div class="result-grid">
+                  <div>
+                    <span class="res-lbl">Model File:</span>
+                    <strong id="rec-file">Qwen3.6-35B-A3B-MXFP4_MOE.gguf</strong>
+                  </div>
+                  <div>
+                    <span class="res-lbl">Download Size:</span>
+                    <strong id="rec-size">21.7 GB</strong>
+                  </div>
+                  <div>
+                    <span class="res-lbl">Speed:</span>
+                    <strong id="rec-speed">~44.2 tokens/sec</strong>
+                  </div>
+                  <div>
+                    <span class="res-lbl">Reasoning:</span>
+                    <strong id="rec-reasoning">Gated reasoning cap (256-512)</strong>
+                  </div>
+                </div>
+                
+                <div class="result-command-box">
+                  <p class="res-lbl">Start server command:</p>
+                  <pre><code id="rec-command">serve_rocm.sh</code></pre>
+                </div>
+
+                <div class="result-command-box">
+                  <p class="res-lbl">Hermes run config:</p>
+                  <pre><code id="rec-hermes-config">thinking_budget_tokens: 512</code></pre>
+                </div>
+                
+                <div class="result-rationale" id="rec-rationale">
+                  This configuration balances model speed and memory consumption. Keeping thinking enabled is critical for coding tasks.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= BENCHMARKS TAB ================= -->
+        <section id="tab-benchmarks" class="tab-content">
+          <div class="grid-2col">
+            <div class="card">
+              <h2>Strix Halo Benchmark Matrix</h2>
+              <p>Performance comparison on AMD APU system (128GB total RAM, 96GB GTT allocated):</p>
+              
+              <div class="table-container">
+                <table class="benchmark-table">
+                  <thead>
+                    <tr>
+                      <th>Model & Mode</th>
+                      <th>Size</th>
+                      <th>Quality</th>
+                      <th>Speed</th>
+                      <th>Gate</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="highlighted-row">
+                      <td>Qwen 3.6 35B (MXFP4, Think-On)</td>
+                      <td>21.7 GB</td>
+                      <td>82 / 84</td>
+                      <td>44.2 t/s</td>
+                      <td class="pass">3 / 3</td>
+                    </tr>
+                    <tr>
+                      <td>Qwen 3.6 35B (MXFP4, Think-Off)</td>
+                      <td>21.7 GB</td>
+                      <td>82 / 84</td>
+                      <td>43.7 t/s</td>
+                      <td class="pass">3 / 3</td>
+                    </tr>
+                    <tr>
+                      <td>Qwen 3.5 35B (MXFP4, Think-On)</td>
+                      <td>21 GB</td>
+                      <td>79 / 84</td>
+                      <td>47.3 t/s</td>
+                      <td class="pass">3 / 3</td>
+                    </tr>
+                    <tr>
+                      <td>Qwen 3.5 122B (MXFP4, Think-On)</td>
+                      <td>70 GB</td>
+                      <td>84 / 84</td>
+                      <td>16.5 t/s</td>
+                      <td class="pass">3 / 3</td>
+                    </tr>
+                    <tr>
+                      <td>Qwen 3 Coder 30B (Q4_K_M)</td>
+                      <td>19.8 GB</td>
+                      <td>N/A</td>
+                      <td>42.5 t/s</td>
+                      <td class="fail">0 / 3</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div class="card">
+              <h2>Visual Performance Analysis</h2>
+              <p class="sub-text">Relative quality score vs generation throughput:</p>
+              <div class="chart-container">
+                <canvas id="benchmarkChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Tuning Insights for Unified Memory</h3>
+            <p>Key findings from benchmarks run on Strix Halo hardware:</p>
+            <div class="grid-3col">
+              <div class="bullet-card">
+                <h4>Vulkan Performance Win</h4>
+                <p>The Vulkan/RADV backend (using Mesa drivers) runs <strong>+13% to +19% faster</strong> than the official ROCm HIP backend on MoE decoding. This represents a significant speed boost for long reasoning sessions.</p>
+              </div>
+              <div class="bullet-card">
+                <h4>MoE Speculation Defect</h4>
+                <p>Speculative decoding (MTP, DFlash) actually <strong>slows down</strong> execution on Mixture-of-Experts models. The expert routing verification penalty exceeds the token generation speed gains. Keep speculation disabled.</p>
+              </div>
+              <div class="bullet-card">
+                <h4>Thinking Budgets</h4>
+                <p>Reasoning models decode reasoning tokens slowly, which consumes 97% of step time. Set a per-request cap (<code>thinking_budget_tokens=256</code> or <code>512</code>) to limit latency without losing accuracy.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= LOG VERIFIER TAB ================= -->
+        <section id="tab-verifier" class="tab-content">
+          <div class="card">
+            <h2>Automated Nonce Gate Verifier</h2>
+            <p>Paste the response output from your local agent run here to test it against the 3 Nonce Gate verification criteria.</p>
+            
+            <div class="verifier-form">
+              <div class="form-group">
+                <label for="input-nonce">Expected Nonce Token</label>
+                <input type="text" id="input-nonce" placeholder="e.g. 1779630594-1234" class="form-input">
+              </div>
+              
+              <div class="form-group">
+                <label for="input-log">Agent Response Text</label>
+                <textarea id="input-log" rows="10" placeholder="Paste agent transcript response here..." class="form-textarea"></textarea>
+              </div>
+              
+              <button class="btn btn-primary" id="btn-verify-logs">Run Verification Check</button>
+            </div>
+
+            <div class="verifier-results" id="verifier-output" style="display: none;">
+              <h3>Verification Results</h3>
+              <div class="results-grid">
+                <div class="result-card" id="card-c1">
+                  <div class="rc-header">
+                    <span class="rc-title">1. Tool Call Detection</span>
+                    <i class="fa-solid fa-circle-question rc-icon" id="icon-c1"></i>
+                  </div>
+                  <p class="rc-desc" id="desc-c1">Verifies if the model used the terminal tool to check the file rather than guessing.</p>
+                </div>
+
+                <div class="result-card" id="card-c2">
+                  <div class="rc-header">
+                    <span class="rc-title">2. Nonce Verification</span>
+                    <i class="fa-solid fa-circle-question rc-icon" id="icon-c2"></i>
+                  </div>
+                  <p class="rc-desc" id="desc-c2">Verifies if the expected nonce token is echoed in the response text.</p>
+                </div>
+
+                <div class="result-card" id="card-c3">
+                  <div class="rc-header">
+                    <span class="rc-title">3. No Fenced Blocks</span>
+                    <i class="fa-solid fa-circle-question rc-icon" id="icon-c3"></i>
+                  </div>
+                  <p class="rc-desc" id="desc-c3">Verifies that the model did not output markdown code blocks (e.g. ```bash cat nonce.txt) instead of running the tool.</p>
+                </div>
+              </div>
+              
+              <div class="ver-summary-box" id="ver-summary">
+                Status Pending
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= GLOSSARY TAB ================= -->
+        <section id="tab-glossary" class="tab-content">
+          <div class="card">
+            <h2>Terminology Glossary</h2>
+            <p>ML and driver terms explained in plain, jargon-free language for utility staff.</p>
+            
+            <div class="glossary-grid">
+              <div class="glossary-item">
+                <dt>Agent</dt>
+                <dd>An AI system that is given tools (such as file reading or script execution) and is capable of running a multi-step loop to accomplish a complex goal autonomously.</dd>
+              </div>
+              <div class="glossary-item">
+                <dt>Unified Memory (UMA)</dt>
+                <dd>An architecture where the computer's CPU and GPU share the same pool of RAM. This allows the graphics processor to access massive memory buffers, enabling large model execution on inexpensive hardware.</dd>
+              </div>
+              <div class="glossary-item">
+                <dt>GTT Size</dt>
+                <dd>Graphics Translation Table. The parameter that dictates how much system RAM the operating system allocates for GPU use. For local LLMs, this must be adjusted to allow the GPU to load large model files.</dd>
+              </div>
+              <div class="glossary-item">
+                <dt>Mixture-of-Experts (MoE)</dt>
+                <dd>A model architecture where only a subset of network layers ("experts") are active for any given word. This enables massive model sizes (e.g. 35B parameters) to run at the speed of much smaller models.</dd>
+              </div>
+              <div class="glossary-item">
+                <dt>Nonce Gate</dt>
+                <dd>A verification test that seeds a unique, random string in a file and asks the model to read and echo it. This proves the agent is executing tools rather than hallucinating answers.</dd>
+              </div>
+              <div class="glossary-item">
+                <dt>Vulkan & RADV</dt>
+                <dd>An open-source graphics library and driver (RADV) that serves as an alternative to ROCm. On AMD APUs, Vulkan provides faster text generation speed for Mixture-of-Experts models.</dd>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

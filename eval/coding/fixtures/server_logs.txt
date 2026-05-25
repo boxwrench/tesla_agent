@@ -1,0 +1,9 @@
+[2026-05-20 08:00:01] INFO: System Heartbeat OK
+[2026-05-20 08:05:12] EVENT: PUMP_STATUS | PAYLOAD: 0x4F4E (Status: Active)
+[2026-05-20 08:10:00] WARN: Low suction pressure detected
+[2026-05-20 08:15:45] EVENT: PUMP_STATUS | PAYLOAD: 0x4F4646 (Status: Idle)
+[2026-05-20 08:20:22] ERROR: Communication timeout - retrying
+[2026-05-20 08:25:10] EVENT: PUMP_STATUS | PAYLOAD: 0x455252 (Status: Error)
+[2026-05-20 08:30:00] DEBUG: Scan completed in 150ms
+[MALFORMED LINE] NO TIMESTAMP
+[2026-05-20 08:35:12] EVENT: PUMP_STATUS | PAYLOAD: 0x52554E (Status: Running)

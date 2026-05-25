@@ -1,0 +1,7 @@
+{
+  "PFOA": {"limit": 4.0, "unit": "ppt"},
+  "PFOS": {"limit": 4.0, "unit": "ppt"},
+  "Arsenic": {"limit": 0.010, "unit": "mg/L"},
+  "Nitrate": {"limit": 10.0, "unit": "mg/L"},
+  "Lead": {"limit": 0.015, "unit": "mg/L"}
+}

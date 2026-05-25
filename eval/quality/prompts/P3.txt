@@ -1,0 +1,1 @@
+We have 7 capital projects: clarifier rehab, SCADA upgrade, new chlorine analyzers, lagoon dredging, backup generator, lab LIMS, intake screen replacement. Sequence them into a phased plan with dependencies and rationale.
