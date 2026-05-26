@@ -19,16 +19,25 @@ This is the guide we wish we had when we started: verbose, explanatory, data-dri
 
 ---
 
-## 📊 Headline Performance Statistics
-Benchmarks run on the AMD Ryzen Strix Halo APU (128 GB system memory, 96 GB allocated VRAM pool):
+## 🛠️ Reference Testing Stack
+All benchmarks were run on local consumer hardware with the following configuration:
+* **Hardware (APU):** AMD Ryzen Strix Halo (gfx1151), 128 GB LPDDR5X system RAM (configured via modprobe with **96 GB GTT graphics memory pool**).
+* **Server Backend:** `llama.cpp/llama-server` (stable build `b9247`) served via ROCm 7.1 and Mesa/RADV Vulkan.
+* **Parameters:** Greedy decoding (temperature = 0), context buffers scaled from 8,192 to 32,768, Flash Attention active.
 
-| Benchmark Category | Scored Performance Metrics | Status / Target |
-|---|---|---|
-| **Planning Quality** | **82 / 84** (Scorecard Rubric) | Clear, rigorous structure; one minor regulatory-date miss |
-| **Tool Execution** | **3 / 3 Passed** (Nonce Gate Validation) | Reliable autonomous tool calling; no code printing |
-| **Coding Reliability** | **3 / 3 E2E Passed** (State-carrying 4-step Grader) | Messy CSV telemetry QA & hex decoding |
-| **Inference Speed** | **44.2 tok/s** (ROCm) / **52.1 tok/s** (Vulkan RADV) | High-speed Mixture-of-Experts (MoE) generation |
-| **Memory Footprint** | **21.7 GB** loaded weight profile | Fits in Strix Halo GTT pool with 32k context |
+## 📊 Model Performance Matrix
+Below are the actual measured results across the different configurations. *Variations in reasoning toggles and graphics backends represent major speed/latency differences:*
+
+| Model & Quantization | RAM Footprint | Context Window | Think Toggle | Planning Quality (Scorecard) | Generation Speed (Decode) | Nonce Gate (Tool Use) | Verdict / Fit |
+|---|---|---|---|---|---|---|---|
+| **Qwen 3.6 35B MoE (MXFP4)** | **21.7 GB** | 32,768 | **On** (512 tokens) | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | **Recommended Default** |
+| **Qwen 3.6 35B MoE (Vulkan RADV)** | **21.7 GB** | 32,768 | **On** (512 tokens) | **82 / 84** | **52.1 tok/s** (Vulkan) | **3 / 3 Pass** | **Recommended Speed Upgrade** |
+| **Qwen 3.6 35B MoE (MXFP4)** | **21.7 GB** | 32,768 | **Off** | **82 / 84** | **43.7 tok/s** | **3 / 3 Pass** | Cuts wall-time in half for prose (falls to 1/3 coding E2E) |
+| **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 8,192 | **On** (1024 tokens) | **80 / 84** | **16.5 tok/s** (ROCm) | **3 / 3 Pass** | **Quality Escalation** |
+| **Qwen3-Coder-Next (UD-Q4_K_XL)** | **49.6 GB** | 16,384 | **On** | — | **42.5 tok/s** (ROCm) | **3 / 3 Pass** | 128GB Coder Challenger |
+| *Qwen3.6-27B (Q6_K, dense)* | *24.4 GB* | 16,384 | *On* | *~77 / 84\** | *~41.0 tok/s\** | *n/a\** | *Projected 64GB option (untested)* |
+
+*\*Note: 27B dense figures are projected estimates pending GGUF availability on this hardware. All other lines are physically measured on the host.*
 
 ---
 
