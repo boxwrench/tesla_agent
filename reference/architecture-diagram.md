@@ -6,7 +6,7 @@ The diagram below illustrates how a user request flows through the local agentic
 graph TD
     User["User Goal (e.g., Run SCADA QA Check)"] -->|Starts Agent| Hermes["Hermes Agent Engine (CLI / Profile)"]
     
-    subgraph Agent Loop (Hermes Sandbox)
+    subgraph "Agent Loop (Hermes Sandbox)"
         Hermes -->|1. Generate Plan| LLM_API["OpenAI API Client"]
         LLM_API -->|Parse Response| Hermes
         Hermes -->|2. Select Tool| Tool_Router{"Tool Router"}
@@ -16,18 +16,18 @@ graph TD
         Sandbox -->|Stdout / Stderr| Hermes
     end
     
-    subgraph Inference Server Layer
+    subgraph "Inference Server Layer"
         LLM_API <==>|HTTP /v1/chat/completions| LlamaServer["llama-server (<LEMONADE_BUILD_TAG> Stable)"]
         LlamaServer -->|Quantized Model Weights| RAM_Model["Qwen 3.6 35B MoE GGUF"]
     end
     
-    subgraph Driver & Driver Settings
+    subgraph "Driver &amp; Driver Settings"
         LlamaServer -->|Driver APIs| GPU_Driver["AMD GPU Driver Interface"]
         GPU_Driver -->|ROCm Path| ROCm["ROCm HIP Library (HSA_OVERRIDE_GFX_VERSION=11.5.1)"]
         GPU_Driver -->|Vulkan Path (Opt-In)| Vulkan["Mesa RADV Driver (HIP_VISIBLE_DEVICES=-1)"]
     end
     
-    subgraph Hardware Layer (Strix Halo APU)
+    subgraph "Hardware Layer (Strix Halo APU)"
         ROCm -.->|Compute Kernels| APU["RDNA3.5 compute units (gfx1151)"]
         Vulkan -.->|Shader Execution| APU
         APU <==>|Shared Unified Memory| GTT["Graphics Translation Table (GTT Pool ~ 96 GB)"]

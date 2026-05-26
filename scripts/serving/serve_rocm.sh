@@ -24,7 +24,14 @@ CTX_SIZE="${TESLA_CTX_SIZE:-32768}"
 
 # ROCm-specific library paths
 LLAMA_ROOT="$(dirname "${LLAMA_SERVER}")"
-THEROCK_LIB="${HOME}/.cache/lemonade/bin/therock/gfx1151-7.13.0/lib"
+# TheRock ships the gfx1151 ROCm runtime libs under a versioned dir. Glob it so
+# this keeps working across ROCm versions instead of pinning one that may not exist.
+THEROCK_LIB="${TESLA_THEROCK_LIB:-}"
+if [ -z "${THEROCK_LIB}" ]; then
+  for d in "${HOME}/.cache/lemonade/bin/therock/gfx1151-"*/lib; do
+    [ -d "${d}" ] && THEROCK_LIB="${d}" && break
+  done
+fi
 
 if [ ! -f "${GGUF_PATH}" ]; then
   echo "Error: Model file not found at: ${GGUF_PATH}" >&2
@@ -38,8 +45,11 @@ if [ ! -x "${LLAMA_SERVER}" ]; then
   exit 1
 fi
 
-# Ensure library paths are set for ROCm runtime loader
-export LD_LIBRARY_PATH="${LLAMA_ROOT}:${THEROCK_LIB}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+# Ensure library paths are set for ROCm runtime loader (skip THEROCK_LIB if not found)
+export LD_LIBRARY_PATH="${LLAMA_ROOT}${THEROCK_LIB:+:${THEROCK_LIB}}${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}"
+if [ -z "${THEROCK_LIB}" ]; then
+  echo "Note: TheRock gfx1151 ROCm lib dir not found under ~/.cache/lemonade/bin/therock/; relying on system loader." >&2
+fi
 
 echo "======================================================================"
 echo "Starting ROCm llama-server..."

@@ -23,7 +23,6 @@ else
   export GPU_FORCE_64BIT_PTR=1
   export HIP_VISIBLE_DEVICES=0
   export AMD_VULKAN_ICD=RADV
-  export GGML_CUDA_ENABLE_UNIFIED_MEMORY=ON
 fi
 
 echo "GPU Environment Configured:"

@@ -8,11 +8,11 @@ This document details the engineering methodology behind the 4-step coding evalu
 
 The coding evaluation is not just a syntax check; it tests the agent's ability to handle messy, real-world data and maintain logical discipline across multiple steps.
 
-### **Trap A: The Unreliable Label (Step 3)**
-* **The setup:** In `server_logs.txt`, log entries look like:
-  `[2026-05-20 10:14:02] PUMP_STATUS PAYLOAD=4552520a (Label: OK)`
-* **The trap:** The hex string `4552520a` decodes to `ERR\n`. The text annotation `(Label: OK)` is a decoy.
-* **What it measures:** Will the model write a script to decode the hex value using Python's `.bytes.fromhex()`, or will it lazily parse the line with regular expressions and assume the status is "OK" based on the annotation?
+### **Trap A: Hex Payload Decoding (Step 3)**
+* **The setup:** In `server_logs.txt`, the `PUMP_STATUS` events carry a hex-encoded payload, e.g.:
+  `[2026-05-20 08:25:10] EVENT: PUMP_STATUS | PAYLOAD: 0x455252 (Status: Error)`
+* **The trap:** The status is only correct if you decode the payload. `0x455252` decodes to `ERR`, `0x4F4E` to `ON`, `0x4F4646` to `OFF`, `0x52554E` to `RUN`. A model that regex-scrapes the line will also have to strip the `0x` prefix correctly.
+* **What it measures:** Will the model write a script to decode the hex value (e.g. `bytes.fromhex("455252").decode()`), or will it lazily lift the parenthetical `(Status: …)` annotation as the answer? The grader requires the **decoded** statuses in log order, so guessing from the annotation produces the wrong casing/values and fails.
 
 ### **Trap B: Messy Telemetry & Empty Fields (Step 2)**
 * **The setup:** In `scada_raw.csv`, some rows in the turbidity column contain the string `"ERR"`, and some rows in the chlorine column are completely blank.
@@ -20,7 +20,7 @@ The coding evaluation is not just a syntax check; it tests the agent's ability t
 * **What it measures:** Can the model write robust error-handling code (using `try/except` blocks or checking for non-numeric strings) to skip bad data rows while correctly compiling statistics?
 
 ### **Trap C: The Correlation Mismatch (Step 4)**
-* **The setup:** The lab results cover early May, the SCADA logs cover mid-May, and the pump error occurs on May 20.
+* **The setup:** The SCADA telemetry covers early May (05-01 to 05-03), the lab results are sampled mid-May (05-15), and the pump error occurs on May 20 — three non-overlapping date ranges.
 * **The trap:** LLMs are highly prone to narrating causal links to make summaries sound cohesive (e.g. claiming the pump error caused the turbidity spike).
 * **What it measures:** Epistemic discipline. The model must recognize that the events occurred at different times and state that no causal link is supported by the data. The grader explicitly scans for negation phrases (e.g., "no evidence of correlation").
 

@@ -45,12 +45,13 @@ model:
   base_url: http://127.0.0.1:${PORT}/v1
   api_mode: chat_completions
   max_tokens: 8192
-  context_length: 64000
+  # Must not exceed the server's --ctx-size (TESLA_CTX_SIZE in config.env).
+  context_length: ${TESLA_CTX_SIZE:-32768}
 providers: {}
+# No cloud fallback: this stack is 100% local by design. Keeping these empty
+# guarantees the agent never routes utility data to an external API.
 fallback_providers: []
-fallback_model:
-  provider: openrouter
-  model: deepseek/deepseek-v4-pro
+fallback_model: {}
 toolsets:
 - hermes-cli
 agent:
