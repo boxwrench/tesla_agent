@@ -3,31 +3,31 @@
    ============================================================================== */
 
 :root {
-  /* Color Palette (Slate & Teal/Blue theme) */
-  --bg-primary: #0b0f19;
-  --bg-secondary: #111827;
-  --bg-card: rgba(17, 24, 39, 0.6);
-  --bg-card-hover: rgba(31, 41, 55, 0.8);
-  --border-color: rgba(255, 255, 255, 0.06);
-  --border-color-active: rgba(6, 182, 212, 0.4);
+  /* Color Palette (Refined clean light natural aesthetic matching Title 22) */
+  --bg-primary: #f8f9fc;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --border-color: rgba(26, 31, 54, 0.08);
+  --border-color-active: rgba(43, 108, 176, 0.4);
   
-  --text-primary: #f3f4f6;
-  --text-secondary: #9ca3af;
-  --text-muted: #6b7280;
+  --text-primary: #1a1f36;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
   
   /* Accent Colors */
-  --accent-cyan: #06b6d4;
-  --accent-blue: #3b82f6;
-  --accent-gradient: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-  --welcome-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #020617 100%);
+  --accent-cyan: #2b6cb0; /* Accent blue matching projects.title22.org */
+  --accent-blue: #3182ce;
+  --accent-gradient: linear-gradient(135deg, #2b6cb0 0%, #3182ce 100%);
+  --welcome-gradient: linear-gradient(135deg, #ebf8ff 0%, #e2e8f0 100%);
   
   /* Status Colors */
-  --color-success: #10b981;
-  --color-success-bg: rgba(16, 185, 129, 0.06);
-  --color-warning: #f59e0b;
-  --color-warning-bg: rgba(245, 158, 11, 0.06);
-  --color-danger: #ef4444;
-  --color-danger-bg: rgba(239, 68, 68, 0.06);
+  --color-success: #2f855a; /* Forest green matching clean natural look */
+  --color-success-bg: rgba(47, 133, 90, 0.08);
+  --color-warning: #c05621;
+  --color-warning-bg: rgba(192, 86, 33, 0.08);
+  --color-danger: #c53030;
+  --color-danger-bg: rgba(197, 48, 48, 0.08);
   
   /* Typography */
   --font-display: 'Outfit', sans-serif;
@@ -37,8 +37,8 @@
   --radius-sm: 6px;
   --radius-md: 12px;
   --radius-lg: 20px;
-  --box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --box-shadow: 0 4px 12px rgba(26, 31, 54, 0.05);
+  --glass-shadow: 0 8px 32px 0 rgba(26, 31, 54, 0.08);
   --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -153,12 +153,12 @@ body {
 
 .nav-item:hover {
   color: var(--text-primary);
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: rgba(26, 31, 54, 0.03);
 }
 
 .nav-item.active {
   color: var(--text-primary);
-  background-color: rgba(6, 182, 212, 0.08);
+  background-color: rgba(43, 108, 176, 0.08);
   box-shadow: inset 0 0 0 1px var(--border-color-active);
 }
 
@@ -177,7 +177,7 @@ body {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(26, 31, 54, 0.03);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
 }
@@ -318,7 +318,7 @@ body {
 /* Welcome Card style */
 .welcome-card {
   background: var(--welcome-gradient);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(26, 31, 54, 0.06);
   border-radius: var(--radius-lg);
   padding: 32px;
   margin-bottom: 24px;
@@ -392,7 +392,7 @@ body {
 
 .stat-box {
   flex: 1;
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(26, 31, 54, 0.03);
   border: 1px solid var(--border-color);
   padding: 12px;
   border-radius: var(--radius-md);
@@ -427,7 +427,7 @@ body {
 .stack-layer {
   width: 100%;
   max-width: 600px;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(26, 31, 54, 0.03);
   border: 1px solid var(--border-color);
   padding: 16px;
   border-radius: var(--radius-md);
@@ -508,7 +508,7 @@ body {
 .setup-nav {
   width: 250px;
   flex-shrink: 0;
-  background-color: rgba(255, 255, 255, 0.01);
+  background-color: rgba(26, 31, 54, 0.02);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   padding: 16px;
@@ -569,7 +569,7 @@ body {
   justify-content: center;
   width: 20px;
   height: 20px;
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(26, 31, 54, 0.06);
   border: 1px solid var(--border-color);
   border-radius: 50%;
   font-size: 11px;
@@ -584,12 +584,12 @@ body {
 }
 
 .setup-step-btn:hover {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(26, 31, 54, 0.03);
   color: var(--text-primary);
 }
 
 .setup-step-btn.active {
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: rgba(26, 31, 54, 0.04);
   color: var(--text-primary);
   box-shadow: inset 1px 0 0 var(--accent-cyan);
 }
@@ -645,7 +645,7 @@ body {
 }
 
 .console-header {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(26, 31, 54, 0.03);
   border-bottom: 1px solid var(--border-color);
   padding: 8px 16px;
   font-size: 11px;
@@ -699,7 +699,7 @@ body {
 }
 
 .explainer-box {
-  background-color: rgba(255, 255, 255, 0.01);
+  background-color: rgba(26, 31, 54, 0.02);
   border-color: var(--text-muted);
 }
 .explainer-box h4 { color: var(--text-secondary); }
@@ -759,13 +759,13 @@ body {
 }
 
 .btn-secondary {
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: rgba(26, 31, 54, 0.04);
   border-color: var(--border-color);
   color: var(--text-secondary);
 }
 
 .btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(26, 31, 54, 0.06);
   color: var(--text-primary);
 }
 
@@ -802,7 +802,7 @@ body {
 }
 
 .radio-card {
-  background-color: rgba(255, 255, 255, 0.01);
+  background-color: rgba(26, 31, 54, 0.02);
   border: 1px solid var(--border-color);
   padding: 16px;
   border-radius: var(--radius-md);
@@ -822,8 +822,8 @@ body {
 }
 
 .radio-card:hover {
-  background-color: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(26, 31, 54, 0.03);
+  border-color: rgba(26, 31, 54, 0.12);
 }
 
 .radio-card:has(input[type="radio"]:checked) {
@@ -852,7 +852,7 @@ body {
 }
 
 .result-box {
-  background-color: rgba(255, 255, 255, 0.02);
+  background-color: rgba(26, 31, 54, 0.03);
   border: 1px solid rgba(6, 182, 212, 0.15);
   border-radius: var(--radius-lg);
   padding: 24px;
@@ -990,7 +990,7 @@ body {
 }
 
 .bullet-card {
-  background-color: rgba(255, 255, 255, 0.01);
+  background-color: rgba(26, 31, 54, 0.02);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   padding: 16px;
@@ -1055,7 +1055,7 @@ body {
 }
 
 .result-card {
-  background-color: rgba(255, 255, 255, 0.01);
+  background-color: rgba(26, 31, 54, 0.02);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   padding: 16px;
