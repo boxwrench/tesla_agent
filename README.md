@@ -42,9 +42,9 @@ Below are the actual measured results across the different configurations. *Vari
 ---
 
 ## 1. Core Objectives
-* **100% Data Privacy:** Run models completely offline. Your sensor logs, SCADA telemetry, and lab results never leave your building.
+* **100% Data Privacy:** Run models completely offline. Your local logs, documents, and sensitive data files never leave your workstation.
 * **Plug-and-Play Setup:** Built specifically for the **AMD Strix Halo (gfx1151)** Unified Memory Architecture.
-* **Teach-by-Building:** Designed for water operators with little to no machine learning experience.
+* **Teach-by-Building:** Designed for learners and professionals with little to no machine learning experience.
 
 ---
 

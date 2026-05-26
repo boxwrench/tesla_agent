@@ -103,17 +103,17 @@
           <div class="grid-2col">
             <div class="card">
               <h3><i class="fa-solid fa-bullseye card-icon blue"></i> What is Agentic AI?</h3>
-              <p>Standard chatbots just answer questions. An <strong>agent</strong> uses <strong>tools</strong>—it can write and execute code, inspect CSV logs, check compliance databases, and verify its own work. It works until a goal is completed, rather than just generating a single text response.</p>
+              <p>Standard chatbots just answer questions. An <strong>agent</strong> uses <strong>tools</strong>—such as writing and running code, searching documentation, or inspecting local files—to perform complex, multi-step tasks. Instead of just replying with a single paragraph, an agent operates in a continuous loop: it plans, takes action, evaluates the output, corrects its mistakes, and keeps working until the goal is achieved.</p>
               <ul class="clean-list">
-                <li><i class="fa-solid fa-circle-check green"></i> <strong>Private SCADA Checks</strong>: Analyze pump logs locally.</li>
-                <li><i class="fa-solid fa-circle-check green"></i> <strong>Automated Compliance</strong>: Check EPA lab data against limits.</li>
-                <li><i class="fa-solid fa-circle-check green"></i> <strong>Incident Reporting</strong>: Draft structured reports from errors.</li>
+                <li><i class="fa-solid fa-circle-check green"></i> <strong>Log Analysis</strong>: Parse and transform messy text or spreadsheet logs locally.</li>
+                <li><i class="fa-solid fa-circle-check green"></i> <strong>Data Checking</strong>: Read datasets and automatically flag rows that deviate from rules.</li>
+                <li><i class="fa-solid fa-circle-check green"></i> <strong>Report Generation</strong>: Synthesize multiple notes, guides, or logs into drafted summaries.</li>
               </ul>
             </div>
             
             <div class="card">
               <h3><i class="fa-solid fa-shield-halved card-icon green"></i> Why Local?</h3>
-              <p>For municipal water treatment and critical infrastructure operations, sending telemetry, SCADA patterns, or log data to public cloud APIs carries massive privacy and security risks. Running a local LLM ensures data stays in your building.</p>
+              <p>For individuals and organizations handling sensitive documents, proprietary logs, or internal codebase files, sending data to public cloud APIs carries massive privacy and security risks. Running a local LLM ensures that your data never leaves your workstation.</p>
               <div class="stats-row">
                 <div class="stat-box">
                   <span class="stat-num">$0</span>
@@ -457,17 +457,17 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="code" checked>
                     <span class="radio-title">Coding & Multi-Step Logic</span>
-                    <span class="radio-desc">Analyzing SCADA logs, writing python checks. Requires reasoning.</span>
+                    <span class="radio-desc">Multi-step programming, data cleaning scripts, and reasoning loops.</span>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="extract">
                     <span class="radio-title">Fast Extraction / QA</span>
-                    <span class="radio-desc">Reading lab results and checking limits. Simple logic.</span>
+                    <span class="radio-desc">Extracting key fields from documents or comparing values to rules.</span>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="synthesis">
                     <span class="radio-title">Complex Quality Planning</span>
-                    <span class="radio-desc">Writing EPA reports. Requires deep synthesis and review.</span>
+                    <span class="radio-desc">Drafting structured reports and summarizing multi-document inputs.</span>
                   </label>
                 </div>
               </div>
