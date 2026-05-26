@@ -2,6 +2,9 @@
 
 This document contains raw performance tables, version pins with fetchable links, SHA256 checksums, and driver environment flags for Strix Halo (gfx1151) setups.
 
+> [!TIP]
+> For seasoned developers seeking complete reproducibility metrics, exact methodology descriptions, and post-mortems of failed attempts (such as vLLM compilation timeouts and MoE speculative decoding overhead), see the [Reproducibility Matrix & Deep-Dive](reproducibility-matrix.md).
+
 ---
 
 ## 1. Strix Halo Performance Benchmarks

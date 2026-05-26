@@ -39,6 +39,9 @@ Below are the actual measured results across the different configurations. *Vari
 | **Qwen 3.6 27B Dense (Q6_K)** | **24.4 GB** | 16,384 | **Off** | *pending* | *pending* | *pending* | Upcoming test candidate |
 | **Qwen3-Coder-Next (UD-Q4_K_XL)** | **49.6 GB** | 16,384 | **On** | — | **42.5 tok/s** (ROCm) | **3 / 3 Pass** | 128GB Coder Challenger |
 
+> [!TIP]
+> For full reproducibility data, model checksums, evaluation methodologies, and detailed post-mortems of failed attempts (such as vLLM compilation timeouts and MoE speculative decoding latency overhead), see the [Reproducibility Matrix & Deep-Dive](reference/reproducibility-matrix.md).
+
 ---
 
 ## 1. Core Objectives
