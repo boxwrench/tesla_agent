@@ -22,11 +22,11 @@
   --welcome-gradient: linear-gradient(135deg, #ebf8ff 0%, #e2e8f0 100%);
   
   /* Status Colors */
-  --color-success: #2f855a; /* Forest green matching clean natural look */
+  --color-success: #14532d; /* Dark green for readable contrast on light backgrounds */
   --color-success-bg: rgba(47, 133, 90, 0.08);
-  --color-warning: #c05621;
+  --color-warning: #7c2d12; /* Dark orange/brown */
   --color-warning-bg: rgba(192, 86, 33, 0.08);
-  --color-danger: #c53030;
+  --color-danger: #7f1d1d; /* Dark red */
   --color-danger-bg: rgba(197, 48, 48, 0.08);
   
   /* Typography */
