@@ -243,7 +243,7 @@ function initBenchmarkChart() {
             font: { family: 'Outfit', weight: 'bold' }
           },
           grid: { color: 'rgba(26, 31, 54, 0.08)' },
-          ticks: { color: '#718096' }
+          ticks: { color: '#4a5568' }
         },
         y: {
           min: 70,
@@ -255,7 +255,7 @@ function initBenchmarkChart() {
             font: { family: 'Outfit', weight: 'bold' }
           },
           grid: { color: 'rgba(26, 31, 54, 0.08)' },
-          ticks: { color: '#718096' }
+          ticks: { color: '#4a5568' }
         }
       },
       plugins: {
