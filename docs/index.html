@@ -638,34 +638,130 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
         <section id="tab-glossary" class="tab-content">
           <div class="card">
             <h2>Terminology Glossary</h2>
-            <p>ML and driver terms explained in plain, jargon-free language for utility staff.</p>
+            <p>Complex AI and driver concepts explained in simple, jargon-free language with analogies and references.</p>
             
-            <div class="glossary-grid">
-              <div class="glossary-item">
-                <dt>Agent</dt>
-                <dd>An AI system that is given tools (such as file reading or script execution) and is capable of running a multi-step loop to accomplish a complex goal autonomously.</dd>
-              </div>
-              <div class="glossary-item">
-                <dt>Unified Memory (UMA)</dt>
-                <dd>An architecture where the computer's CPU and GPU share the same pool of RAM. This allows the graphics processor to access massive memory buffers, enabling large model execution on inexpensive hardware.</dd>
-              </div>
-              <div class="glossary-item">
-                <dt>GTT Size</dt>
-                <dd>Graphics Translation Table. The parameter that dictates how much system RAM the operating system allocates for GPU use. For local LLMs, this must be adjusted to allow the GPU to load large model files.</dd>
-              </div>
-              <div class="glossary-item">
-                <dt>Mixture-of-Experts (MoE)</dt>
-                <dd>A model architecture where only a subset of network layers ("experts") are active for any given word. This enables massive model sizes (e.g. 35B parameters) to run at the speed of much smaller models.</dd>
-              </div>
-              <div class="glossary-item">
-                <dt>Nonce Gate</dt>
-                <dd>A verification test that seeds a unique, random string in a file and asks the model to read and echo it. This proves the agent is executing tools rather than hallucinating answers.</dd>
-              </div>
-              <div class="glossary-item">
-                <dt>Vulkan & RADV</dt>
-                <dd>An open-source graphics library and driver (RADV) that serves as an alternative to ROCm. On AMD APUs, Vulkan provides faster text generation speed for Mixture-of-Experts models.</dd>
+            <div class="glossary-section">
+              <h3 class="glossary-sec-title"><i class="fa-solid fa-microchip blue"></i> 1. Hardware & Memory Architecture</h3>
+              <div class="glossary-grid">
+                <div class="glossary-item">
+                  <dt>APU (Accelerated Processing Unit) <a href="https://www.amd.com" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Reference</a></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A single chip that contains both the computer's CPU manager and GPU math speed-runner.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A premium kitchen machine that blends and cooks on the same counter instead of buying two separate appliances.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Unified Memory (UMA) <a href="https://developers.google.com/machine-learning/glossary#hardware-accelerators" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Google Glossary</a></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A system where the CPU and GPU share the exact same physical system RAM pool.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A chef and assistant sharing a single massive counter space instead of running between separate tables.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>GTT Size (Graphics Translation Table)</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> The operating system setting that controls how much shared RAM the GPU is allowed to access.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A boundary line in a shared room telling the graphics card: "You can use 75% of this space."</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>ROCm & Vulkan (Mesa RADV) <a href="https://rocm.docs.amd.com/" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> ROCm docs</a></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> Driver pipelines that translate AI math operations into commands the graphics chip understands.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Bilingual translators bridging the gap between your code and the graphics hardware.</p>
+                  </dd>
+                </div>
               </div>
             </div>
+
+            <div class="glossary-section" style="margin-top: 32px;">
+              <h3 class="glossary-sec-title"><i class="fa-solid fa-brain green"></i> 2. Machine Learning & LLM Core</h3>
+              <div class="glossary-grid">
+                <div class="glossary-item">
+                  <dt>LLM (Large Language Model) <a href="https://developers.google.com/machine-learning/glossary#large-language-model" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Google Glossary</a></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A massive autocomplete engine trained on billions of texts to predict the next word.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A hyper-smart predictive text keyboard that has read the entire internet.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Tokens <a href="https://developers.google.com/machine-learning/glossary#token" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Google Glossary</a></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> Word-pieces that the AI reads and writes. A token is usually 3 to 4 characters.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Cutting text into syllable Lego bricks to build sentences rather than reading individual letters.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Context Window (Context Size) <a href="https://huggingface.co/docs/transformers/index" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> HF docs</a></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> The size of the AI's active notepad (short-term memory).</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A notebook where the AI writes down what you said and what it did. If it runs out of pages, it starts forgetting the beginning.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Flash Attention & Speculative Decoding</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> Speed-reading math tricks and word-guessing loops to accelerate model processing.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Indexing a book for fast lookups (Attention) and having an assistant draft text for a senior editor to quickly check (Speculative).</p>
+                  </dd>
+                </div>
+              </div>
+            </div>
+
+            <div class="glossary-section" style="margin-top: 32px;">
+              <h3 class="glossary-sec-title"><i class="fa-solid fa-compress teal"></i> 3. Model Formats & Compression</h3>
+              <div class="glossary-grid">
+                <div class="glossary-item">
+                  <dt>GGUF (GPT-Generated Unified Format)</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A single-file package format designed to run AI models on standard consumer hardware.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> An `.mp3` or `.zip` file specifically optimized for loading AI brains.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Quantization <a href="https://developers.google.com/machine-learning/glossary#quantization" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Google Glossary</a></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A compression technique that lowers model decimals to integers to shrink file size.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Saving a huge raw photo as a JPEG. It takes up 70% less space, but looks identical to your eyes.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Mixture-of-Experts (MoE)</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A model design where only a small part of the brain is active for each word.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A hospital with 8 specialist doctors. For a cold, only the 2 required specialists treat you, keeping it fast and cheap.</p>
+                  </dd>
+                </div>
+              </div>
+            </div>
+
+            <div class="glossary-section" style="margin-top: 32px;">
+              <h3 class="glossary-sec-title"><i class="fa-solid fa-robot orange"></i> 4. Agentic Workflows</h3>
+              <div class="glossary-grid">
+                <div class="glossary-item">
+                  <dt>Agent (Agentic AI)</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A chatbot given tools and a goal, running in a loop until it's finished.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Giving an assistant a mouse and keyboard, saying: "Clean this file and let me know when done," instead of just asking for advice.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Tool Call</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> The moment the AI decides to run an external program (e.g., a file reader or bash command) instead of guessing.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A chef looking up a recipe in an index rather than trying to remember the measurements.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Nonce Gate</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A verification test to prove the agent is executing tools rather than hallucinating answers.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Putting a secret word inside a box and asking the agent to open the box and tell you the word. If they echo it back, they successfully used the key.</p>
+                  </dd>
+                </div>
+              </div>
+            </div>
+            
           </div>
         </section>
 
