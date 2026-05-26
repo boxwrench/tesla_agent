@@ -48,9 +48,7 @@
         <button class="nav-item" data-tab="benchmarks" id="btn-tab-benchmarks">
           <i class="fa-solid fa-chart-line"></i> Benchmarks
         </button>
-        <button class="nav-item" data-tab="verifier" id="btn-tab-verifier">
-          <i class="fa-solid fa-spell-check"></i> Log Verifier
-        </button>
+
         <button class="nav-item" data-tab="glossary" id="btn-tab-glossary">
           <i class="fa-solid fa-book"></i> Glossary
         </button>
@@ -634,60 +632,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
           </div>
         </section>
 
-        <!-- ================= LOG VERIFIER TAB ================= -->
-        <section id="tab-verifier" class="tab-content">
-          <div class="card">
-            <h2>Automated Nonce Gate Verifier</h2>
-            <p>Paste the response output from your local agent run here to test it against the 3 Nonce Gate verification criteria.</p>
-            
-            <div class="verifier-form">
-              <div class="form-group">
-                <label for="input-nonce">Expected Nonce Token</label>
-                <input type="text" id="input-nonce" placeholder="e.g. 1779630594-1234" class="form-input">
-              </div>
-              
-              <div class="form-group">
-                <label for="input-log">Agent Response Text</label>
-                <textarea id="input-log" rows="10" placeholder="Paste agent transcript response here..." class="form-textarea"></textarea>
-              </div>
-              
-              <button class="btn btn-primary" id="btn-verify-logs">Run Verification Check</button>
-            </div>
 
-            <div class="verifier-results" id="verifier-output" style="display: none;">
-              <h3>Verification Results</h3>
-              <div class="results-grid">
-                <div class="result-card" id="card-c1">
-                  <div class="rc-header">
-                    <span class="rc-title">1. Tool Call Detection</span>
-                    <i class="fa-solid fa-circle-question rc-icon" id="icon-c1"></i>
-                  </div>
-                  <p class="rc-desc" id="desc-c1">Verifies if the model used the terminal tool to check the file rather than guessing.</p>
-                </div>
-
-                <div class="result-card" id="card-c2">
-                  <div class="rc-header">
-                    <span class="rc-title">2. Nonce Verification</span>
-                    <i class="fa-solid fa-circle-question rc-icon" id="icon-c2"></i>
-                  </div>
-                  <p class="rc-desc" id="desc-c2">Verifies if the expected nonce token is echoed in the response text.</p>
-                </div>
-
-                <div class="result-card" id="card-c3">
-                  <div class="rc-header">
-                    <span class="rc-title">3. No Fenced Blocks</span>
-                    <i class="fa-solid fa-circle-question rc-icon" id="icon-c3"></i>
-                  </div>
-                  <p class="rc-desc" id="desc-c3">Verifies that the model did not output markdown code blocks (e.g. ```bash cat nonce.txt) instead of running the tool.</p>
-                </div>
-              </div>
-              
-              <div class="ver-summary-box" id="ver-summary">
-                Status Pending
-              </div>
-            </div>
-          </div>
-        </section>
 
         <!-- ================= GLOSSARY TAB ================= -->
         <section id="tab-glossary" class="tab-content">
