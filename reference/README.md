@@ -19,6 +19,9 @@ The following table summarizes the speed and quality benchmarks run on the host 
 | **Qwen 3.6 35B MoE (MXFP4)** | 21.7 GB | 32,768 | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | **Current default CODE baseline** |
 | **Qwen 3.6 35B MoE (Vulkan RADV)** | 21.7 GB | 32,768 | **82 / 84** | **52.1 tok/s** (RADV) | **3 / 3 Pass** | **Recommended speed upgrade** |
 | **Qwen 3.5 122B MoE (MXFP4)** | 70.0 GB | 8,192 | **80 / 84** | **16.5 tok/s** (ROCm) | **3 / 3 Pass** | **Quality escalation** |
+| **Qwen 3.5 122B MoE (MXFP4)** *think-off* | 70.0 GB | 8,192 | *pending* | *pending* | *pending* | Think-off comparison variant |
+| **Qwen 3.6 27B Dense (Q6_K)** *think-on* | 24.4 GB | 16,384 | *pending* | *pending* | *pending* | Upcoming test candidate |
+| **Qwen 3.6 27B Dense (Q6_K)** *think-off* | 24.4 GB | 16,384 | *pending* | *pending* | *pending* | Upcoming test candidate |
 | **Qwen 3.5 35B MoE (MXFP4)** | 21.0 GB | 8,192 | **79 / 84** | **47.3 tok/s** (ROCm) | **3 / 3 Pass** | Retained for regression tests |
 | **Qwen3-Coder-Next (UD-Q4_K_XL)** | 49.6 GB | 16,384 | — | 42.5 tok/s (ROCm) | 3 / 3 Pass | CODE challenger (128GB-class) |
 

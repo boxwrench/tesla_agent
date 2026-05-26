@@ -34,6 +34,9 @@ Below are the actual measured results across the different configurations. *Vari
 | **Qwen 3.6 35B MoE (Vulkan RADV)** | **21.7 GB** | 32,768 | **On** (512 tokens) | **82 / 84** | **52.1 tok/s** (Vulkan) | **3 / 3 Pass** | **Recommended Speed Upgrade** |
 | **Qwen 3.6 35B MoE (MXFP4)** | **21.7 GB** | 32,768 | **Off** | **82 / 84** | **43.7 tok/s** | **3 / 3 Pass** | Cuts wall-time in half for prose (falls to 1/3 coding E2E) |
 | **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 8,192 | **On** (1024 tokens) | **80 / 84** | **16.5 tok/s** (ROCm) | **3 / 3 Pass** | **Quality Escalation** |
+| **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 8,192 | **Off** | *pending* | *pending* | *pending* | Think-off comparison variant |
+| **Qwen 3.6 27B Dense (Q6_K)** | **24.4 GB** | 16,384 | **On** (512 tokens) | *pending* | *pending* | *pending* | Upcoming test candidate |
+| **Qwen 3.6 27B Dense (Q6_K)** | **24.4 GB** | 16,384 | **Off** | *pending* | *pending* | *pending* | Upcoming test candidate |
 | **Qwen3-Coder-Next (UD-Q4_K_XL)** | **49.6 GB** | 16,384 | **On** | — | **42.5 tok/s** (ROCm) | **3 / 3 Pass** | 128GB Coder Challenger |
 
 ---
