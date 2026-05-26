@@ -118,7 +118,6 @@ function initSetupStepper() {
 
 /* ================= Model Recommendation Finder ================= */
 function initModelFinder() {
-  const ramRadios = document.querySelectorAll('input[name="finder-ram"]');
   const priorityRadios = document.querySelectorAll('input[name="finder-priority"]');
   
   const recModelName = document.getElementById('rec-model-name');
@@ -132,8 +131,7 @@ function initModelFinder() {
   const recRationale = document.getElementById('rec-rationale');
 
   const modelMatrix = {
-    // === 128 GB Setup (MoE support) ===
-    '128-code': {
+    'code': {
       name: "Qwen 3.6 35B Mixture-of-Experts (MXFP4 Quant)",
       mode: "Reasoning Enabled",
       file: "Qwen3.6-35B-A3B-MXFP4_MOE.gguf",
@@ -144,7 +142,7 @@ function initModelFinder() {
       hermes: "thinking_budget_tokens: 512\nmax_tokens: 8192",
       rationale: "This configuration provides the best balance of multi-step coding reasoning and speed on a 128GB APU system. Flash attention is enabled by default to handle context. Capping reasoning tokens via 'thinking_budget_tokens' ensures fast loops."
     },
-    '128-extract': {
+    'extract': {
       name: "Qwen 3.6 35B Mixture-of-Experts (MXFP4 Quant)",
       mode: "Reasoning Disabled (Pure Extraction)",
       file: "Qwen3.6-35B-A3B-MXFP4_MOE.gguf",
@@ -155,7 +153,7 @@ function initModelFinder() {
       hermes: "thinking_budget_tokens: 0\nmax_tokens: 4096",
       rationale: "Simple telemetry extraction and log parsing do not require reasoning outputs. Disabling thinking using the template keyword parameters saves 50%+ wall-clock time and guarantees tool-use functions run directly. Note that --reasoning-budget 0 is broken and must not be used."
     },
-    '128-synthesis': {
+    'synthesis': {
       name: "Qwen 3.5 122B Mixture-of-Experts (MXFP4 Quant)",
       mode: "High-Quality Synthesis",
       file: "Qwen3.5-122B-A10B-MXFP4_MOE.gguf",
@@ -165,52 +163,15 @@ function initModelFinder() {
       command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.5-122B-A10B-MXFP4_MOE.gguf --ctx-size 8192",
       hermes: "thinking_budget_tokens: 1024\nmax_tokens: 8192",
       rationale: "When writing formal EPA compliance reports, accuracy and synthesis quality are critical. The 122B MoE model provides unmatched instruction following. Context size must be capped at 8192 to prevent graphics driver spillover hangs."
-    },
-    // === 64 GB Setup (Dense models only) ===
-    '64-code': {
-      name: "Qwen3.6-27B (Q6_K, Dense) — projected",
-      mode: "Coding (projected, not yet benchmarked)",
-      file: "Qwen3.6-27B-Q6_K.gguf",
-      size: "24.4 GB (projected)",
-      speed: "~41.0 tokens/sec (projected)",
-      reasoning: "Gated reasoning cap (256)",
-      command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.6-27B-Q6_K.gguf",
-      hermes: "thinking_budget_tokens: 256\nmax_tokens: 8192",
-      rationale: "A 64GB RAM system (≈48GB GTT) cannot hold the large MoE models. The validated CODE challenger, Qwen3-Coder-Next (UD-Q4_K_XL, 3/3 gate), is ~49.6GB and therefore a 128GB-class model — it does NOT fit 64GB. For a 64GB host, a dense ~27B is the realistic coding option, but note this configuration has not yet been benchmarked on this hardware."
-    },
-    '64-extract': {
-      name: "Qwen3.6-7B (Q6_K) — projected",
-      mode: "Fast Check & Extraction (projected)",
-      file: "Qwen3.6-7B-Q6_K.gguf",
-      size: "5.8 GB (projected)",
-      speed: "~72.0 tokens/sec (projected)",
-      reasoning: "Disabled",
-      command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.6-7B-Q6_K.gguf --ctx-size 16384",
-      hermes: "thinking_budget_tokens: 0\nmax_tokens: 2048",
-      rationale: "A lightweight, fast model for simple data mapping and format validation, leaving ample RAM for other host processes. Note: this small-model configuration has not yet been benchmarked on this hardware — figures are estimates."
-    },
-    '64-synthesis': {
-      name: "Qwen3.6-27B (Q6_K, Dense) — projected",
-      mode: "Standard Dense Synthesis (projected)",
-      file: "Qwen3.6-27B-Q6_K.gguf",
-      size: "24.4 GB (projected)",
-      speed: "~35.0 tokens/sec (projected)",
-      reasoning: "Reasoning active",
-      command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.6-27B-Q6_K.gguf --ctx-size 16384",
-      hermes: "thinking_budget_tokens: 512\nmax_tokens: 4096",
-      rationale: "For report synthesis on a 64GB RAM system, a dense ~27B Q6 quant is the realistic option without risking GTT memory crashes. Note: this configuration has not yet been benchmarked on this hardware — figures are estimates."
     }
   };
 
   function updateFinderResult() {
-    let ramVal = "128";
     let priVal = "code";
 
-    ramRadios.forEach(radio => { if (radio.checked) ramVal = radio.value; });
     priorityRadios.forEach(radio => { if (radio.checked) priVal = radio.value; });
 
-    const configKey = `${ramVal}-${priVal}`;
-    const result = modelMatrix[configKey];
+    const result = modelMatrix[priVal];
 
     if (result) {
       recModelName.textContent = result.name;
@@ -225,15 +186,10 @@ function initModelFinder() {
 
       // Handle coloring badges based on mode
       recMode.className = "badge";
-      if (result.mode.includes("Disabled") || result.mode.includes("Extraction")) {
-        recMode.classList.add('badge-blue');
-      } else {
-        recMode.classList.add('badge-blue'); // Default blue
-      }
+      recMode.classList.add('badge-blue');
     }
   }
 
-  ramRadios.forEach(radio => radio.addEventListener('change', updateFinderResult));
   priorityRadios.forEach(radio => radio.addEventListener('change', updateFinderResult));
 
   // Initialize
@@ -256,17 +212,16 @@ function initBenchmarkChart() {
           { x: 47.3, y: 79, label: 'Qwen 3.5 35B MoE (Think-On)' },
           { x: 16.5, y: 80, label: 'Qwen 3.5 122B MoE (Think-On)' }
         ],
-        backgroundColor: '#06b6d4', // Cyan
+        backgroundColor: '#2b6cb0', // Primary Accent Blue
         pointRadius: 8,
         pointHoverRadius: 10
       },
       {
         label: 'Other Models',
         data: [
-          { x: 42.5, y: 76, label: 'Qwen3-Coder-Next (3/3 Pass, CODE challenger)' },
-          { x: 41.0, y: 77, label: 'Qwen3.6-27B Dense (projected)' }
+          { x: 42.5, y: 76, label: 'Qwen3-Coder-Next (3/3 Pass, CODE challenger)' }
         ],
-        backgroundColor: '#9ca3af', // Gray
+        backgroundColor: '#718096', // Neutral Grey
         pointRadius: 6,
         pointHoverRadius: 8
       }
@@ -284,11 +239,11 @@ function initBenchmarkChart() {
           title: {
             display: true,
             text: 'Generation Speed (Tokens/Second)',
-            color: '#9ca3af',
+            color: '#4a5568',
             font: { family: 'Outfit', weight: 'bold' }
           },
-          grid: { color: 'rgba(255, 255, 255, 0.05)' },
-          ticks: { color: '#9ca3af' }
+          grid: { color: 'rgba(26, 31, 54, 0.08)' },
+          ticks: { color: '#718096' }
         },
         y: {
           min: 70,
@@ -296,16 +251,16 @@ function initBenchmarkChart() {
           title: {
             display: true,
             text: 'Quality Score (Scorecard Rubric / 84)',
-            color: '#9ca3af',
+            color: '#4a5568',
             font: { family: 'Outfit', weight: 'bold' }
           },
-          grid: { color: 'rgba(255, 255, 255, 0.05)' },
-          ticks: { color: '#9ca3af' }
+          grid: { color: 'rgba(26, 31, 54, 0.08)' },
+          ticks: { color: '#718096' }
         }
       },
       plugins: {
         legend: {
-          labels: { color: '#f3f4f6', font: { family: 'Outfit' } }
+          labels: { color: '#1a1f36', font: { family: 'Outfit' } }
         },
         tooltip: {
           callbacks: {

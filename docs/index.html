@@ -452,23 +452,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
             
             <div class="finder-form">
               <div class="form-group">
-                <label>1. System RAM Installed</label>
-                <div class="radio-group">
-                  <label class="radio-card">
-                    <input type="radio" name="finder-ram" value="128" checked>
-                    <span class="radio-title">128 GB RAM</span>
-                    <span class="radio-desc">Full 96GB GTT headroom. Run any MoE model.</span>
-                  </label>
-                  <label class="radio-card">
-                    <input type="radio" name="finder-ram" value="64">
-                    <span class="radio-title">64 GB RAM</span>
-                    <span class="radio-desc">48GB GTT headroom. Limited to smaller models.</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label>2. Primary Task Priority</label>
+                <label>Primary Task Priority</label>
                 <div class="radio-group">
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="code" checked>
@@ -595,19 +579,9 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                       <td>42.5 t/s</td>
                       <td class="pass">3 / 3</td>
                     </tr>
-                    <tr>
-                      <td>Qwen3.6-27B (Q6_K, Dense) <em>— projected</em></td>
-                      <td>24.4 GB</td>
-                      <td><em>~77 / 84*</em></td>
-                      <td><em>~41.0 t/s*</em></td>
-                      <td><em>n/a*</em></td>
-                    </tr>
                   </tbody>
                 </table>
               </div>
-              <p class="sub-text" style="font-size: 0.78rem; color: #a1a1aa; margin-top: 8px;">
-                * Projected. The dense Qwen3.6-27B has not yet been benchmarked on this hardware (pending a dense GGUF); figures are estimates, not measured results.
-              </p>
             </div>
             
             <div class="card">

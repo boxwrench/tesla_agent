@@ -48,17 +48,13 @@ Because the Strix Halo APU (graphics identifier `gfx1151`) is a new consumer arc
 
 ---
 
-## 4. Hardware Configuration Options
+## 4. Hardware Baseline
 
-While 128 GB of RAM is the ideal "workhorse" setup, you can adapt these settings for other configurations:
+This guide targets the reference hardware baseline:
+* **System RAM:** 128 GB LPDDR5X (Unified memory pool).
+* **Optimal GTT Allocation:** 96 GB (`gttsize=98304`).
+* **Graphics Compatibility:** AMD Radeon APU (exposed as `gfx1151`).
 
-| System RAM | Optimal GTT Size | Recommended GTT Setting | Recommended Model |
-|---|---|---|---|
-| **128 GB** | **96 GB** | `gttsize=98304` | Qwen 3.6 35B MoE (MXFP4) |
-| **64 GB** | **48 GB** | `gttsize=49152` | Qwen 3.6 27B Dense (Q4_K_M) *— projected* |
-| **32 GB** | **20 GB** | `gttsize=20480` | Qwen 3.6 7B Dense (Q6_K) *— projected* |
-
-> [!NOTE]
-> * **Projected Models:** The 27B and 7B dense configurations are theoretical suggestions for smaller memory footprints and have not been benchmarked on this hardware yet.
+If your system has less memory, the large MoE and coder models will fail to load or trigger driver kernel page faults.
 
 In the next chapter, we will walk through the development journey—the mistakes made, the dead ends hit, and how we arrived at this simple setup.
