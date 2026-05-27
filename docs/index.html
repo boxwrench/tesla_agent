@@ -18,6 +18,9 @@
   <!-- Chart.js for beautiful interactive benchmarks -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
+  <!-- Marked.js for markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -48,7 +51,9 @@
         <button class="nav-item" data-tab="benchmarks" id="btn-tab-benchmarks">
           <i class="fa-solid fa-chart-line"></i> Benchmarks
         </button>
-
+        <button class="nav-item" data-tab="guide" id="btn-tab-guide">
+          <i class="fa-solid fa-graduation-cap"></i> 10-Chapter Guide
+        </button>
         <button class="nav-item" data-tab="glossary" id="btn-tab-glossary">
           <i class="fa-solid fa-book"></i> Glossary
         </button>
@@ -650,9 +655,25 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
               </div>
             </div>
           </div>
+        <!-- ================= GUIDE TAB ================= -->
+        <section id="tab-guide" class="tab-content">
+          <div class="guide-layout">
+            <aside class="guide-sidebar card">
+              <h3>Chapters</h3>
+              <nav class="guide-menu" id="guide-chapters-menu">
+                <!-- Chapters will be populated dynamically -->
+              </nav>
+            </aside>
+            <div class="guide-display card">
+              <div id="guide-content-loading" class="loading-spinner" style="display: none;">
+                <i class="fa-solid fa-spinner fa-spin"></i> Loading chapter...
+              </div>
+              <article id="guide-viewer" class="markdown-body">
+                <!-- Chapter markdown rendered here -->
+              </article>
+            </div>
+          </div>
         </section>
-
-
 
         <!-- ================= GLOSSARY TAB ================= -->
         <section id="tab-glossary" class="tab-content">

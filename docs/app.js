@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSetupStepper();
   initModelFinder();
   initBenchmarkChart();
+  initGuideTab();
 });
 
 /* ================= Tab Navigation ================= */
@@ -273,6 +274,78 @@ function initBenchmarkChart() {
       }
     }
   });
+}
+
+/* ================= 10-Chapter Guide Logic ================= */
+function initGuideTab() {
+  const chapters = [
+    { file: '01-what-is-agentic-ai.md', title: 'Chapter 1: What is Agentic AI?' },
+    { file: '02-why-local.md', title: 'Chapter 2: Why Local?' },
+    { file: '03-the-hardware.md', title: 'Chapter 3: The Hardware' },
+    { file: '04-the-journey.md', title: 'Chapter 4: The Journey' },
+    { file: '05-setup.md', title: 'Chapter 5: Setup' },
+    { file: '06-verification.md', title: 'Chapter 6: Verification' },
+    { file: '07-choosing-a-model.md', title: 'Chapter 7: Choosing a Model' },
+    { file: '08-speed-and-tuning.md', title: 'Chapter 8: Speed and Tuning' },
+    { file: '09-building-your-workflow.md', title: 'Chapter 9: Building Your Workflow' },
+    { file: '10-orchestrating-agents.md', title: 'Chapter 10: Orchestrating Agents' }
+  ];
+
+  const menuContainer = document.getElementById('guide-chapters-menu');
+  const viewer = document.getElementById('guide-viewer');
+  const spinner = document.getElementById('guide-content-loading');
+
+  if (!menuContainer || !viewer) return;
+
+  // Build the sidebar menu
+  chapters.forEach((ch, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'guide-chapter-btn';
+    if (idx === 0) btn.classList.add('active');
+    btn.textContent = ch.title;
+    btn.setAttribute('data-file', ch.file);
+
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.guide-chapter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadChapter(ch.file);
+    });
+
+    menuContainer.appendChild(btn);
+  });
+
+  // Load a chapter by filename
+  async function loadChapter(fileName) {
+    if (spinner) spinner.style.display = 'flex';
+    viewer.style.opacity = '0.3';
+    try {
+      const response = await fetch(`./guide/${fileName}`);
+      if (!response.ok) {
+        throw new Error(`Failed to load chapter: ${response.statusText}`);
+      }
+      const markdownText = await response.text();
+      
+      // Parse markdown with marked
+      if (typeof marked !== 'undefined') {
+        viewer.innerHTML = marked.parse(markdownText);
+      } else {
+        viewer.innerHTML = `<pre>${markdownText}</pre>`;
+      }
+    } catch (error) {
+      viewer.innerHTML = `<div class="card" style="border-left:4px solid var(--color-danger); background-color:var(--color-danger-bg);">
+        <h3>Error Loading Chapter</h3>
+        <p>${error.message}</p>
+      </div>`;
+    } finally {
+      if (spinner) spinner.style.display = 'none';
+      viewer.style.opacity = '1';
+      // Scroll display area back to top
+      viewer.parentElement.scrollTop = 0;
+    }
+  }
+
+  // Load the first chapter by default
+  loadChapter(chapters[0].file);
 }
 
 
