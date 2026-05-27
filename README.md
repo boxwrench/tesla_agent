@@ -19,6 +19,27 @@ This is the guide we wish we had when we started: verbose, explanatory, data-dri
 
 ---
 
+## 📖 The Guide
+
+Start here and read in order — each chapter builds on the last. Written for water-treatment and utility professionals new to AI, not just engineers.
+
+| # | Chapter | What it covers |
+|---|---|---|
+| 01 | [What is Agentic AI?](guide/01-what-is-agentic-ai.md) | Core concepts — agents, tools, the tool-call loop |
+| 02 | [Why Local?](guide/02-why-local.md) | Privacy, offline capability, and cost |
+| 03 | [The Hardware](guide/03-the-hardware.md) | Strix Halo, unified memory, and GTT pools |
+| 04 | [The Journey](guide/04-the-journey.md) | What failed, what worked, and why |
+| 05 | [Setup](guide/05-setup.md) | Step-by-step build with troubleshooting |
+| 06 | [Verification](guide/06-verification.md) | Running the Nonce Gate and Coding Eval |
+| 07 | [Choosing a Model](guide/07-choosing-a-model.md) | Benchmarks and reasoning toggles |
+| 08 | [Speed and Tuning](guide/08-speed-and-tuning.md) | Vulkan vs ROCm, reasoning budgets |
+| 09 | [Building Your Workflow](guide/09-building-your-workflow.md) | Putting it to work on real utility tasks |
+| 10 | [How Agents Work Together](guide/10-orchestrating-agents.md) | One agent vs pipelines, batch, and orchestrators |
+
+> Prefer a rendered, interactive version? See the [live site](https://boxwrench.github.io/tesla_agent/). For technical lookups, jump to the [Reference](reference/README.md).
+
+---
+
 ## 🛠️ Reference Testing Stack
 All benchmarks were run on local consumer hardware with the following configuration:
 * **Hardware (APU):** AMD Ryzen Strix Halo (gfx1151), 128 GB LPDDR5X system RAM (configured via modprobe with **96 GB GTT graphics memory pool**).
