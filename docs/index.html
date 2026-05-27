@@ -21,7 +21,7 @@
   <!-- Marked.js for markdown rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   
-  <link rel="stylesheet" href="style.css?v=1.0.2">
+  <link rel="stylesheet" href="style.css?v=1.0.3">
 </head>
 <body>
 
@@ -748,6 +748,13 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                     <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Indexing a book for fast lookups (Attention) and having an assistant draft text for a senior editor to quickly check (Speculative).</p>
                   </dd>
                 </div>
+                <div class="glossary-item">
+                  <dt>Chat Template (Jinja2) <a href="https://huggingface.co/docs/transformers/main/en/chat_templating" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> HF Guide</a></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A formatting script that wraps conversational history (User, Assistant, System) and tool-calling data in structured XML or markdown tags so the AI model understands where thoughts end and tool requests begin.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A standardized utility log sheet. No matter who takes the measurements, they write them in the exact same boxes so the state compliance auditor can read them instantly.</p>
+                  </dd>
+                </div>
               </div>
             </div>
 
@@ -802,6 +809,40 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                     <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Putting a secret word inside a box and asking the agent to open the box and tell you the word. If they echo it back, they successfully used the key.</p>
                   </dd>
                 </div>
+                <div class="glossary-item">
+                  <dt>Sandbox (Docker / Container) <a href="https://docs.docker.com/" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Docker Docs</a></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A secure, isolated virtual room inside your computer where the AI agent is allowed to write and run code without risk of altering or damaging your actual operating system.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A safety hood in a laboratory. You run chemical reactions inside the hood to contain fumes and spills, protecting the rest of the building.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Orchestrator Pattern (Multi-Agent) <a href="https://arxiv.org/abs/2501.00000" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Agentic Design</a></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A workflow where a main "Manager" AI agent takes a complex user goal, breaks it into smaller sub-tasks, delegates them to specialized "Worker" sub-agents, and compiles their final outputs.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A chief operator coordinating plant maintenance, laboratory testing, and electrical crews rather than trying to do every job himself.</p>
+                  </dd>
+                </div>
+              </div>
+            </div>
+
+            <div class="glossary-section" style="margin-top: 32px;">
+              <h3 class="glossary-sec-title"><i class="fa-solid fa-faucet-drip orange"></i> 5. Utility & Domain Context</h3>
+              <div class="glossary-grid">
+                <div class="glossary-item">
+                  <dt>SCADA (Supervisory Control and Data Acquisition)</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> The industrial computer network that reads sensor data (flow, pressure, tank levels) and operates mechanical hardware (pumps, valves, chemical feeds) in real-time.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> The dashboard gauges, gas pedal, and steering wheel of a massive commercial truck.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>MCL (Maximum Contaminant Level) <a href="https://www.epa.gov/ground-water-and-drinking-water/national-primary-drinking-water-regulations" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> EPA Regulations</a></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> The legal safety limit set by the EPA on the concentration of a chemical or contaminant allowed in public drinking water systems.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> The legal speed limit on a residential street. Going above it triggers a violation and requires immediate corrective action.</p>
+                  </dd>
+                </div>
               </div>
             </div>
             
@@ -813,6 +854,6 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
 
   </div>
 
-  <script src="app.js?v=1.0.2"></script>
+  <script src="app.js?v=1.0.3"></script>
 </body>
 </html>
