@@ -132,14 +132,14 @@ function initModelFinder() {
   const modelMatrix = {
     'code': {
       name: "Qwen 3.6 35B Mixture-of-Experts (MXFP4 Quant)",
-      mode: "Reasoning Enabled",
+      mode: "Reasoning Enabled (Uncapped)",
       file: "Qwen3.6-35B-A3B-MXFP4_MOE.gguf",
       size: "21.7 GB",
-      speed: "~44.2 tokens/sec (ROCm default, up to ~52 t/s Vulkan)",
-      reasoning: "Gated reasoning cap (256-512 tokens recommended)",
-      command: "bash scripts/serving/serve_rocm.sh",
-      hermes: "thinking_budget_tokens: 512\nmax_tokens: 8192",
-      rationale: "This configuration provides the best balance of multi-step coding reasoning and speed on a 128GB APU system. Flash attention is enabled by default to handle context. Capping reasoning tokens via 'thinking_budget_tokens' ensures fast loops."
+      speed: "~50.1 tokens/sec (Vulkan/RADV default; ~44.2 t/s ROCm fallback)",
+      reasoning: "Uncapped think-on — do NOT budget the coding route",
+      command: "bash scripts/serving/serve_vulkan.sh",
+      hermes: "max_tokens: 8192",
+      rationale: "Best balance of multi-step coding reasoning and speed on a 128GB APU. The Vulkan/RADV backend is the promoted default (+51% prefill, +13.5% decode over ROCm); ROCm is the fallback. IMPORTANT: do not cap reasoning on coding tasks — a budget sweep showed any cap drops the stateful coding gate to 1-2/3, while uncapped think-on holds 3/3. Reasoning budgets are a planning/prose latency lever, not a coding one."
     },
     'extract': {
       name: "Qwen 3.6 35B Mixture-of-Experts (MXFP4 Quant)",
@@ -157,11 +157,11 @@ function initModelFinder() {
       mode: "High-Quality Synthesis",
       file: "Qwen3.5-122B-A10B-MXFP4_MOE.gguf",
       size: "70.0 GB (fits GTT memory limits)",
-      speed: "~16.5 tokens/sec (ROCm server)",
+      speed: "~19.4 tokens/sec (ROCm server)",
       reasoning: "Deep reasoning active",
-      command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.5-122B-A10B-MXFP4_MOE.gguf --ctx-size 8192",
+      command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.5-122B-A10B-MXFP4_MOE.gguf --ctx-size 12288",
       hermes: "thinking_budget_tokens: 1024\nmax_tokens: 8192",
-      rationale: "When writing formal EPA compliance reports, accuracy and synthesis quality are critical. The 122B MoE model provides unmatched instruction following. Context size must be capped at 8192 to prevent graphics driver spillover hangs."
+      rationale: "When drafting formal master-plan reports and research syntheses, accuracy and instruction-following quality matter most. The 122B MoE provides the strongest synthesis on this hardware. Context is capped (8k-12k) to keep allocations inside the GTT pool and prevent graphics-driver spillover hangs."
     }
   };
 
@@ -206,10 +206,11 @@ function initBenchmarkChart() {
       {
         label: 'Mixture of Experts (MoE)',
         data: [
-          { x: 44.2, y: 82, label: 'Qwen 3.6 35B MoE (Think-On)' },
+          { x: 50.1, y: 82, label: 'Qwen 3.6 35B MoE (Vulkan, Think-On) — default' },
+          { x: 44.2, y: 82, label: 'Qwen 3.6 35B MoE (ROCm, Think-On)' },
           { x: 43.7, y: 82, label: 'Qwen 3.6 35B MoE (Think-Off)' },
           { x: 47.3, y: 79, label: 'Qwen 3.5 35B MoE (Think-On)' },
-          { x: 16.5, y: 80, label: 'Qwen 3.5 122B MoE (Think-On)' }
+          { x: 19.4, y: 80, label: 'Qwen 3.5 122B MoE (Think-On)' }
         ],
         backgroundColor: '#2b6cb0', // Primary Accent Blue
         pointRadius: 8,
@@ -218,7 +219,7 @@ function initBenchmarkChart() {
       {
         label: 'Other Models',
         data: [
-          { x: 42.5, y: 76, label: 'Qwen3-Coder-Next (3/3 Pass, CODE challenger)' }
+          { x: 34.6, y: 76, label: 'Qwen3-Coder-Next (3/3 Pass, CODE challenger)' }
         ],
         backgroundColor: '#718096', // Neutral Grey
         pointRadius: 6,

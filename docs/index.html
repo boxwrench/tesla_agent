@@ -154,6 +154,18 @@
               </div>
             </div>
           </div>
+
+          <div class="card">
+            <h3><i class="fa-solid fa-sitemap card-icon blue"></i> How Agents Work Together</h3>
+            <p>One agent is often enough &mdash; but bigger jobs go better when you arrange several, the way a plant runs a crew rather than one operator. Match the shape to the work:</p>
+            <ul class="clean-list">
+              <li><i class="fa-solid fa-circle-check green"></i> <strong>One agent</strong>: a self-contained job, start to finish.</li>
+              <li><i class="fa-solid fa-circle-check green"></i> <strong>Sequential pipeline</strong>: steps that depend on each other (gather &rarr; compare &rarr; draft).</li>
+              <li><i class="fa-solid fa-circle-check green"></i> <strong>Batch</strong>: the same job over many independent items (e.g. summarize 40 equipment manuals).</li>
+              <li><i class="fa-solid fa-circle-check green"></i> <strong>Orchestrator</strong>: a coordinator that splits a big goal, delegates the parts, and assembles the result.</li>
+            </ul>
+            <p class="sub-text">Full walkthrough with water-industry examples: <a href="https://github.com/boxwrench/tesla_agent/blob/main/guide/10-orchestrating-agents.md" target="_blank" rel="noopener">Chapter 10 &mdash; How Agents Work Together</a>.</p>
+          </div>
         </section>
 
         <!-- ================= INTERACTIVE SETUP TAB ================= -->
@@ -489,22 +501,22 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   </div>
                   <div>
                     <span class="res-lbl">Speed:</span>
-                    <strong id="rec-speed">~44.2 tokens/sec</strong>
+                    <strong id="rec-speed">~50.1 tokens/sec (Vulkan; ~44.2 ROCm)</strong>
                   </div>
                   <div>
                     <span class="res-lbl">Reasoning:</span>
-                    <strong id="rec-reasoning">Gated reasoning cap (256-512)</strong>
+                    <strong id="rec-reasoning">Uncapped think-on (do not budget coding)</strong>
                   </div>
                 </div>
-                
+
                 <div class="result-command-box">
                   <p class="res-lbl">Start server command:</p>
-                  <pre><code id="rec-command">serve_rocm.sh</code></pre>
+                  <pre><code id="rec-command">serve_vulkan.sh</code></pre>
                 </div>
 
                 <div class="result-command-box">
                   <p class="res-lbl">Hermes run config:</p>
-                  <pre><code id="rec-hermes-config">thinking_budget_tokens: 512</code></pre>
+                  <pre><code id="rec-hermes-config">max_tokens: 8192</code></pre>
                 </div>
                 
                 <div class="result-rationale" id="rec-rationale">
@@ -525,7 +537,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
                   <strong style="color: var(--text-primary);"><i class="fa-solid fa-layer-group"></i> Benchmark Stack:</strong><br>
                   • <strong>Hardware:</strong> AMD Ryzen Strix Halo APU (gfx1151), 128 GB LPDDR5X RAM (96 GB GTT allocated)<br>
-                  • <strong>Backend:</strong> llama.cpp/llama-server (<code style="color: var(--accent-cyan); font-weight: 600;">b9247</code>) served via ROCm 7.1 / Vulkan (Mesa RADV)<br>
+                  • <strong>Backend:</strong> llama.cpp/llama-server (<code style="color: var(--accent-cyan); font-weight: 600;">b9247</code>) served via ROCm 7.2.x / Vulkan (Mesa RADV 25.2.8)<br>
                   • <strong>Parameters:</strong> Temp = 0 (greedy decoding), context budget = 8k-32k, Flash Attention enabled
                 </p>
               </div>
@@ -543,7 +555,14 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   </thead>
                   <tbody>
                     <tr class="highlighted-row">
-                      <td>Qwen 3.6 35B (MXFP4, Think-On)</td>
+                      <td>Qwen 3.6 35B (Vulkan RADV, Think-On) — default</td>
+                      <td>21.7 GB</td>
+                      <td>82 / 84</td>
+                      <td>50.1 t/s</td>
+                      <td class="pass">3 / 3</td>
+                    </tr>
+                    <tr>
+                      <td>Qwen 3.6 35B (ROCm, Think-On) — fallback</td>
                       <td>21.7 GB</td>
                       <td>82 / 84</td>
                       <td>44.2 t/s</td>
@@ -552,7 +571,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                     <tr>
                       <td>Qwen 3.6 35B (MXFP4, Think-Off)</td>
                       <td>21.7 GB</td>
-                      <td>—</td>
+                      <td>82 / 84</td>
                       <td>43.7 t/s</td>
                       <td class="fail">1 / 3</td>
                     </tr>
@@ -567,42 +586,43 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                        <td>Qwen 3.5 122B (MXFP4, Think-On)</td>
                        <td>70 GB</td>
                        <td>80 / 84</td>
-                       <td>16.5 t/s</td>
+                       <td>19.4 t/s</td>
                        <td class="pass">3 / 3</td>
                      </tr>
                      <tr>
                        <td>Qwen 3.5 122B (MXFP4, Think-Off)</td>
                        <td>70 GB</td>
-                       <td><em>pending</em></td>
-                       <td><em>pending</em></td>
-                       <td><em>pending</em></td>
+                       <td>81 / 84</td>
+                       <td>19.5 t/s</td>
+                       <td class="pass">3 / 3</td>
                      </tr>
                      <tr>
-                       <td>Qwen 3.6 27B (Q6_K, Think-On)</td>
-                       <td>24.4 GB</td>
-                       <td><em>pending</em></td>
-                       <td><em>pending</em></td>
-                       <td><em>pending</em></td>
+                       <td>Qwen 3.6 27B Dense (UD-Q4_K_XL, Think-On)</td>
+                       <td>16.4 GB</td>
+                       <td>—</td>
+                       <td>~7.0 t/s</td>
+                       <td class="pass">3 / 3</td>
                      </tr>
                      <tr>
-                       <td>Qwen 3.6 27B (Q6_K, Think-Off)</td>
-                       <td>24.4 GB</td>
-                       <td><em>pending</em></td>
-                       <td><em>pending</em></td>
-                       <td><em>pending</em></td>
+                       <td>Qwen 3.6 27B Dense (UD-Q4_K_XL, Think-Off)</td>
+                       <td>16.4 GB</td>
+                       <td>—</td>
+                       <td>~7.0 t/s</td>
+                       <td class="fail">1 / 3</td>
                      </tr>
                     <tr>
                       <td>Qwen3-Coder-Next (UD-Q4_K_XL)</td>
                       <td>49.6 GB</td>
                       <td>—</td>
-                      <td>42.5 t/s</td>
+                      <td>34.6 t/s</td>
                       <td class="pass">3 / 3</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
+              <p class="sub-text" style="margin-top:12px;"><strong>Speculative decoding (dense only):</strong> DFlash lifts the dense 27B from ~7 t/s to <strong>~31 t/s (2.82&times;)</strong> using a footprint-minimized Q4_K_M draft. Speculation works on <em>dense</em> models (no expert router to thrash); on MoE it is counterproductive. <em>Speed verified; tool-call discipline on that build is in validation.</em></p>
             </div>
-            
+
             <div class="card">
               <h2>Visual Performance Analysis</h2>
               <p class="sub-text">Relative quality score vs generation throughput:</p>
