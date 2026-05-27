@@ -71,7 +71,8 @@ tesla_agent/
 │   ├── 06-verification.md        # Running the Nonce Gate and Coding Eval
 │   ├── 07-choosing-a-model.md     # Benchmarks and reasoning toggles
 │   ├── 08-speed-and-tuning.md     # Going faster: Vulkan vs ROCm, budgets
-│   └── 09-building-your-workflow.md # Transition to real-world utility work
+│   ├── 09-building-your-workflow.md # Transition to real-world utility work
+│   └── 10-orchestrating-agents.md # One agent vs pipelines, batch, orchestrators
 │
 ├── reference/                     # TECHNICAL REFERENCE (Quick lookups)
 │   ├── README.md                  # Pinned versions, checksums, benchmarks
