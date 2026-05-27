@@ -34,14 +34,16 @@ To ensure reproducibility, all benchmarks, evaluations, and tests were executed 
 
 ## 📦 2. Model Artifact Manifest
 
-The following models are used in the reference tests. Download paths are pinned to public Hugging Face repositories:
+The following models are used in the reference tests. Download paths are pinned to public Hugging Face repositories.
 
-| Model Identity | Format & Quant | File Name | Size (GB) | HF Source Repository | SHA256 Checksum |
+> **About the checksums:** these are `sha256sum` of the maintainer's local single-file GGUFs — use them to verify your own download is bit-identical (`sha256sum <file>`). Unsloth occasionally re-quantizes, so a live HF file may differ; treat a mismatch as "version drift," not corruption. The 122B is not currently on local disk, so its hash is unpinned — verify against the source repo.
+
+| Model Identity | Format & Quant | File Name | Size (GB) | HF Source Repository | SHA256 (local copy) |
 |---|---|---|---|---|---|
-| **Qwen 3.6 35B MoE** | GGUF (MXFP4) | `Qwen3.6-35B-A3B-MXFP4_MOE.gguf` | 21.7 GB | [unsloth/Qwen3.6-35B-A3B-GGUF](https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF) | `a4e58b16...92f1` |
-| **Qwen 3.5 122B MoE** | GGUF (MXFP4) | `Qwen3.5-122B-A10B-MXFP4_MOE.gguf` | 70.0 GB | [unsloth/Qwen3.5-122B-A10B-GGUF](https://huggingface.co/unsloth/Qwen3.5-122B-A10B-GGUF) | `2b8a7f92...c8d1` |
-| **Qwen3-Coder-Next** | GGUF (UD-Q4_K_XL) | `Qwen3-Coder-Next-UD-Q4_K_XL.gguf` | 49.6 GB | [unsloth/Qwen3-Coder-Next-GGUF](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) | `7f1e4b92...09e1` |
-| **Qwen 3.5 35B MoE** | GGUF (MXFP4) | `Qwen3.5-35B-A3B-MXFP4_MOE.gguf` | 21.0 GB | [unsloth/Qwen3.5-35B-A3B-GGUF](https://huggingface.co/unsloth/Qwen3.5-35B-A3B-GGUF) | `8b72e1fa...41b0` |
+| **Qwen 3.6 35B MoE** | GGUF (MXFP4) | `Qwen3.6-35B-A3B-MXFP4_MOE.gguf` | 21.7 GB | [unsloth/Qwen3.6-35B-A3B-GGUF](https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF) | `2fdd20997c4d88ee25f70f500c61f8b999378d92ab055f9d450fc70d617158d3` |
+| **Qwen 3.5 122B MoE** | GGUF (MXFP4) | `Qwen3.5-122B-A10B-MXFP4_MOE.gguf` | 70.0 GB | [unsloth/Qwen3.5-122B-A10B-GGUF](https://huggingface.co/unsloth/Qwen3.5-122B-A10B-GGUF) | *(unpinned — not on local disk; verify against source)* |
+| **Qwen3-Coder-Next** | GGUF (UD-Q4_K_XL) | `Qwen3-Coder-Next-UD-Q4_K_XL.gguf` | 49.6 GB | [unsloth/Qwen3-Coder-Next-GGUF](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) | `4bb93f0a0221ef4ff963ca9094df629c8dfdfabc3b4fdd85c1a2e4c0624fce36` |
+| **Qwen 3.5 35B MoE** | GGUF (MXFP4) | `Qwen3.5-35B-A3B-MXFP4_MOE.gguf` | 21.0 GB | [unsloth/Qwen3.5-35B-A3B-GGUF](https://huggingface.co/unsloth/Qwen3.5-35B-A3B-GGUF) | `0f135a59159030f4710477abc6f9922d2f13552c85bff736deaaef71023cd770` |
 
 ---
 
@@ -106,7 +108,7 @@ In developing this reference setup, several highly recommended ML pipelines fail
 ### C. 122B MoE VRAM Spillover Hangs (Attempt 3)
 * **What we tried:** Running `Qwen 3.5 122B MoE` (70.0 GB) with a large context size (32,768 tokens) on the 128 GB system.
 * **Why it failed:** Although the base weights (70 GB) fit comfortably inside the 96 GB GTT limit, scaling the context window to 32k requires a massive KV cache allocation in graphics memory. This context allocation exceeded the 96 GB limit, causing GPU allocations to spill over into general system RAM. This triggered kernel driver conflicts, resulting in GPU ring timeouts and system freezes.
-* **The Solution:** Pinned the maximum context size of the 122B model to **8,192 tokens** in the configuration script. This keeps memory consumption within the GTT limit and prevents driver hangs.
+* **The Solution:** Pinned the maximum context size of the 122B model to a safe **12,288 tokens** (verified working cap; an 8k–12k range stays inside the GTT limit). This keeps memory consumption within the GTT limit and prevents driver hangs.
 
 ### D. Speculative Decoding Spec-Defect (`--spec-dec` Crashes)
 * **What we tried:** Enabling speculative decoding flags directly inside the llama-server invocation for MoE models.

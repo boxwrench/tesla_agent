@@ -9,7 +9,7 @@ graph TD
     Start -->|Coding & Multi-Step Logic| Code["Qwen 3.6 35B MoE (Vulkan RADV)<br/>• think-on, UNCAPPED (do not budget)<br/>• max_tokens: 8192"]
     style Code fill:#ebf8ff,stroke:#2b6cb0,stroke-width:2px,color:#1a1f36
     
-    Start -->|Formal Report Synthesis| Synth["Qwen 3.5 122B MoE (MXFP4)<br/>• Context limit: 8192 (VRAM safety)<br/>• thinking_budget_tokens: 1024"]
+    Start -->|Formal Report Synthesis| Synth["Qwen 3.5 122B MoE (MXFP4)<br/>• Context limit: 12288 (VRAM safety)<br/>• thinking_budget_tokens: 1024"]
     
     Start -->|Fast QA & Extraction| Ext["Qwen 3.6 35B MoE (MXFP4)<br/>• think-off via chat-template parameter<br/>• Save 50% wall-time"]
 ```
