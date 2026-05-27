@@ -56,12 +56,14 @@ Below are the actual measured results across the different configurations. *Vari
 | **Qwen 3.6 35B MoE (ROCm)** | **21.7 GB** | 32,768 | **Off** | **82 / 84** | **43.7 tok/s** | **3 / 3 Pass** | Cuts wall-time in half for prose (falls to 1/3 coding E2E) |
 | **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **On** | **80 / 84** | **19.4 tok/s** (ROCm) | **3 / 3 Pass** | **Quality Escalation** |
 | **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **Off** | **81 / 84** | **19.5 tok/s** | **3 / 3 Pass** | Holds 3/3 coding even think-off |
-| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **On** | — | **~7.0 tok/s** (ROCm) | **3 / 3 Pass** | Capability asset; coding 3/3 (think-on) |
-| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **Off** | — | **~7.0 tok/s** | **3 / 3 Pass** | Falls to 1/3 coding E2E (reasoning is load-bearing) |
+| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **On** | — | **~7.0 tok/s** (ROCm) | **3 / 3 Pass** | *Experimental — not in the stack (see note)* |
+| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **Off** | — | **~7.0 tok/s** | **3 / 3 Pass** | *Experimental — not in the stack* |
 | **Qwen3-Coder-Next (UD-Q4_K_XL)** | **49.6 GB** | 16,384 | **On** | — | **34.6 tok/s** (ROCm) | **3 / 3 Pass** | 128GB Coder Challenger |
 
 > [!NOTE]
-> **Speculative decoding (DFlash) on the dense 27B: 2.82× / ~31 tok/s.** The dense 27B's ~7 tok/s autoregressive floor is lifted to **~31 tok/s (2.82×)** by DFlash speculative decoding with a footprint-minimized Q4_K_M draft (HumanEval 2.57×, acceptance length 6.67, DDTree budget 22). This is the inverse of the MoE result below — speculation *works* on dense models because there is no expert router to thrash. *(Speed verified; pairing this speed with full tool-call discipline on the same build is in validation.)*
+> **The dense 27B is benchmarked but NOT in the production stack** — it is a break-glass *"arrow in the quiver"* for tough, blocked projects where trying a different (dense, single-trace) model might help, **not a first- or second-line choice.** A blind quality pairwise put it 0–6 against the 122B (largely on output-discipline leakage, but it showed no reasoning *upgrade* over the 35B/122B on substance either), and it is slower than the 35B workhorse. The 35B MoE (workhorse) + 122B MoE (escalation) span the production ladder.
+>
+> *Technical aside (why it's interesting even though unshipped):* DFlash speculative decoding lifts its ~7 tok/s floor to **~31 tok/s (2.82×)** with a footprint-minimized Q4_K_M draft — the inverse of the MoE result below, because a dense model has no expert router to thrash during draft verification.
 
 > [!TIP]
 > For full reproducibility data, model checksums, evaluation methodologies, and detailed post-mortems of failed attempts (such as vLLM compilation timeouts and MoE speculative decoding latency overhead), see the [Reproducibility Matrix & Deep-Dive](reference/reproducibility-matrix.md).

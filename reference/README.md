@@ -23,8 +23,8 @@ The following table summarizes the speed and quality benchmarks run on the host 
 | **Qwen 3.6 35B MoE (ROCm)** | 21.7 GB | 32,768 | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | ROCm fallback backend |
 | **Qwen 3.5 122B MoE (MXFP4)** | 70.0 GB | 12,288 | **80 / 84** | **19.4 tok/s** (ROCm) | **3 / 3 Pass** | **Quality escalation** |
 | **Qwen 3.5 122B MoE (MXFP4)** *think-off* | 70.0 GB | 12,288 | **81 / 84** | **19.5 tok/s** | **3 / 3 Pass** | Holds 3/3 coding even think-off |
-| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** *think-on* | 16.4 GB | 32,768 | — | **~7.0 tok/s** (ROCm) | **3 / 3 Pass** | Capability asset; coding 3/3. DFlash speculative → ~31 tok/s (2.82×) |
-| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** *think-off* | 16.4 GB | 32,768 | — | **~7.0 tok/s** | **3 / 3 Pass** | Falls to 1/3 coding (reasoning load-bearing) |
+| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** *think-on* | 16.4 GB | 32,768 | — | **~7.0 tok/s** (ROCm) | **3 / 3 Pass** | *Experimental — not in stack;* break-glass option. DFlash → ~31 tok/s (2.82×) |
+| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** *think-off* | 16.4 GB | 32,768 | — | **~7.0 tok/s** | **3 / 3 Pass** | *Experimental — not in stack* |
 | **Qwen 3.5 35B MoE (MXFP4)** | 21.0 GB | 8,192 | **79 / 84** | **47.3 tok/s** (ROCm) | **3 / 3 Pass** | Retained for regression tests |
 | **Qwen3-Coder-Next (UD-Q4_K_XL)** | 49.6 GB | 16,384 | — | 34.6 tok/s (ROCm) | 3 / 3 Pass | CODE challenger (128GB-class) |
 

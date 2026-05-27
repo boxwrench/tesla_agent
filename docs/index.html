@@ -601,15 +601,15 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                        <td>19.5 t/s</td>
                        <td class="pass">3 / 3</td>
                      </tr>
-                     <tr>
-                       <td>Qwen 3.6 27B Dense (UD-Q4_K_XL, Think-On)</td>
+                     <tr style="opacity:0.7;">
+                       <td>Qwen 3.6 27B Dense (UD-Q4_K_XL, Think-On) <em>— experimental, not in stack</em></td>
                        <td>16.4 GB</td>
                        <td>—</td>
                        <td>~7.0 t/s</td>
                        <td class="pass">3 / 3</td>
                      </tr>
-                     <tr>
-                       <td>Qwen 3.6 27B Dense (UD-Q4_K_XL, Think-Off)</td>
+                     <tr style="opacity:0.7;">
+                       <td>Qwen 3.6 27B Dense (UD-Q4_K_XL, Think-Off) <em>— experimental, not in stack</em></td>
                        <td>16.4 GB</td>
                        <td>—</td>
                        <td>~7.0 t/s</td>
@@ -625,7 +625,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   </tbody>
                 </table>
               </div>
-              <p class="sub-text" style="margin-top:12px;"><strong>Speculative decoding (dense only):</strong> DFlash lifts the dense 27B from ~7 t/s to <strong>~31 t/s (2.82&times;)</strong> using a footprint-minimized Q4_K_M draft. Speculation works on <em>dense</em> models (no expert router to thrash); on MoE it is counterproductive. <em>Speed verified; tool-call discipline on that build is in validation.</em></p>
+              <p class="sub-text" style="margin-top:12px;"><strong>Note — the dense 27B is benchmarked but NOT in the production stack.</strong> A blind quality pairwise put it 0&ndash;6 vs the 122B, and it was neither faster nor clearly smarter than the 35B workhorse. It is kept as a break-glass <em>"arrow in the quiver"</em> for tough, blocked projects, not a first- or second-line model. <em>Technical aside:</em> DFlash speculative decoding lifts its ~7 t/s floor to <strong>~31 t/s (2.82&times;)</strong> with a footprint-minimized Q4_K_M draft &mdash; speculation works on <em>dense</em> models (no expert router to thrash) where it is counterproductive on MoE.</p>
             </div>
 
             <div class="card">

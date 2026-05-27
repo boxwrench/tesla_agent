@@ -71,12 +71,19 @@ Benchmarks are measured in tokens/second (generation/decode speed) and quality s
 | **Qwen 3.6 35B MoE (Think-Off)** | ROCm 7.2.x | **82 / 84** | **43.7 tok/s** | ~628.1 tok/s | 21.7 GB | **3 / 3 Pass** |
 | **Qwen 3.5 122B MoE (Think-On)** | ROCm 7.2.x | **80 / 84** | **19.4 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
 | **Qwen 3.5 122B MoE (Think-Off)** | ROCm 7.2.x | **81 / 84** | **19.5 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
-| **Qwen 3.6 27B Dense (Think-On)** | ROCm 7.2.x (UD-Q4_K_XL) | — | **~7.0 tok/s** | — | 16.4 GB | **3 / 3 Pass** (coding 3/3) |
-| **Qwen 3.6 27B Dense (Think-Off)** | ROCm 7.2.x (UD-Q4_K_XL) | — | **~7.0 tok/s** | — | 16.4 GB | **3 / 3 Pass** (coding 1/3) |
-| **Qwen 3.6 27B Dense + DFlash spec.** | Lucebox HIP (Q4_K_M draft) | — | **~31.3 tok/s (2.82×)** | — | ~16 GB | *in validation* |
+| **Qwen 3.6 27B Dense (Think-On)** *(experimental, not in stack)* | ROCm 7.2.x (UD-Q4_K_XL) | — | **~7.0 tok/s** | — | 16.4 GB | **3 / 3 Pass** (coding 3/3) |
+| **Qwen 3.6 27B Dense (Think-Off)** *(experimental, not in stack)* | ROCm 7.2.x (UD-Q4_K_XL) | — | **~7.0 tok/s** | — | 16.4 GB | **3 / 3 Pass** (coding 1/3) |
+| **Qwen 3.6 27B Dense + DFlash spec.** *(experimental)* | Lucebox HIP (Q4_K_M draft) | — | **~31.3 tok/s (2.82×)** | — | ~16 GB | discipline-limited |
 | **Qwen 3.5 35B MoE (Think-On)** | ROCm 7.2.x | **79 / 84** | **47.3 tok/s** | ~562.9 tok/s | 21.0 GB | **3 / 3 Pass** |
 | **Qwen3-Coder-Next (Think-On)** | ROCm 7.2.x | — | **34.6 tok/s** | ~127.0 tok/s | 49.6 GB | **3 / 3 Pass** |
 
+> **Status: the dense 27B is benchmarked but NOT in the production stack.** A blind
+> quality pairwise put it 0–6 vs the 122B (largely output-discipline leakage, but it
+> showed no reasoning *upgrade* over the 35B/122B on substance), and it is slower than
+> the 35B workhorse. It is retained as a break-glass *"arrow in the quiver"* for tough,
+> blocked projects — not a first- or second-line model. The speculative-decoding result
+> below is kept as a technical finding.
+>
 > **DFlash speculative decoding on the dense 27B** lifts its ~7 tok/s autoregressive floor to **~31.3 tok/s (2.82×)** using a footprint-minimized Q4_K_M draft (HumanEval 2.57×, mean acceptance length 6.67, DDTree budget 22 — the gfx1151 sweet spot). Counter-intuitively the *smaller* Q4_K_M draft (1.03 GB) beats a larger Q8_0 draft (1.84 GB, only 1.49×): on this bandwidth-bound APU the draft's own weight reads compete for the same memory bus the target needs to verify, so minimizing draft footprint wins. This is the inverse of the MoE speculative-decoding result (post-mortem #3) — speculation succeeds on **dense** models because there is no expert router to thrash. *Speed is verified; pairing this speed with full tool-call discipline on the same Q4_K_M build is still in validation (the verified 27B tool-call/coding passes above are on the UD-Q4_K_XL build).*
 
 ---
