@@ -58,12 +58,12 @@ We compiled `llama.cpp` using the **Vulkan** backend instead of AMD's official R
 * Vulkan achieved a **+13% to +19% speedup** in text decoding on 35B models.
 * The Vulkan backend runs via the open-source **Mesa RADV** driver, proving that community drivers can outperform vendor computing libraries for local consumer APUs.
 
-### Insight B: Speculative Decoding is Bad for MoE Models
+### Insight B: Match the Speedup to the Architecture
 We attempted to speed up generation using "speculative decoding" (such as MTP or DFlash), which uses a tiny model to guess words and a large model to verify them.
-* On Mixture-of-Experts (MoE) models, speculative decoding was actually **slower** than normal generation.
-* *Why:* Verifying guesses forces the large model to reactivate and route different experts constantly, adding a routing latency penalty that wipes out any speed gains.
+* On **Mixture-of-Experts (MoE)** models, speculative decoding was actually **slower** than normal generation. *Why:* verifying guesses forces the large model to reactivate and route different experts constantly, adding a routing penalty that wipes out the gains.
+* On **dense** models the opposite is true. The dense 27B has no expert router, so DFlash speculative decoding lifts it from ~7 tok/s to **~31 tok/s (2.82×)**. (A surprise on this hardware: the *smaller* draft model wins — a fatter draft starves the shared memory bus it shares with the model it's helping.)
 
-### The Win: Reasoning Budgets
-The true speed adjustment is the **Reasoning Budget** (using the `thinking_budget_tokens` flag). By capping how many tokens the model is allowed to spend "thinking" (e.g. limit to 256 or 512 tokens), we cut response times in half without sacrificing compliance quality.
+### The Other Lever: Reasoning Budgets (mind the exception)
+A second adjustment is the **Reasoning Budget** (the `thinking_budget_tokens` flag): capping how many tokens the model spends "thinking" (e.g. 256–512) roughly halves response time on **planning and prose** work. **One important exception:** on stateful **coding** tasks, capping the budget made the model drop carried-forward details and fail the multi-step gate — there, leave thinking uncapped. Speed is cheap; a wrong answer fast is not a bargain.
 
 In the next chapter, we will build this exact, simplified stack step-by-step.

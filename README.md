@@ -22,7 +22,7 @@ This is the guide we wish we had when we started: verbose, explanatory, data-dri
 ## 🛠️ Reference Testing Stack
 All benchmarks were run on local consumer hardware with the following configuration:
 * **Hardware (APU):** AMD Ryzen Strix Halo (gfx1151), 128 GB LPDDR5X system RAM (configured via modprobe with **96 GB GTT graphics memory pool**).
-* **Server Backend:** `llama.cpp/llama-server` (stable build `b9247`) served via ROCm 7.1 and Mesa/RADV Vulkan.
+* **Server Backend:** `llama.cpp/llama-server` (stable build `b9247`) served via ROCm 7.2.x (HIP) and Mesa/RADV Vulkan (Mesa 25.2.8). The 35B `CODE` workhorse is now served on the **Vulkan/RADV** backend (see matrix).
 * **Parameters:** Greedy decoding (temperature = 0), context buffers scaled from 8,192 to 32,768, Flash Attention active.
 
 ## 📊 Model Performance Matrix
@@ -30,14 +30,17 @@ Below are the actual measured results across the different configurations. *Vari
 
 | Model & Quantization | RAM Footprint | Context Window | Think Toggle | Planning Quality (Scorecard) | Generation Speed (Decode) | Nonce Gate (Tool Use) | Verdict / Fit |
 |---|---|---|---|---|---|---|---|
-| **Qwen 3.6 35B MoE (MXFP4)** | **21.7 GB** | 32,768 | **On** (512 tokens) | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | **Recommended Default** |
-| **Qwen 3.6 35B MoE (Vulkan RADV)** | **21.7 GB** | 32,768 | **On** (512 tokens) | **82 / 84** | **52.1 tok/s** (Vulkan) | **3 / 3 Pass** | **Recommended Speed Upgrade** |
-| **Qwen 3.6 35B MoE (MXFP4)** | **21.7 GB** | 32,768 | **Off** | **82 / 84** | **43.7 tok/s** | **3 / 3 Pass** | Cuts wall-time in half for prose (falls to 1/3 coding E2E) |
-| **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 8,192 | **On** (1024 tokens) | **80 / 84** | **16.5 tok/s** (ROCm) | **3 / 3 Pass** | **Quality Escalation** |
-| **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 8,192 | **Off** | *pending* | *pending* | *pending* | Think-off comparison variant |
-| **Qwen 3.6 27B Dense (Q6_K)** | **24.4 GB** | 16,384 | **On** (512 tokens) | *pending* | *pending* | *pending* | Upcoming test candidate |
-| **Qwen 3.6 27B Dense (Q6_K)** | **24.4 GB** | 16,384 | **Off** | *pending* | *pending* | *pending* | Upcoming test candidate |
-| **Qwen3-Coder-Next (UD-Q4_K_XL)** | **49.6 GB** | 16,384 | **On** | — | **42.5 tok/s** (ROCm) | **3 / 3 Pass** | 128GB Coder Challenger |
+| **Qwen 3.6 35B MoE (Vulkan RADV)** | **21.7 GB** | 32,768 | **On** | **82 / 84** | **50.1 tok/s** (Vulkan) | **3 / 3 Pass** | **Recommended Default (CODE workhorse)** |
+| **Qwen 3.6 35B MoE (ROCm)** | **21.7 GB** | 32,768 | **On** | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | ROCm fallback backend |
+| **Qwen 3.6 35B MoE (ROCm)** | **21.7 GB** | 32,768 | **Off** | **82 / 84** | **43.7 tok/s** | **3 / 3 Pass** | Cuts wall-time in half for prose (falls to 1/3 coding E2E) |
+| **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **On** | **80 / 84** | **19.4 tok/s** (ROCm) | **3 / 3 Pass** | **Quality Escalation** |
+| **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **Off** | **81 / 84** | **19.5 tok/s** | **3 / 3 Pass** | Holds 3/3 coding even think-off |
+| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **On** | — | **~7.0 tok/s** (ROCm) | **3 / 3 Pass** | Capability asset; coding 3/3 (think-on) |
+| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **Off** | — | **~7.0 tok/s** | **3 / 3 Pass** | Falls to 1/3 coding E2E (reasoning is load-bearing) |
+| **Qwen3-Coder-Next (UD-Q4_K_XL)** | **49.6 GB** | 16,384 | **On** | — | **34.6 tok/s** (ROCm) | **3 / 3 Pass** | 128GB Coder Challenger |
+
+> [!NOTE]
+> **Speculative decoding (DFlash) on the dense 27B: 2.82× / ~31 tok/s.** The dense 27B's ~7 tok/s autoregressive floor is lifted to **~31 tok/s (2.82×)** by DFlash speculative decoding with a footprint-minimized Q4_K_M draft (HumanEval 2.57×, acceptance length 6.67, DDTree budget 22). This is the inverse of the MoE result below — speculation *works* on dense models because there is no expert router to thrash. *(Speed verified; pairing this speed with full tool-call discipline on the same build is in validation.)*
 
 > [!TIP]
 > For full reproducibility data, model checksums, evaluation methodologies, and detailed post-mortems of failed attempts (such as vLLM compilation timeouts and MoE speculative decoding latency overhead), see the [Reproducibility Matrix & Deep-Dive](reference/reproducibility-matrix.md).

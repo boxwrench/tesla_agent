@@ -12,3 +12,6 @@ __pycache__/
 
 # System Files
 .DS_Store
+
+# Tool-specific local state (not project content)
+.antigravitycli/

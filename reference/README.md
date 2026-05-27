@@ -15,18 +15,18 @@ The following table summarizes the speed and quality benchmarks run on the host 
 > **Benchmark Environment Stack:**
 > * **Hardware:** AMD Ryzen Strix Halo APU (gfx1151), 128 GB LPDDR5X RAM (96 GB GTT memory pool allocated)
 > * **Inference Engine:** llama.cpp/llama-server (`b9247`) stable backend
-> * **Parameters & Drivers:** Temp = 0 (greedy decoding), context buffer = 8,192 to 32,768, Flash Attention enabled, run via ROCm 7.1 and Mesa/RADV Vulkan.
+> * **Parameters & Drivers:** Temp = 0 (greedy decoding), context buffer = 8,192 to 32,768, Flash Attention enabled, run via ROCm 7.2.x (HIP) and Mesa/RADV Vulkan (Mesa 25.2.8).
 
 | Model & Quantization | Size | Context Size | Quality (Scorecard) | Generation Speed | Nonce Gate | Status / Verdict |
 |---|---|---|---|---|---|---|
-| **Qwen 3.6 35B MoE (MXFP4)** | 21.7 GB | 32,768 | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | **Current default CODE baseline** |
-| **Qwen 3.6 35B MoE (Vulkan RADV)** | 21.7 GB | 32,768 | **82 / 84** | **52.1 tok/s** (RADV) | **3 / 3 Pass** | **Recommended speed upgrade** |
-| **Qwen 3.5 122B MoE (MXFP4)** | 70.0 GB | 8,192 | **80 / 84** | **16.5 tok/s** (ROCm) | **3 / 3 Pass** | **Quality escalation** |
-| **Qwen 3.5 122B MoE (MXFP4)** *think-off* | 70.0 GB | 8,192 | *pending* | *pending* | *pending* | Think-off comparison variant |
-| **Qwen 3.6 27B Dense (Q6_K)** *think-on* | 24.4 GB | 16,384 | *pending* | *pending* | *pending* | Upcoming test candidate |
-| **Qwen 3.6 27B Dense (Q6_K)** *think-off* | 24.4 GB | 16,384 | *pending* | *pending* | *pending* | Upcoming test candidate |
+| **Qwen 3.6 35B MoE (Vulkan RADV)** | 21.7 GB | 32,768 | **82 / 84** | **50.1 tok/s** (RADV) | **3 / 3 Pass** | **Default CODE workhorse** (promoted; +51% prefill, +13.5% decode vs ROCm) |
+| **Qwen 3.6 35B MoE (ROCm)** | 21.7 GB | 32,768 | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | ROCm fallback backend |
+| **Qwen 3.5 122B MoE (MXFP4)** | 70.0 GB | 12,288 | **80 / 84** | **19.4 tok/s** (ROCm) | **3 / 3 Pass** | **Quality escalation** |
+| **Qwen 3.5 122B MoE (MXFP4)** *think-off* | 70.0 GB | 12,288 | **81 / 84** | **19.5 tok/s** | **3 / 3 Pass** | Holds 3/3 coding even think-off |
+| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** *think-on* | 16.4 GB | 32,768 | — | **~7.0 tok/s** (ROCm) | **3 / 3 Pass** | Capability asset; coding 3/3. DFlash speculative → ~31 tok/s (2.82×) |
+| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** *think-off* | 16.4 GB | 32,768 | — | **~7.0 tok/s** | **3 / 3 Pass** | Falls to 1/3 coding (reasoning load-bearing) |
 | **Qwen 3.5 35B MoE (MXFP4)** | 21.0 GB | 8,192 | **79 / 84** | **47.3 tok/s** (ROCm) | **3 / 3 Pass** | Retained for regression tests |
-| **Qwen3-Coder-Next (UD-Q4_K_XL)** | 49.6 GB | 16,384 | — | 42.5 tok/s (ROCm) | 3 / 3 Pass | CODE challenger (128GB-class) |
+| **Qwen3-Coder-Next (UD-Q4_K_XL)** | 49.6 GB | 16,384 | — | 34.6 tok/s (ROCm) | 3 / 3 Pass | CODE challenger (128GB-class) |
 
 ---
 

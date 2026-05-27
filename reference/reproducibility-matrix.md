@@ -20,8 +20,8 @@ To ensure reproducibility, all benchmarks, evaluations, and tests were executed 
 
 ### B. Software Configuration
 * **Operating System:** Linux (Ubuntu 24.04 LTS, Kernel `6.11.0-generic` or newer).
-* **AMD Driver Suite:** ROCm 7.1.0 (HIP runtime).
-* **Open Source Graphics Drivers:** Mesa 24.2+ (RADV Vulkan compiler).
+* **AMD Driver Suite:** ROCm 7.2.x (HIP runtime; 7.1.x also works).
+* **Open Source Graphics Drivers:** Mesa 25.2.8 (RADV Vulkan compiler).
 * **Inference Server:** `llama.cpp` / `llama-server` (stable build `b9247`).
 * **Environment Overrides (`config.env`):**
   ```bash
@@ -66,15 +66,18 @@ Benchmarks are measured in tokens/second (generation/decode speed) and quality s
 
 | Model Configuration | Inference Backend | Quality Score | Decode Speed | Prefill Speed | GTT Memory Allocation | Nonce Gate Result |
 |---|---|---|---|---|---|---|
-| **Qwen 3.6 35B MoE (Think-On)** | ROCm 7.1.0 | **82 / 84** | **44.2 tok/s** | ~280 tok/s | 21.7 GB (VRAM) | **3 / 3 Pass** |
-| **Qwen 3.6 35B MoE (Think-On)** | Vulkan RADV | **82 / 84** | **52.1 tok/s** | ~240 tok/s | 21.7 GB (VRAM) | **3 / 3 Pass** |
-| **Qwen 3.6 35B MoE (Think-Off)** | ROCm 7.1.0 | **82 / 84** | **43.7 tok/s** | ~280 tok/s | 21.7 GB (VRAM) | **3 / 3 Pass** |
-| **Qwen 3.5 122B MoE (Think-On)** | ROCm 7.1.0 | **80 / 84** | **16.5 tok/s** | ~110 tok/s | 70.0 GB (VRAM) | **3 / 3 Pass** |
-| **Qwen 3.5 122B MoE (Think-Off)** | ROCm 7.1.0 | *pending* | *pending* | *pending* | 70.0 GB (VRAM) | *pending* |
-| **Qwen 3.6 27B Dense (Think-On)** | ROCm 7.1.0 | *pending* | *pending* | *pending* | 24.4 GB (VRAM) | *pending* |
-| **Qwen 3.6 27B Dense (Think-Off)** | ROCm 7.1.0 | *pending* | *pending* | *pending* | 24.4 GB (VRAM) | *pending* |
-| **Qwen 3.5 35B MoE (Think-On)** | ROCm 7.1.0 | **79 / 84** | **47.3 tok/s** | ~295 tok/s | 21.0 GB (VRAM) | **3 / 3 Pass** |
-| **Qwen3-Coder-Next (Think-On)** | ROCm 7.1.0 | — | **42.5 tok/s** | ~210 tok/s | 49.6 GB (VRAM) | **3 / 3 Pass** |
+| **Qwen 3.6 35B MoE (Think-On)** — **default** | **Vulkan RADV** | **82 / 84** | **50.1 tok/s** | **932.1 tok/s** | 21.7 GB | **3 / 3 Pass** |
+| **Qwen 3.6 35B MoE (Think-On)** — fallback | ROCm 7.2.x | **82 / 84** | **44.2 tok/s** | ~628.1 tok/s | 21.7 GB | **3 / 3 Pass** |
+| **Qwen 3.6 35B MoE (Think-Off)** | ROCm 7.2.x | **82 / 84** | **43.7 tok/s** | ~628.1 tok/s | 21.7 GB | **3 / 3 Pass** |
+| **Qwen 3.5 122B MoE (Think-On)** | ROCm 7.2.x | **80 / 84** | **19.4 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
+| **Qwen 3.5 122B MoE (Think-Off)** | ROCm 7.2.x | **81 / 84** | **19.5 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
+| **Qwen 3.6 27B Dense (Think-On)** | ROCm 7.2.x (UD-Q4_K_XL) | — | **~7.0 tok/s** | — | 16.4 GB | **3 / 3 Pass** (coding 3/3) |
+| **Qwen 3.6 27B Dense (Think-Off)** | ROCm 7.2.x (UD-Q4_K_XL) | — | **~7.0 tok/s** | — | 16.4 GB | **3 / 3 Pass** (coding 1/3) |
+| **Qwen 3.6 27B Dense + DFlash spec.** | Lucebox HIP (Q4_K_M draft) | — | **~31.3 tok/s (2.82×)** | — | ~16 GB | *in validation* |
+| **Qwen 3.5 35B MoE (Think-On)** | ROCm 7.2.x | **79 / 84** | **47.3 tok/s** | ~562.9 tok/s | 21.0 GB | **3 / 3 Pass** |
+| **Qwen3-Coder-Next (Think-On)** | ROCm 7.2.x | — | **34.6 tok/s** | ~127.0 tok/s | 49.6 GB | **3 / 3 Pass** |
+
+> **DFlash speculative decoding on the dense 27B** lifts its ~7 tok/s autoregressive floor to **~31.3 tok/s (2.82×)** using a footprint-minimized Q4_K_M draft (HumanEval 2.57×, mean acceptance length 6.67, DDTree budget 22 — the gfx1151 sweet spot). Counter-intuitively the *smaller* Q4_K_M draft (1.03 GB) beats a larger Q8_0 draft (1.84 GB, only 1.49×): on this bandwidth-bound APU the draft's own weight reads compete for the same memory bus the target needs to verify, so minimizing draft footprint wins. This is the inverse of the MoE speculative-decoding result (post-mortem #3) — speculation succeeds on **dense** models because there is no expert router to thrash. *Speed is verified; pairing this speed with full tool-call discipline on the same Q4_K_M build is still in validation (the verified 27B tool-call/coding passes above are on the UD-Q4_K_XL build).*
 
 ---
 
@@ -90,7 +93,8 @@ In developing this reference setup, several highly recommended ML pipelines fail
 ### B. MoE Speculative Decoding Latency Penalty (Attempt 2)
 * **What we tried:** Accelerating `Qwen 3.6 35B MoE` decoding speed by using a tiny draft model (e.g. `Qwen 3.6 3B` or speculative target tensors) to predict text tokens, which are verified in batches by the 35B MoE.
 * **Why it failed:** Speculative decoding relies on the drafting model being extremely fast and the validation step being cheap. However, on Mixture-of-Experts models, validating speculative tokens forces the gating router to constantly swap and evaluate different expert weights. This router evaluation penalty adds significant latency. Rather than speeding up generation, speculative decoding actually **slowed down** generation by ~10% on MoE architectures.
-* **The Solution:** Use **Reasoning Budgets** (`thinking_budget_tokens`). Capping the maximum reasoning steps using the API parameters reduces latency by up to 50% without adding expert routing overhead.
+* **The Latency Lever (with a caveat):** Use **Reasoning Budgets** (`thinking_budget_tokens`) to cap how many tokens the model spends "thinking." On **planning / prose** workloads this cuts wall-clock substantially without expert-routing overhead. **But do NOT cap the CODE route:** a controlled budget sweep found that *no* bounded budget reliably holds the stateful coding gate — only unrestricted think-on scored 3/3, while caps (512/256/128) dropped to 1–2/3 and were non-monotonic (variance on the Step-2 trap dominated). So reasoning budgets are a *planning* latency lever, not a coding one; keep the coding route on unrestricted think-on.
+* **The Real Speedup (dense only):** For raw decode speed without touching reasoning, **DFlash speculative decoding works on dense models** (see post-mortem #3 for why it fails on MoE) — 2.82× on the dense 27B.
 
 ### C. 122B MoE VRAM Spillover Hangs (Attempt 3)
 * **What we tried:** Running `Qwen 3.5 122B MoE` (70.0 GB) with a large context size (32,768 tokens) on the 128 GB system.
@@ -100,4 +104,4 @@ In developing this reference setup, several highly recommended ML pipelines fail
 ### D. Speculative Decoding Spec-Defect (`--spec-dec` Crashes)
 * **What we tried:** Enabling speculative decoding flags directly inside the llama-server invocation for MoE models.
 * **Why it failed:** The spec-dec engine failed to correctly load and synchronize the tokenizers of the draft model and the MoE model, resulting in parsing mismatch errors and immediate server crashes.
-* **The Lesson:** Do not attempt speculative decoding on MoE architectures; it is functionally counterproductive due to the routing latency penalty.
+* **The Lesson:** Do not attempt speculative decoding on **MoE** architectures; it is functionally counterproductive due to the routing latency penalty. **The opposite holds for dense models:** on the dense Qwen 3.6 27B, DFlash speculative decoding delivers **2.82× (≈31 tok/s)** precisely because a dense model has no expert router to thrash during draft verification. Match the acceleration technique to the architecture: reasoning budgets for MoE latency, speculative decoding for dense throughput.

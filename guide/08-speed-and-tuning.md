@@ -29,8 +29,11 @@ You can set this parameter directly inside the API request payload (or in your a
 thinking_budget_tokens: 256
 ```
 This forces the model to wrap up its thinking trace and output its final answer once the cap is reached. Because it is configured per-request, your system can automatically adjust budgets:
-* **High budget (e.g. 1024):** For writing complex compliance code.
+* **High budget (e.g. 1024):** For drafting a long planning brief or research summary.
 * **Low budget (e.g. 128):** For checking sensor logs or formatting simple statuses.
+
+> [!WARNING]
+> **Do not cap thinking on stateful, multi-step tasks.** In our testing, *any* budget cap caused the model to drop details it needed to carry between steps and fail the multi-step coding gate — only uncapped thinking held the result. Reasoning budgets are a latency win for single-shot planning and prose, not for chained agent loops. When in doubt, leave it uncapped.
 
 ### **The Global Server Lever: `--reasoning-budget N`**
 You can also cap reasoning globally when launching the model server:
