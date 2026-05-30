@@ -81,15 +81,11 @@ e2e: PASS
 
 ## 3. Sandbox Path Validation
 
-Hermes executes commands inside an isolated Docker container to protect your host system. It maps directories between your host and the sandbox container:
-
-* **Host path:** `~/.hermes/profiles/<profile>/sandboxes/docker/default/home/`
-* **Container path:** `/root/`
+Hermes executes commands inside an isolated Docker container to protect your host system. The important public rule is simple: stage input files through the agent sandbox's configured input directory, and collect outputs from its configured output directory.
 
 When you stage files or run scripts:
-* The host-side files must go in the sandbox `home/input/` folder.
-* The model inside the container will look for them under `/root/input/`.
-* The model must write its step outputs to `/root/output/`.
-* You collect the outputs on the host side from the sandbox `home/output/` folder.
+* The agent must be able to read the staged input files.
+* The model must write the expected step outputs.
+* The grader must be pointed at the collected output directory.
 
-If the agent reports that files are missing, verify that this directory mapping is correctly configured in your Docker runtime.
+If the agent reports that files are missing, verify that the sandbox input/output mapping is correctly configured in your Docker runtime.

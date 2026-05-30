@@ -132,15 +132,15 @@ function initModelFinder() {
 
   const modelMatrix = {
     'code': {
-      name: "Qwen 3.6 35B Mixture-of-Experts (MXFP4 Quant)",
-      mode: "Reasoning Enabled (Uncapped)",
+      name: "Qwen 3.6 35B MoE (MXFP4) or Gemma 4 31B IT (Q6_K)",
+      mode: "CODE Baseline + Gemma Peer",
       file: "Qwen3.6-35B-A3B-MXFP4_MOE.gguf",
-      size: "21.7 GB",
-      speed: "~50.1 tokens/sec (Vulkan/RADV default; ~44.2 t/s ROCm fallback)",
-      reasoning: "Uncapped think-on — do NOT budget the coding route",
+      size: "21.7 GB baseline; 25.2 GB Gemma peer",
+      speed: "Qwen 35B: 50.1 t/s; Gemma 31B: 43-48 t/s",
+      reasoning: "Uncapped for coding; use orchestrated steps for Gemma 31B",
       command: "bash scripts/serving/serve_vulkan.sh",
       hermes: "max_tokens: 8192",
-      rationale: "Best balance of multi-step coding reasoning and speed on a 128GB APU. The Vulkan/RADV backend is the promoted default (+51% prefill, +13.5% decode over ROCm); ROCm is the fallback. IMPORTANT: do not cap reasoning on coding tasks — a budget sweep showed any cap drops the stateful coding gate to 1-2/3, while uncapped think-on holds 3/3. Reasoning budgets are a planning/prose latency lever, not a coding one."
+      rationale: "Qwen 3.6 35B remains the compact CODE/general baseline: fast, repeatedly gate-clean, and broadly useful. Gemma 4 31B IT is the cross-family CODE peer after clearing nonce and orchestrated coding gates. Do not cap reasoning on stateful coding tasks; use staged/orchestrated steps when a single long episode degrades."
     },
     'extract': {
       name: "Qwen 3.6 35B Mixture-of-Experts (MXFP4 Quant)",
@@ -154,15 +154,15 @@ function initModelFinder() {
       rationale: "Simple telemetry extraction and log parsing do not require reasoning outputs. Disabling thinking using the template keyword parameters saves 50%+ wall-clock time and guarantees tool-use functions run directly. Note that --reasoning-budget 0 is broken and must not be used."
     },
     'synthesis': {
-      name: "Qwen 3.5 122B Mixture-of-Experts (MXFP4 Quant)",
-      mode: "High-Quality Synthesis",
-      file: "Qwen3.5-122B-A10B-MXFP4_MOE.gguf",
-      size: "70.0 GB (fits GTT memory limits)",
-      speed: "~19.4 tokens/sec (ROCm server)",
-      reasoning: "Deep reasoning active",
-      command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.5-122B-A10B-MXFP4_MOE.gguf --ctx-size 12288",
-      hermes: "thinking_budget_tokens: 1024\nmax_tokens: 8192",
-      rationale: "When drafting formal master-plan reports and research syntheses, accuracy and instruction-following quality matter most. The 122B MoE provides the strongest synthesis on this hardware. Context is capped (8k-12k) to keep allocations inside the GTT pool and prevent graphics-driver spillover hangs."
+      name: "gpt-oss-120B (MXFP4, 3 shards)",
+      mode: "QUALITY Baseline",
+      file: "gpt-oss-120b-mxfp4-0000{1..3}-of-00003.gguf",
+      size: "~63 GB",
+      speed: "~46 tokens/sec (Vulkan/RADV)",
+      reasoning: "High reasoning with draft-with-assumptions prompt",
+      command: "Configure the local server for the gpt-oss-120B shard set",
+      hermes: "max_tokens: 8192\nsystem prompt: draft with labeled assumptions",
+      rationale: "The newest local pairwise battery makes gpt-oss-120B the general quality baseline: 5-1 vs Qwen 35B and 4-2 vs Qwen 122B after the prompt stopped checklist deflection. Keep Qwen 122B available as a spot-specialist for regulatory-currency tasks and incisive plan reviews."
     }
   };
 
@@ -201,36 +201,27 @@ function initBenchmarkChart() {
   const ctx = document.getElementById('benchmarkChart');
   if (!ctx) return;
 
-  // Datasets mapping: X = Speed (t/s), Y = Quality Score (out of 84)
+  // Decode speed leaderboard. Quality evidence is shown in the benchmark table.
   const chartData = {
-    datasets: [
-      {
-        label: 'Mixture of Experts (MoE)',
-        data: [
-          { x: 50.1, y: 82, label: 'Qwen 3.6 35B MoE (Vulkan, Think-On) — default' },
-          { x: 44.2, y: 82, label: 'Qwen 3.6 35B MoE (ROCm, Think-On)' },
-          { x: 43.7, y: 82, label: 'Qwen 3.6 35B MoE (Think-Off)' },
-          { x: 47.3, y: 79, label: 'Qwen 3.5 35B MoE (Think-On)' },
-          { x: 19.4, y: 80, label: 'Qwen 3.5 122B MoE (Think-On)' }
-        ],
-        backgroundColor: '#2b6cb0', // Primary Accent Blue
-        pointRadius: 8,
-        pointHoverRadius: 10
-      },
-      {
-        label: 'Other Models',
-        data: [
-          { x: 34.6, y: 76, label: 'Qwen3-Coder-Next (3/3 Pass, CODE challenger)' }
-        ],
-        backgroundColor: '#718096', // Neutral Grey
-        pointRadius: 6,
-        pointHoverRadius: 8
-      }
-    ]
+    labels: [
+      'Qwen 35B',
+      'gpt-oss 120B',
+      'Gemma 31B',
+      'Gemma 26B-A4B',
+      'Qwen3-Coder',
+      'Qwen 122B',
+      'Qwen 27B Dense'
+    ],
+    datasets: [{
+      label: 'Decode tok/s',
+      data: [50.1, 46, 43, 40.11, 34.6, 19.4, 9.6],
+      backgroundColor: ['#2b6cb0', '#14532d', '#3182ce', '#718096', '#718096', '#7c2d12', '#7f1d1d'],
+      borderRadius: 6
+    }]
   };
 
   new Chart(ctx, {
-    type: 'scatter',
+    type: 'bar',
     data: chartData,
     options: {
       responsive: true,
@@ -239,7 +230,7 @@ function initBenchmarkChart() {
         x: {
           title: {
             display: true,
-            text: 'Generation Speed (Tokens/Second)',
+            text: 'Model',
             color: '#4a5568',
             font: { family: 'Outfit', weight: 'bold' }
           },
@@ -247,11 +238,10 @@ function initBenchmarkChart() {
           ticks: { color: '#4a5568' }
         },
         y: {
-          min: 70,
-          max: 86,
+          beginAtZero: true,
           title: {
             display: true,
-            text: 'Quality Score (Scorecard Rubric / 84)',
+            text: 'Decode Speed (Tokens/Second)',
             color: '#4a5568',
             font: { family: 'Outfit', weight: 'bold' }
           },
@@ -266,8 +256,8 @@ function initBenchmarkChart() {
         tooltip: {
           callbacks: {
             label: function(context) {
-              const point = context.raw;
-              return `${point.label}: Speed=${point.x} t/s, Quality=${point.y}/84`;
+              const speedLabels = ['50.1', '~46', '43-48', '40.11 mean', '34.6', '19.4', '9.6-11.5'];
+              return `${context.label}: ${speedLabels[context.dataIndex]} tok/s`;
             }
           }
         }
@@ -347,5 +337,3 @@ function initGuideTab() {
   // Load the first chapter by default
   loadChapter(chapters[0].file);
 }
-
-

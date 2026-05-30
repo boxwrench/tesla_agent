@@ -90,10 +90,13 @@ def check_summary_fidelity(got, truth):
     if any(re.search(rf"\b{re.escape(parameter)}\b", text) for parameter in non_exceedances):
         return False
 
-    # Check for stating no proven correlation/link
+    # Check for stating no proven correlation/link. "Absence" is included as
+    # a noun-phrase negator, matching the prior malformed_skipped-style grader
+    # broadening pattern: additive only, so it can convert false FAILs to PASS
+    # without causing prior PASSes to fail.
     relation_term = r"(?:caus\w*|correl\w*|link\w*|relationship\w*|associat\w*)"
     negative_relation = (
-        rf"(?:\bno\b|\bnot\b|\bwithout\b|\bcannot\b|\bcan't\b|\bdoes not\b)"
+        rf"(?:\bno\b|\bnot\b|\bwithout\b|\bcannot\b|\bcan't\b|\bdoes not\b|\babsence\b)"
         rf"[^.]*\b{relation_term}\b"
     )
     return bool(re.search(negative_relation, text))

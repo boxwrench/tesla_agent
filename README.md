@@ -45,27 +45,30 @@ Start here and read in order — each chapter builds on the last. Written for wa
 ## 🛠️ Reference Testing Stack
 All benchmarks were run on local consumer hardware with the following configuration:
 * **Hardware (APU):** AMD Ryzen Strix Halo (gfx1151), 128 GB LPDDR5X system RAM (configured via modprobe with **96 GB GTT graphics memory pool**).
-* **Server Backend:** `llama.cpp/llama-server` (stable build `b9247`) served via ROCm 7.2.x (HIP) and Mesa/RADV Vulkan (Mesa 25.2.8). The 35B `CODE` workhorse is now served on the **Vulkan/RADV** backend (see matrix).
+* **Server Backend:** `llama.cpp/llama-server` (stable build `b9247`) served via ROCm 7.2.x (HIP) and Mesa/RADV Vulkan (Mesa 25.2.8). The fastest current lanes use the **Vulkan/RADV** backend (see matrix).
 * **Parameters:** Greedy decoding (temperature = 0), context buffers scaled from 8,192 to 32,768, Flash Attention active.
 
 ## 📊 Model Performance Matrix
-Below are the actual measured results across the different configurations. *Variations in reasoning toggles and graphics backends represent major speed/latency differences:*
+Below are the actual measured results across the different configurations. *Community consensus still rates Qwen models highly for reasoning, and Qwen remains available in this stack. The recommendations below follow the local Strix Halo agent-workflow gates and pairwise results measured for this repository.*
 
 | Model & Quantization | RAM Footprint | Context Window | Think Toggle | Planning Quality (Scorecard) | Generation Speed (Decode) | Nonce Gate (Tool Use) | Verdict / Fit |
 |---|---|---|---|---|---|---|---|
-| **Qwen 3.6 35B MoE (Vulkan RADV)** | **21.7 GB** | 32,768 | **On** | **82 / 84** | **50.1 tok/s** (Vulkan) | **3 / 3 Pass** | **Recommended Default (CODE workhorse)** |
+| **gpt-oss-120B (MXFP4, 3 shards)** | **~63 GB** | 32,768 | High reasoning | **Pairwise: 5-1 vs Qwen 35B; 4-2 vs Qwen 122B** | **~46 tok/s** (Vulkan) | **3 / 3 Pass** | **QUALITY baseline (general)** |
+| **Gemma 4 31B IT (Q6_K)** | **25.2 GB** | 32,768 | On for coding | Pairwise: **4-2 vs Gemma 26B-A4B** | **43-48 tok/s** (Vulkan) | **3 / 3 Pass** | **CODE Gemma peer; use orchestrated path** |
+| **Qwen 3.6 35B MoE (Vulkan RADV)** | **21.7 GB** | 32,768 | **On** | **82 / 84** | **50.1 tok/s** (Vulkan) | **3 / 3 Pass** | **CODE/general baseline** |
 | **Qwen 3.6 35B MoE (ROCm)** | **21.7 GB** | 32,768 | **On** | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | ROCm fallback backend |
 | **Qwen 3.6 35B MoE (ROCm)** | **21.7 GB** | 32,768 | **Off** | **82 / 84** | **43.7 tok/s** | **3 / 3 Pass** | Cuts wall-time in half for prose (falls to 1/3 coding E2E) |
-| **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **On** | **80 / 84** | **19.4 tok/s** (ROCm) | **3 / 3 Pass** | **Quality Escalation** |
+| **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **On** | **80 / 84** | **19.4 tok/s** (ROCm) | **3 / 3 Pass** | **QUALITY spot-specialist: regulatory currency and sharp plan review** |
 | **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **Off** | **81 / 84** | **19.5 tok/s** | **3 / 3 Pass** | Holds 3/3 coding even think-off |
-| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **On** | — | **~7.0 tok/s** (ROCm) | **3 / 3 Pass** | *Experimental — not in the stack (see note)* |
-| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **Off** | — | **~7.0 tok/s** | **3 / 3 Pass** | *Experimental — not in the stack* |
+| **Gemma 4 26B-A4B IT (UD-Q6_K_XL)** | **21.2 GB** | 32,768 | Off in tested gate | Pairwise: 2-4 vs Gemma 31B | **40.11 tok/s** mean | **3 / 3 Pass** | **Queued candidate only; coding gate cleared, not Stable Stack** |
+| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **On** | 0-6 vs Qwen 122B | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in the stack (see note)* |
+| **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **Off** | — | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in the stack* |
 | **Qwen3-Coder-Next (UD-Q4_K_XL)** | **49.6 GB** | 16,384 | **On** | — | **34.6 tok/s** (ROCm) | **3 / 3 Pass** | 128GB Coder Challenger |
 
 > [!NOTE]
-> **The dense 27B is benchmarked but NOT in the production stack** — it is a break-glass *"arrow in the quiver"* for tough, blocked projects where trying a different (dense, single-trace) model might help, **not a first- or second-line choice.** A blind quality pairwise put it 0–6 against the 122B (largely on output-discipline leakage, but it showed no reasoning *upgrade* over the 35B/122B on substance either), and it is slower than the 35B workhorse. The 35B MoE (workhorse) + 122B MoE (escalation) span the production ladder.
+> **The dense Qwen 3.6 27B is benchmarked but NOT in the production stack** — community discussion often treats it as a strong reasoner, but the local Strix Halo gates did not corroborate that for this workflow. A blind quality pairwise put it 0-6 against the 122B on the standard prompt set, and tested backends remained around 9.6-11.5 tok/s for normal decode. It remains a break-glass *"arrow in the quiver"* for tough, blocked projects where trying a different dense trace might help, **not a first- or second-line choice.**
 >
-> *Technical aside (why it's interesting even though unshipped):* DFlash speculative decoding lifts its ~7 tok/s floor to **~31 tok/s (2.82×)** with a footprint-minimized Q4_K_M draft — the inverse of the MoE result below, because a dense model has no expert router to thrash during draft verification.
+> *Technical aside (why it's interesting even though unshipped):* DFlash speculative decoding lifts the dense route to **~31 tok/s (2.82×)** with a footprint-minimized Q4_K_M draft — the inverse of the MoE result below, because a dense model has no expert router to thrash during draft verification.
 
 > [!TIP]
 > For full reproducibility data, model checksums, evaluation methodologies, and detailed post-mortems of failed attempts (such as vLLM compilation timeouts and MoE speculative decoding latency overhead), see the [Reproducibility Matrix & Deep-Dive](reference/reproducibility-matrix.md).

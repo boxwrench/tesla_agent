@@ -35,6 +35,8 @@ This forces the model to wrap up its thinking trace and output its final answer 
 > [!WARNING]
 > **Do not cap thinking on stateful, multi-step tasks.** In our testing, *any* budget cap caused the model to drop details it needed to carry between steps and fail the multi-step coding gate — only uncapped thinking held the result. Reasoning budgets are a latency win for single-shot planning and prose, not for chained agent loops. When in doubt, leave it uncapped.
 
+For gpt-oss-120B, the important public-facing rule is simpler: use a system prompt that asks for a draft with clearly labeled assumptions. Before that prompt fix, the model often deflected into a checklist of missing inputs; after it, the same model became the measured quality baseline.
+
 ### **The Global Server Lever: `--reasoning-budget N`**
 You can also cap reasoning globally when launching the model server:
 ```bash
@@ -67,6 +69,20 @@ cmake --build build-vulkan --config Release --target llama-server
    bash scripts/serving/serve_vulkan.sh
    ```
 This script automatically exports `HIP_VISIBLE_DEVICES=-1` (hiding the GPU from ROCm, forcing Vulkan selection) and sets the ICD to `RADV` (Mesa Vulkan driver). Retesting shows a **+13% to +19% speedup** in token decoding with zero quality loss.
+
+### Current Decode Leaderboard
+
+All values below are local Strix Halo results from the verified stack. They are not universal model rankings.
+
+| Model | Decode speed | Role |
+|---|---:|---|
+| Qwen 3.6 35B-A3B MXFP4 | 50.1 tok/s | CODE/general baseline |
+| gpt-oss-120B MXFP4 | ~46 tok/s | QUALITY baseline |
+| Gemma 4 31B IT Q6_K | 43-48 tok/s | CODE Gemma peer |
+| Gemma 4 26B-A4B UD-Q6_K_XL | 40.11 tok/s mean | Queued candidate |
+| Qwen3-Coder-Next UD-Q4_K_XL | 34.6 tok/s | hard-coding challenger |
+| Qwen 122B-A10B MXFP4 | ~19 tok/s | QUALITY spot-specialist |
+| Qwen 3.6 27B Dense UD-Q4_K_XL | 9.6-11.5 tok/s normal decode | break-glass only |
 
 ---
 

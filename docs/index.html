@@ -102,6 +102,7 @@
             <h2>Welcome to Your Agentic AI Guide</h2>
             <p>This interactive workspace teaches you how to run a private, local agentic AI workflow on consumer AMD hardware. No API keys, no external cloud dependencies, and 100% data privacy.</p>
             <p class="blog-note">Related writing: <a href="https://www.title22.org/" target="_blank" rel="noopener">Water, Systems, and Strategy</a>.</p>
+            <p class="blog-note">Technical details: <a href="https://github.com/boxwrench/tesla_agent/blob/main/reference/reproducibility-matrix.md" target="_blank" rel="noopener">Reproducibility Matrix &amp; Technical Deep-Dive</a>.</p>
           </div>
 
           <div class="grid-2col">
@@ -352,7 +353,7 @@ lemonade backends install llamacpp:rocm</code></pre>
               <!-- STEP 5 -->
               <div class="setup-step-content" id="setup-step-5">
                 <h2>Step 5: Download the Recommended Model</h2>
-                <p class="step-intro">We use the 21.7 GB Qwen 3.6 35B Mixture-of-Experts (MoE) model. Quantized in MXFP4 format, it fits comfortably in Strix Halo unified memory while matching the reasoning quality of larger models.</p>
+                <p class="step-intro">The starter setup uses the 21.7 GB Qwen 3.6 35B Mixture-of-Experts (MoE) model because it is compact, fast, and still the CODE/general baseline. The full ladder now also includes gpt-oss-120B for quality synthesis and Gemma 4 31B as a cross-family coding peer; use the Model Finder after this baseline is working.</p>
                 
                 <div class="console-box">
                   <div class="console-header">
@@ -363,8 +364,8 @@ pip install huggingface_hub
 
 # Download the model GGUF from the verified Unsloth repository
 mkdir -p ~/models/qwen3.6-35b-a3b
-huggingface-cli download <MODEL_HF_REPO> \
-  <MODEL_FILENAME> \
+huggingface-cli download unsloth/Qwen3.6-35B-A3B-GGUF \
+  Qwen3.6-35B-A3B-MXFP4_MOE.gguf \
   --local-dir ~/models/qwen3.6-35b-a3b</code></pre>
                 </div>
                 
@@ -561,7 +562,21 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   </thead>
                   <tbody>
                     <tr class="highlighted-row">
-                      <td>Qwen 3.6 35B (Vulkan RADV, Think-On) — default</td>
+                      <td>gpt-oss-120B MXFP4 — QUALITY baseline</td>
+                      <td>~63 GB</td>
+                      <td>5-1 vs Qwen 35B; 4-2 vs Qwen 122B</td>
+                      <td>~46 t/s</td>
+                      <td class="pass">3 / 3</td>
+                    </tr>
+                    <tr class="highlighted-row">
+                      <td>Gemma 4 31B IT Q6_K — CODE Gemma peer</td>
+                      <td>25.2 GB</td>
+                      <td>4-2 vs Gemma 26B-A4B</td>
+                      <td>43-48 t/s</td>
+                      <td class="pass">3 / 3</td>
+                    </tr>
+                    <tr class="highlighted-row">
+                      <td>Qwen 3.6 35B (Vulkan RADV, Think-On) — CODE/general baseline</td>
                       <td>21.7 GB</td>
                       <td>82 / 84</td>
                       <td>50.1 t/s</td>
@@ -589,7 +604,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                       <td class="pass">3 / 3</td>
                     </tr>
                     <tr>
-                       <td>Qwen 3.5 122B (MXFP4, Think-On)</td>
+                       <td>Qwen 3.5 122B (MXFP4, Think-On) — QUALITY spot-specialist</td>
                        <td>70 GB</td>
                        <td>80 / 84</td>
                        <td>19.4 t/s</td>
@@ -602,18 +617,25 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                        <td>19.5 t/s</td>
                        <td class="pass">3 / 3</td>
                      </tr>
+                     <tr style="opacity:0.85;">
+                       <td>Gemma 4 26B-A4B IT (UD-Q6_K_XL) <em>— queued, not Stable Stack</em></td>
+                       <td>21.2 GB</td>
+                       <td>2-4 vs Gemma 31B</td>
+                       <td>40.11 t/s mean</td>
+                       <td class="pass">3 / 3</td>
+                     </tr>
                      <tr style="opacity:0.7;">
                        <td>Qwen 3.6 27B Dense (UD-Q4_K_XL, Think-On) <em>— experimental, not in stack</em></td>
                        <td>16.4 GB</td>
-                       <td>—</td>
-                       <td>~7.0 t/s</td>
+                       <td>0-6 vs Qwen 122B</td>
+                       <td>9.6-11.5 t/s</td>
                        <td class="pass">3 / 3</td>
                      </tr>
                      <tr style="opacity:0.7;">
                        <td>Qwen 3.6 27B Dense (UD-Q4_K_XL, Think-Off) <em>— experimental, not in stack</em></td>
                        <td>16.4 GB</td>
                        <td>—</td>
-                       <td>~7.0 t/s</td>
+                       <td>9.6-11.5 t/s</td>
                        <td class="fail">1 / 3</td>
                      </tr>
                     <tr>
@@ -626,12 +648,12 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   </tbody>
                 </table>
               </div>
-              <p class="sub-text" style="margin-top:12px;"><strong>Note — the dense 27B is benchmarked but NOT in the production stack.</strong> A blind quality pairwise put it 0&ndash;6 vs the 122B, and it was neither faster nor clearly smarter than the 35B workhorse. It is kept as a break-glass <em>"arrow in the quiver"</em> for tough, blocked projects, not a first- or second-line model. <em>Technical aside:</em> DFlash speculative decoding lifts its ~7 t/s floor to <strong>~31 t/s (2.82&times;)</strong> with a footprint-minimized Q4_K_M draft &mdash; speculation works on <em>dense</em> models (no expert router to thrash) where it is counterproductive on MoE.</p>
+              <p class="sub-text" style="margin-top:12px;"><strong>Note — the dense 27B is benchmarked but NOT in the production stack.</strong> Community discussion often treats Qwen 27B as a strong reasoner, but the local Strix Halo benches did not support that routing choice: blind pairwise was 0&ndash;6 vs the 122B and normal decode tested around 9.6&ndash;11.5 t/s. It is kept as a break-glass option for tough, blocked projects, not a first- or second-line model. <em>Technical aside:</em> DFlash speculative decoding lifts its floor to <strong>~31 t/s (2.82&times;)</strong> with a footprint-minimized Q4_K_M draft &mdash; speculation works on <em>dense</em> models (no expert router to thrash) where it is counterproductive on MoE. Full audit trail: <a href="https://github.com/boxwrench/tesla_agent/blob/main/reference/reproducibility-matrix.md" target="_blank" rel="noopener">Reproducibility Matrix &amp; Technical Deep-Dive</a>.</p>
             </div>
 
             <div class="card">
               <h2>Visual Performance Analysis</h2>
-              <p class="sub-text">Relative quality score vs generation throughput:</p>
+              <p class="sub-text">Decode speed leaderboard; quality evidence is in the benchmark table and reproducibility matrix:</p>
               <div class="chart-container">
                 <canvas id="benchmarkChart"></canvas>
               </div>
@@ -652,7 +674,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
               </div>
               <div class="bullet-card">
                 <h4>Thinking Budgets</h4>
-                <p>Reasoning models decode reasoning tokens slowly, which consumes 97% of step time. Set a per-request cap (<code>thinking_budget_tokens=256</code> or <code>512</code>) to limit latency without losing accuracy.</p>
+                <p>Reasoning budgets are useful for planning and prose, but do not cap stateful coding loops. In the coding gate, any cap degraded reliability; leave coding routes uncapped.</p>
               </div>
             </div>
           </div>
@@ -783,6 +805,27 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                     <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A hospital with 8 specialist doctors. For a cold, only the 2 required specialists treat you, keeping it fast and cheap.</p>
                   </dd>
                 </div>
+                <div class="glossary-item">
+                  <dt>Q6_K / UD-Q6_K_XL</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> GGUF compression formats that keep more detail than 4-bit formats while still fitting local hardware.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A larger field notebook with clearer handwriting: more room than the tiny version, but easier to read back accurately.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Gemma 4</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A separate model family now used here as a cross-family coding peer to the Qwen baseline.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A second qualified reviewer with a different working style, useful for catching different mistakes.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>gpt-oss-120B</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A large open-weight model that became this stack's general quality baseline after local pairwise testing.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> The senior reviewer lane became fast enough and useful enough to become the default for formal synthesis.</p>
+                  </dd>
+                </div>
               </div>
             </div>
 
@@ -822,6 +865,20 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   <dd>
                     <p><strong>ELI5:</strong> A workflow where a main "Manager" AI agent takes a complex user goal, breaks it into smaller sub-tasks, delegates them to specialized "Worker" sub-agents, and compiles their final outputs.</p>
                     <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A chief operator coordinating plant maintenance, laboratory testing, and electrical crews rather than trying to do every job himself.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Pairwise Scorecard</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A blind A/B comparison where two model answers are shuffled and judged prompt by prompt.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A taste test with the labels covered. It helps when normal scores are too close to settle the choice.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>pass^3 Gate</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A reliability rule requiring three clean end-to-end passes instead of one lucky success.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Starting equipment three times cleanly tells you more than seeing it start once.</p>
                   </dd>
                 </div>
               </div>

@@ -41,9 +41,20 @@ The following models are used in the reference tests. Download paths are pinned 
 | Model Identity | Format & Quant | File Name | Size (GB) | HF Source Repository | SHA256 (local copy) |
 |---|---|---|---|---|---|
 | **Qwen 3.6 35B MoE** | GGUF (MXFP4) | `Qwen3.6-35B-A3B-MXFP4_MOE.gguf` | 21.7 GB | [unsloth/Qwen3.6-35B-A3B-GGUF](https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF) | `2fdd20997c4d88ee25f70f500c61f8b999378d92ab055f9d450fc70d617158d3` |
+| **Gemma 4 31B IT** | GGUF (Q6_K) | `gemma-4-31B-it-Q6_K.gguf` | 25.2 GB | Unsloth GGUF release | `abd0be03a2bc3f3c9d8e018cbb4ff5b553c340c65d49b6b346c48be5a1efde28` |
+| **gpt-oss-120B** | GGUF (MXFP4, 3 shards) | `gpt-oss-120b-mxfp4-0000{1..3}-of-00003.gguf` | ~63 GB | Unsloth GGUF release | shard pins below |
 | **Qwen 3.5 122B MoE** | GGUF (MXFP4) | `Qwen3.5-122B-A10B-MXFP4_MOE.gguf` | 70.0 GB | [unsloth/Qwen3.5-122B-A10B-GGUF](https://huggingface.co/unsloth/Qwen3.5-122B-A10B-GGUF) | *(unpinned — not on local disk; verify against source)* |
+| **Gemma 4 26B-A4B IT** | GGUF (UD-Q6_K_XL) | `gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf` | 21.2 GB | Unsloth GGUF release | `5cfb7ab424c01388538005f26573f3bd374d3140cc021a1c44249e69928882a4` |
 | **Qwen3-Coder-Next** | GGUF (UD-Q4_K_XL) | `Qwen3-Coder-Next-UD-Q4_K_XL.gguf` | 49.6 GB | [unsloth/Qwen3-Coder-Next-GGUF](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) | `4bb93f0a0221ef4ff963ca9094df629c8dfdfabc3b4fdd85c1a2e4c0624fce36` |
 | **Qwen 3.5 35B MoE** | GGUF (MXFP4) | `Qwen3.5-35B-A3B-MXFP4_MOE.gguf` | 21.0 GB | [unsloth/Qwen3.5-35B-A3B-GGUF](https://huggingface.co/unsloth/Qwen3.5-35B-A3B-GGUF) | `0f135a59159030f4710477abc6f9922d2f13552c85bff736deaaef71023cd770` |
+
+### gpt-oss-120B MXFP4 per-shard SHA256
+
+```text
+gpt-oss-120b-mxfp4-00001-of-00003.gguf  e2865eb6c1df7b2ffbebf305cd5d9074d5ccc0fe3b862f98d343a46dad1606f9
+gpt-oss-120b-mxfp4-00002-of-00003.gguf  346492f65891fb27cac5c74a8c07626cbfeb4211cd391ec4de37dbbe3109a93b
+gpt-oss-120b-mxfp4-00003-of-00003.gguf  66dca81040933f5a49177e82c479c51319cefb83bd22dad9f06dad45e25f1463
+```
 
 ---
 
@@ -68,25 +79,25 @@ Benchmarks are measured in tokens/second (generation/decode speed) and quality s
 
 | Model Configuration | Inference Backend | Quality Score | Decode Speed | Prefill Speed | GTT Memory Allocation | Nonce Gate Result |
 |---|---|---|---|---|---|---|
+| **gpt-oss-120B MXFP4** — QUALITY baseline | **Vulkan RADV** | **Pairwise 5-1 vs Qwen 35B; 4-2 vs Qwen 122B** | **~46 tok/s** | — | ~63 GB | **3 / 3 Pass** |
+| **Gemma 4 31B IT Q6_K** — CODE Gemma peer | **Vulkan RADV** | **Pairwise 4-2 vs Gemma 26B-A4B** | **43-48 tok/s** | — | 25.2 GB | **3 / 3 Pass** |
 | **Qwen 3.6 35B MoE (Think-On)** — **default** | **Vulkan RADV** | **82 / 84** | **50.1 tok/s** | **932.1 tok/s** | 21.7 GB | **3 / 3 Pass** |
 | **Qwen 3.6 35B MoE (Think-On)** — fallback | ROCm 7.2.x | **82 / 84** | **44.2 tok/s** | ~628.1 tok/s | 21.7 GB | **3 / 3 Pass** |
 | **Qwen 3.6 35B MoE (Think-Off)** | ROCm 7.2.x | **82 / 84** | **43.7 tok/s** | ~628.1 tok/s | 21.7 GB | **3 / 3 Pass** |
-| **Qwen 3.5 122B MoE (Think-On)** | ROCm 7.2.x | **80 / 84** | **19.4 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
+| **Qwen 3.5 122B MoE (Think-On)** — QUALITY spot-specialist | ROCm 7.2.x | **80 / 84** | **19.4 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
 | **Qwen 3.5 122B MoE (Think-Off)** | ROCm 7.2.x | **81 / 84** | **19.5 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
-| **Qwen 3.6 27B Dense (Think-On)** *(experimental, not in stack)* | ROCm 7.2.x (UD-Q4_K_XL) | — | **~7.0 tok/s** | — | 16.4 GB | **3 / 3 Pass** (coding 3/3) |
-| **Qwen 3.6 27B Dense (Think-Off)** *(experimental, not in stack)* | ROCm 7.2.x (UD-Q4_K_XL) | — | **~7.0 tok/s** | — | 16.4 GB | **3 / 3 Pass** (coding 1/3) |
+| **Gemma 4 26B-A4B IT UD-Q6_K_XL** *(queued, not Stable Stack)* | Vulkan RADV | **Pairwise 2-4 vs Gemma 31B** | **40.11 tok/s mean** | — | 21.2 GB | **3 / 3 Pass** |
+| **Qwen 3.6 27B Dense (Think-On)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | **0-6 vs Qwen 122B** | **9.6-11.5 tok/s** tested normal decode | — | 16.4 GB | **3 / 3 Pass** (coding 3/3) |
+| **Qwen 3.6 27B Dense (Think-Off)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | — | **9.6-11.5 tok/s** tested normal decode | — | 16.4 GB | **3 / 3 Pass** (coding 1/3) |
 | **Qwen 3.6 27B Dense + DFlash spec.** *(experimental)* | Lucebox HIP (Q4_K_M draft) | — | **~31.3 tok/s (2.82×)** | — | ~16 GB | discipline-limited |
 | **Qwen 3.5 35B MoE (Think-On)** | ROCm 7.2.x | **79 / 84** | **47.3 tok/s** | ~562.9 tok/s | 21.0 GB | **3 / 3 Pass** |
 | **Qwen3-Coder-Next (Think-On)** | ROCm 7.2.x | — | **34.6 tok/s** | ~127.0 tok/s | 49.6 GB | **3 / 3 Pass** |
 
-> **Status: the dense 27B is benchmarked but NOT in the production stack.** A blind
-> quality pairwise put it 0–6 vs the 122B (largely output-discipline leakage, but it
-> showed no reasoning *upgrade* over the 35B/122B on substance), and it is slower than
-> the 35B workhorse. It is retained as a break-glass *"arrow in the quiver"* for tough,
-> blocked projects — not a first- or second-line model. The speculative-decoding result
-> below is kept as a technical finding.
+> **Stable Stack update (2026-05-30):** gpt-oss-120B is now the general QUALITY baseline after blinded pairwise wins of 5-1 vs Qwen 35B and 4-2 vs Qwen 122B. Qwen 122B is retained as a QUALITY spot-specialist for regulatory-currency work and sharp plan reviews. Gemma 4 31B is the cross-family CODE peer; Gemma 26B-A4B cleared the coding gate but did not graduate because Gemma 31B was both faster and higher quality in pairwise.
 >
-> **DFlash speculative decoding on the dense 27B** lifts its ~7 tok/s autoregressive floor to **~31.3 tok/s (2.82×)** using a footprint-minimized Q4_K_M draft (HumanEval 2.57×, mean acceptance length 6.67, DDTree budget 22 — the gfx1151 sweet spot). Counter-intuitively the *smaller* Q4_K_M draft (1.03 GB) beats a larger Q8_0 draft (1.84 GB, only 1.49×): on this bandwidth-bound APU the draft's own weight reads compete for the same memory bus the target needs to verify, so minimizing draft footprint wins. This is the inverse of the MoE speculative-decoding result (post-mortem #3) — speculation succeeds on **dense** models because there is no expert router to thrash. *Speed is verified; pairing this speed with full tool-call discipline on the same Q4_K_M build is still in validation (the verified 27B tool-call/coding passes above are on the UD-Q4_K_XL build).*
+> **Status: the dense Qwen 3.6 27B is benchmarked but NOT in the production stack.** Community consensus often treats it as a strong reasoner, but local Strix Halo testing did not support that routing choice: blind pairwise was 0-6 vs the 122B on the standard 6-prompt set, and normal decode tested around 9.6-11.5 tok/s across backends. It is retained as a break-glass *"arrow in the quiver"* for tough, blocked projects — not a first- or second-line model. The speculative-decoding result below is kept as a technical finding.
+>
+> **DFlash speculative decoding on the dense 27B** lifts the dense route to **~31.3 tok/s (2.82×)** using a footprint-minimized Q4_K_M draft (HumanEval 2.57×, mean acceptance length 6.67, DDTree budget 22 — the gfx1151 sweet spot). Counter-intuitively the *smaller* Q4_K_M draft (1.03 GB) beats a larger Q8_0 draft (1.84 GB, only 1.49×): on this bandwidth-bound APU the draft's own weight reads compete for the same memory bus the target needs to verify, so minimizing draft footprint wins. This is the inverse of the MoE speculative-decoding result (post-mortem #3) — speculation succeeds on **dense** models because there is no expert router to thrash. *Speed is verified; pairing this speed with full tool-call discipline on the same Q4_K_M build is still in validation (the verified 27B tool-call/coding passes above are on the UD-Q4_K_XL build).*
 
 ---
 

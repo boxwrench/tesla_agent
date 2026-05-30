@@ -131,8 +131,8 @@ We download the recommended Qwen 3.6 35B MoE model quantized in the space-effici
 mkdir -p ~/models/qwen3.6-35b-a3b
 
 # Download the model from the verified Hugging Face repository
-huggingface-cli download <MODEL_HF_REPO> \
-  <MODEL_FILENAME> \
+huggingface-cli download unsloth/Qwen3.6-35B-A3B-GGUF \
+  Qwen3.6-35B-A3B-MXFP4_MOE.gguf \
   --local-dir ~/models/qwen3.6-35b-a3b
 ```
 

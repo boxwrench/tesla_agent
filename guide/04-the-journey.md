@@ -61,9 +61,18 @@ We compiled `llama.cpp` using the **Vulkan** backend instead of AMD's official R
 ### Insight B: Match the Speedup to the Architecture
 We attempted to speed up generation using "speculative decoding" (such as MTP or DFlash), which uses a tiny model to guess words and a large model to verify them.
 * On **Mixture-of-Experts (MoE)** models, speculative decoding was actually **slower** than normal generation. *Why:* verifying guesses forces the large model to reactivate and route different experts constantly, adding a routing penalty that wipes out the gains.
-* On **dense** models the opposite is true. The dense 27B has no expert router, so DFlash speculative decoding lifts it from ~7 tok/s to **~31 tok/s (2.82×)**. (A surprise on this hardware: the *smaller* draft model wins — a fatter draft starves the shared memory bus it shares with the model it's helping.) *We benchmarked the dense 27B thoroughly but did **not** keep it in the stack: in practice it was neither faster nor clearly smarter than the 35B MoE workhorse. It stays on the shelf as a "try something different" option for tough, stuck problems — an arrow in the quiver, not a daily driver.*
+* On **dense** models the opposite is true. The dense 27B has no expert router, so DFlash speculative decoding lifts the route to **~31 tok/s (2.82×)**. (A surprise on this hardware: the *smaller* draft model wins — a fatter draft starves the shared memory bus it shares with the model it's helping.) *We benchmarked the dense 27B thoroughly but did **not** keep it in the stack: in practice it was neither faster nor clearly smarter than the 35B MoE workhorse. It stays on the shelf as a "try something different" option for tough, stuck problems — an arrow in the quiver, not a daily driver.*
 
 ### The Other Lever: Reasoning Budgets (mind the exception)
 A second adjustment is the **Reasoning Budget** (the `thinking_budget_tokens` flag): capping how many tokens the model spends "thinking" (e.g. 256–512) roughly halves response time on **planning and prose** work. **One important exception:** on stateful **coding** tasks, capping the budget made the model drop carried-forward details and fail the multi-step gate — there, leave thinking uncapped. Speed is cheap; a wrong answer fast is not a bargain.
+
+### The 2026-05-30 Ladder Pivot
+Later benchmarks added two important model families to the stack.
+
+* **gpt-oss-120B became the general QUALITY baseline.** After the draft-with-assumptions system prompt fixed its checklist-deflection behavior, it won blinded pairwise tests 5-1 vs Qwen 35B and 4-2 vs Qwen 122B, while decoding around 46 tok/s on Vulkan/RADV.
+* **Gemma 4 31B became the cross-family CODE peer.** It cleared nonce and orchestrated coding gates, then beat Gemma 26B-A4B 4-2 on the quality battery.
+* **Qwen stayed in the stack, but with narrower roles.** Qwen 3.6 35B remains the CODE/general baseline, and Qwen 122B is retained as a QUALITY spot-specialist for regulatory-currency and sharp plan-review tasks.
+
+This is not a claim that Qwen is "bad." Online consensus still treats Qwen as a strong reasoning family, and the local Qwen routes remain useful. The change is narrower: on this Strix Halo hardware, with these agentic utility workflows, the latest local gates favor gpt-oss-120B and Gemma 4 31B for the main quality and cross-family coding lanes.
 
 In the next chapter, we will build this exact, simplified stack step-by-step.

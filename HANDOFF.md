@@ -16,9 +16,9 @@ Recent small updates already pushed to `main`:
 - `3754360` - Fix setup success text contrast.
 - `0d76b4c` - Add Title22 blog link.
 
-## Pending Benchmark Pivot
+## Benchmark Pivot Status
 
-The next major update should be discussed before implementation. New benchmark data reportedly points to a better recommended stack:
+This branch is implementing the 2026-05-30 benchmark pivot from the private source repo into public-safe language:
 
 - Gemma 4 and GPT-OSS 120B perform better across the tested local agentic workflows.
 - Qwen models should remain documented and available.
@@ -29,9 +29,9 @@ Suggested framing:
 
 > Qwen remains a strong reasoning family and a credible alternative, but this guide's default recommendations follow measured local Strix Halo agent-workflow results. Based on the newest benchmarks, Gemma 4 and GPT-OSS 120B become the primary recommended options, while Qwen remains available for workflows where its reasoning style or compatibility is preferred.
 
-## Data Needed Before Editing
+## Data Shape Used
 
-Collect the new benchmark data in this shape before changing docs:
+Benchmark data is represented in public docs using this shape:
 
 ```text
 Model:

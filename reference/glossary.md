@@ -108,6 +108,18 @@ graph LR
 * **ELI5 Explanation:** An advanced 4-bit compression standard supported directly by hardware accelerators (like Strix Halo) that packages weights into tiny microscaled blocks.
 * **Analogy:** A high-compression shipping crate layout that matches the factory forklift's dimensions exactly, allowing fast unloading.
 
+### **Q6_K / UD-Q6_K_XL**
+* **ELI5 Explanation:** GGUF quantization formats that keep more numerical detail than 4-bit formats while still shrinking the model enough to run locally.
+* **Analogy:** If MXFP4 is a very compact field notebook, Q6_K is a larger notebook with clearer handwriting. It takes more room, but can preserve useful detail.
+
+### **gpt-oss-120B**
+* **ELI5 Explanation:** A large open-weight model family used here as the new general quality baseline after local pairwise testing.
+* **Analogy:** The slow, careful senior reviewer lane became faster than expected on Strix Halo, so it moved from "special escalation" into the main quality chair.
+
+### **Gemma 4**
+* **ELI5 Explanation:** A separate model family from Google. In this stack, Gemma 4 31B is kept as a cross-family coding peer to the Qwen workhorse.
+* **Analogy:** A second contractor with a different working style. It can catch different mistakes than the usual crew, so it is useful even when the original tool still works.
+
 ---
 
 ## 🤖 Group 4: Agentic Workflows & Loops
@@ -125,3 +137,15 @@ These terms cover how AI goes from a conversational chatter to an active workspa
 ### **Nonce Gate**
 * **ELI5 Explanation:** A security-check game used to verify that an agent is actually running code in its sandbox rather than fabricating answers.
 * **Analogy:** A physical key-check. We hide a secret random word (the nonce) inside a box, and tell the agent to open the box and read it. If the agent repeats the exact word back to us, we know they actually opened the box instead of guessing.
+
+### **Orchestrated Coding Eval**
+* **ELI5 Explanation:** A coding test where the agent solves a multi-step job as separate coordinated steps instead of one long monologue.
+* **Analogy:** Instead of asking one person to remember every instruction for an entire shift, the job is handed off as a checklist: finish Step 1, record the result, then use it for Step 2.
+
+### **Pairwise Scorecard**
+* **ELI5 Explanation:** A blind comparison where two model answers are shown side by side, shuffled as A/B, and a judge picks the better answer for each prompt.
+* **Analogy:** A taste test with the labels covered. It helps when regular scorecards are too close to tell which answer is actually more useful.
+
+### **pass^3 Gate**
+* **ELI5 Explanation:** A reliability bar requiring three clean end-to-end passes, not just one lucky success.
+* **Analogy:** Starting a pump once proves it can start. Starting it three times cleanly says more about whether it is dependable.
