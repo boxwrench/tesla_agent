@@ -78,6 +78,11 @@ GitHub Pages mirror:
 - `docs/index.html`
 - `docs/app.js`
 - `docs/guide/*.md` mirrors for any changed `guide/*.md` files.
+- Interactive Setup must be reviewed because default model download commands, serving commands, success logs, and explanatory text may need to change.
+- Model Finder must be updated, not just the Markdown benchmark tables.
+- Benchmark chart data in `docs/app.js` must reflect the new model ladder.
+- The hosted website should link clearly to `reference/reproducibility-matrix.md` / "Reproducibility Matrix & Technical Deep-Dive" from the main repo.
+- Glossary entries should be added for any new model families, serving concepts, benchmark concepts, or architecture terms introduced by Gemma 4 / GPT-OSS 120B.
 
 Scripts/config if defaults change:
 
