@@ -1025,7 +1025,78 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 </div>
               </div>
             </div>
-            
+
+            <div class="glossary-section" style="margin-top: 32px;">
+              <h3 class="glossary-sec-title"><i class="fa-solid fa-shield-halved" style="color: #d97706;"></i> 6. Agent Safety & Sandboxing</h3>
+              <p style="margin: 8px 0 16px 0; font-size: 0.95em; opacity: 0.85;">Each term below includes a plant analog — the same control in language treatment operators already use. Full treatment in <a href="guide/11-agent-safety.md">Chapter 11 — Agent Safety</a>.</p>
+              <div class="glossary-grid">
+                <div class="glossary-item">
+                  <dt>Sandbox</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A walled-off environment that looks like a full computer to the program inside, but cannot reach your real system or files.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A child's playpen — they can move freely inside it without reaching the stairs.</p>
+                    <p class="analogy"><i class="fa-solid fa-helmet-safety" style="color: #d97706;"></i> <em>Plant analog:</em> The <strong>SCADA training simulator.</strong> Same screens, same alarms — but a wrong setpoint doesn't dose finished water.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Bind Mount</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> Telling a sandbox: "give the program inside this <em>one specific folder</em> of my real computer, and nothing else."</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Handing the apprentice a folder of pages instead of a key to the whole filing cabinet.</p>
+                    <p class="analogy"><i class="fa-solid fa-helmet-safety" style="color: #d97706;"></i> <em>Plant analog:</em> The <strong>data binder</strong> you handed the apprentice — they see exactly the pages you put in it, nothing else.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Principle of Least Privilege <a href="https://csrc.nist.gov/glossary/term/least_privilege" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> NIST</a></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> Give each person, program, or role <em>only</em> the access they need for the job — nothing more. Default to "no" unless required.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A new hire gets keys to their office and the break room — not the server room — until the job requires it.</p>
+                    <p class="analogy"><i class="fa-solid fa-helmet-safety" style="color: #d97706;"></i> <em>Plant analog:</em> Not every operator gets the <strong>supervisor PIN.</strong> Not every contractor gets the master keyring. Each role's access is sized to the role.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>OS Keyring / Credential Vault</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A locked, encrypted vault built into your OS where passwords and keys are stored. Accessible only with your login.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A safe-deposit box at the bank — they hold it, only your signature opens it.</p>
+                    <p class="analogy"><i class="fa-solid fa-helmet-safety" style="color: #d97706;"></i> <em>Plant analog:</em> The <strong>locked key cabinet behind the supervisor's desk.</strong> Credentials live there, not on the workstation.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Prompt Injection <a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> OWASP LLM01</a></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> An attack where untrusted text (a document, a PDF, an email) contains hidden instructions the agent reads and follows <em>as if you'd typed them</em>. The most-studied current agentic attack vector.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A villain mails your secretary a letter that says "move all funds to account X — signed, the boss." If the secretary trusts the letter, the boss never needed to be involved.</p>
+                    <p class="analogy"><i class="fa-solid fa-helmet-safety" style="color: #d97706;"></i> <em>Plant analog:</em> A <strong>complaint letter</strong> containing "approve a 50% chlorine feed increase" — if your agent reads incoming mail, that sentence is a tool call to it.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Approval Gate / Confirmation Prompt</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> The "Are you sure?" the agent must ask before running a destructive command. Whitelist safe tools; require confirmation for the rest.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> The "Do you really want to send this email?" pop-up — slows things by half a second, catches one mistake a month.</p>
+                    <p class="analogy"><i class="fa-solid fa-helmet-safety" style="color: #d97706;"></i> <em>Plant analog:</em> The <strong>two-key chemical-feed setpoint override.</strong> The <strong>witness signature</strong> on a backwash change. Load-bearing wall, not "slowing the work down."</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Kill Switch &amp; Audit Trail</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> The command that immediately stops the agent, and the saved record of every action it took. Know where both are <em>before</em> you start a run.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> The off-switch and the cash register tape. Stops the action; tells you what happened.</p>
+                    <p class="analogy"><i class="fa-solid fa-helmet-safety" style="color: #d97706;"></i> <em>Plant analog:</em> The <strong>E-stop</strong> on rotating equipment, and the <strong>alarm history.</strong> You don't disable either "to clean up the screen."</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Sudo / Root <span style="opacity: 0.6; font-size: 0.85em;">(supervisor mode)</span></dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> "Supervisor mode" on a Linux/Mac computer. Anything run with <code>sudo</code> has full system authority to change settings the regular account cannot.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> The supervisor's master keycard that bypasses normal authorization on every door.</p>
+                    <p class="analogy"><i class="fa-solid fa-helmet-safety" style="color: #d97706;"></i> <em>Plant analog:</em> The <strong>supervisor PIN</strong> that bypasses alarm acknowledgements. Agents almost never need it.</p>
+                  </dd>
+                </div>
+              </div>
+            </div>
+
           </div>
         </section>
 
