@@ -472,19 +472,39 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <label>Primary Task Priority</label>
                 <div class="radio-group">
                   <label class="radio-card">
-                    <input type="radio" name="finder-priority" value="code" checked>
-                    <span class="radio-title">Coding & Multi-Step Logic</span>
-                    <span class="radio-desc">Multi-step programming, data cleaning scripts, and reasoning loops.</span>
+                    <input type="radio" name="finder-priority" value="code-fast" checked>
+                    <span class="radio-title">CODE — fast workhorse</span>
+                    <span class="radio-desc">First reach for coding/agent tasks. Qwen 3.6 35B MoE on Vulkan. 50.1 t/s, 82/84 rubric, 3/3 nonce.</span>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="finder-priority" value="code-peer">
+                    <span class="radio-title">CODE — Gemma peer (orchestrated)</span>
+                    <span class="radio-desc">Cross-family second opinion; orchestrated multi-step pattern required. Gemma 4 31B IT. 43–48 t/s.</span>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="extract">
-                    <span class="radio-title">Fast Extraction / QA</span>
-                    <span class="radio-desc">Extracting key fields from documents or comparing values to rules.</span>
+                    <span class="radio-title">EXTRACT — no-think fast</span>
+                    <span class="radio-desc">Telemetry, log parsing, structured extraction. Qwen 3.6 35B MoE with thinking disabled. 43.7 t/s.</span>
                   </label>
                   <label class="radio-card">
-                    <input type="radio" name="finder-priority" value="synthesis">
-                    <span class="radio-title">Complex Quality Planning</span>
-                    <span class="radio-desc">Drafting structured reports and summarizing multi-document inputs.</span>
+                    <input type="radio" name="finder-priority" value="synthesis-baseline">
+                    <span class="radio-title">SYNTHESIS — quality baseline</span>
+                    <span class="radio-desc">General planning, master-plan drafts. gpt-oss-120B MXFP4 (3 shards). Pairwise 5-1 vs Qwen 35B, 4-2 vs Qwen 122B.</span>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="finder-priority" value="synthesis-specialist">
+                    <span class="radio-title">SYNTHESIS — regulatory specialist</span>
+                    <span class="radio-desc">Regulatory currency (EPA NPDWRs, state DEQ rules), incisive plan reviews. Qwen 3.5 122B-A10B. 19.4 t/s, 80–81/84.</span>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="finder-priority" value="companion">
+                    <span class="radio-title">COMPANION — small-footprint MoE</span>
+                    <span class="radio-desc">For concurrent loads (e.g. 26B + 120B fits where 31B + 120B doesn't). Gemma 4 26B-A4B IT. 40.11 t/s. Queued, not Stable Stack.</span>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="finder-priority" value="arrow">
+                    <span class="radio-title">BREAK-GLASS — dense reasoning probe</span>
+                    <span class="radio-desc">For tough/blocked tasks where a different dense single-trace might unstick. Qwen 3.6 27B Dense. 9.6–11.5 t/s; DFlash lifts to ~31 t/s.</span>
                   </label>
                 </div>
               </div>

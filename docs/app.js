@@ -131,43 +131,87 @@ function initModelFinder() {
   const recRationale = document.getElementById('rec-rationale');
 
   const modelMatrix = {
-    'code': {
-      name: "Qwen 3.6 35B MoE (MXFP4) or Gemma 4 31B IT (Q6_K)",
-      mode: "CODE Baseline + Gemma Peer",
+    'code-fast': {
+      name: "Qwen 3.6 35B Mixture-of-Experts (MXFP4 Quant)",
+      mode: "CODE — fast workhorse",
       file: "Qwen3.6-35B-A3B-MXFP4_MOE.gguf",
-      size: "21.7 GB baseline; 25.2 GB Gemma peer",
-      speed: "Qwen 35B: 50.1 t/s; Gemma 31B: 43-48 t/s",
-      reasoning: "Uncapped for coding; use orchestrated steps for Gemma 31B",
+      size: "21.7 GB",
+      speed: "~50.1 tokens/sec (Vulkan/RADV; ~44.2 t/s ROCm fallback)",
+      reasoning: "Uncapped think-on — do NOT budget the coding route",
       command: "bash scripts/serving/serve_vulkan.sh",
       hermes: "max_tokens: 8192",
-      rationale: "Qwen 3.6 35B remains the compact CODE/general baseline: fast, repeatedly gate-clean, and broadly useful. Gemma 4 31B IT is the cross-family CODE peer after clearing nonce and orchestrated coding gates. Do not cap reasoning on stateful coding tasks; use staged/orchestrated steps when a single long episode degrades."
+      rationale: "First reach for any coding or multi-step agent task. Best balance of reasoning quality and speed on a 128 GB APU (82/84 rubric, 3/3 nonce gate). Vulkan/RADV is the promoted backend (+51% prefill, +13.5% decode over ROCm); ROCm is the fallback. A budget sweep showed any reasoning cap drops the stateful coding gate to 1-2/3 while uncapped think-on holds 3/3 — reasoning budgets are a planning latency lever, not a coding one."
+    },
+    'code-peer': {
+      name: "Gemma 4 31B IT (Q6_K)",
+      mode: "CODE — Gemma peer (orchestrated)",
+      file: "gemma-4-31B-it-Q6_K.gguf",
+      size: "25.2 GB",
+      speed: "43-48 tokens/sec (Vulkan/RADV)",
+      reasoning: "On for coding; use orchestrated multi-step pattern",
+      command: "bash scripts/serving/serve_vulkan.sh --model gemma-4-31B-it-Q6_K.gguf",
+      hermes: "max_tokens: 8192",
+      rationale: "Cross-family second opinion when a single long coding episode degrades, or for tasks where Qwen's style has plateaued. Cleared nonce 3/3 (think-off and think-on) and orchestrated coding 3/3 E2E; the orchestrated/staged path is what graduated, not single-episode. Won 4-2 quality pairwise vs Gemma 4 26B-A4B (System Development Charge, AWWA M36, P&ID-level engineering specificity)."
     },
     'extract': {
       name: "Qwen 3.6 35B Mixture-of-Experts (MXFP4 Quant)",
-      mode: "Reasoning Disabled (Pure Extraction)",
+      mode: "EXTRACT — no-think fast",
       file: "Qwen3.6-35B-A3B-MXFP4_MOE.gguf",
       size: "21.7 GB",
-      speed: "~43.7 tokens/sec (Faster wall-time by avoiding reasoning decode)",
+      speed: "~43.7 tokens/sec (faster wall-time by avoiding reasoning decode)",
       reasoning: "Disabled via template parameters (enable_thinking: false)",
       command: "bash scripts/serving/serve_rocm.sh --jinja --chat-template-kwargs '{\"enable_thinking\":false}'",
       hermes: "thinking_budget_tokens: 0\nmax_tokens: 4096",
-      rationale: "Simple telemetry extraction and log parsing do not require reasoning outputs. Disabling thinking using the template keyword parameters saves 50%+ wall-clock time and guarantees tool-use functions run directly. Note that --reasoning-budget 0 is broken and must not be used."
+      rationale: "Simple telemetry extraction and log parsing do not require reasoning. Disabling thinking through template kwargs saves 50%+ wall-clock time and guarantees tool-use calls fire directly. Note: --reasoning-budget 0 is broken upstream and must not be used; rely on the template kwarg."
     },
-    'synthesis': {
+    'synthesis-baseline': {
       name: "gpt-oss-120B (MXFP4, 3 shards)",
-      mode: "QUALITY Baseline",
+      mode: "SYNTHESIS — quality baseline",
       file: "gpt-oss-120b-mxfp4-0000{1..3}-of-00003.gguf",
       size: "~63 GB",
       speed: "~46 tokens/sec (Vulkan/RADV)",
-      reasoning: "High reasoning with draft-with-assumptions prompt",
+      reasoning: "High reasoning, draft-with-illustrative-assumptions system prompt",
       command: "Configure the local server for the gpt-oss-120B shard set",
       hermes: "max_tokens: 8192\nsystem prompt: draft with labeled assumptions",
-      rationale: "The newest local pairwise battery makes gpt-oss-120B the general quality baseline: 5-1 vs Qwen 35B and 4-2 vs Qwen 122B after the prompt stopped checklist deflection. Keep Qwen 122B available as a spot-specialist for regulatory-currency tasks and incisive plan reviews."
+      rationale: "The current general quality baseline after blinded pairwise wins of 5-1 vs Qwen 35B and 4-2 vs Qwen 122B (single judge, seed-fixed A/B order). Requires the 'draft with illustrative assumptions' system prompt; pre-prompt behavior was deflection-with-checklist (the 3-3 pre-fix pairwise vs 35B measured the prompt bug, not the model). Use for master-plan reports, research synthesis, multi-document summarization."
+    },
+    'synthesis-specialist': {
+      name: "Qwen 3.5 122B-A10B (MXFP4)",
+      mode: "SYNTHESIS — regulatory specialist",
+      file: "Qwen3.5-122B-A10B-MXFP4_MOE.gguf",
+      size: "70.0 GB (fits GTT memory limits at ctx 12,288)",
+      speed: "~19.4 tokens/sec (ROCm)",
+      reasoning: "Deep reasoning active; think-off variant holds the coding gate 3/3",
+      command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.5-122B-A10B-MXFP4_MOE.gguf --ctx-size 12288",
+      hermes: "thinking_budget_tokens: 1024\nmax_tokens: 8192",
+      rationale: "Reserved as a QUALITY spot-specialist after gpt-oss-120B took the general baseline. Reach for it on regulatory-currency tasks (EPA April-2024 PFAS NPDWR framing, state DEQ rule synthesis) and incisive plan reviews where the 122B's wider knowledge base earns its decode cost. 80-81/84 rubric, 3/3 nonce."
+    },
+    'companion': {
+      name: "Gemma 4 26B-A4B IT (UD-Q6_K_XL)",
+      mode: "COMPANION — small-footprint MoE",
+      file: "gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf",
+      size: "21.2 GB",
+      speed: "40.11 tokens/sec mean (Vulkan/RADV)",
+      reasoning: "Off in tested gate (think-on variant also cleared nonce 3/3)",
+      command: "bash scripts/serving/serve_vulkan.sh --model gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf",
+      hermes: "max_tokens: 8192",
+      rationale: "Cleared the coding gate (nonce 3/3, orchestrated pass^3) but did NOT graduate to the Stable Stack because Gemma 4 31B is both faster and higher quality (4-2 pairwise loss). Use case: when GPU memory pressure matters and you want concurrent loads — 26B-A4B + gpt-oss-120B fits where 31B + 120B does not. Also a step-1 file-analysis fallback for prompts where 31B's empty-exceedances bug recurs (orchestrated coding step 1 PASSed across all four runs)."
+    },
+    'arrow': {
+      name: "Qwen 3.6 27B Dense (UD-Q4_K_XL)",
+      mode: "BREAK-GLASS — dense reasoning probe",
+      file: "Qwen3.6-27B-UD-Q4_K_XL.gguf",
+      size: "16.4 GB",
+      speed: "9.6-11.5 tokens/sec normal decode; ~31 t/s with DFlash speculative",
+      reasoning: "Either mode; coding gate held 3/3 think-on, 1/3 think-off",
+      command: "bash scripts/serving/serve_rocm.sh --model Qwen3.6-27B-UD-Q4_K_XL.gguf",
+      hermes: "max_tokens: 8192",
+      rationale: "Experimental arrow in the quiver — community discussion often rates this model highly for reasoning, but local Strix Halo testing did not corroborate the routing choice: blind pairwise was 0-6 vs Qwen 122B on the standard 6-prompt set, and decode lagged the 35B workhorse across Vulkan, ROCm, and Lucebox HIP backends. Try when a different dense single-trace might unstick a blocked task. DFlash speculative decoding with a Q4_K_M draft lifts decode to ~31 t/s (2.82×) — the inverse of the MoE speculative result, because a dense model has no expert router to thrash."
     }
   };
 
   function updateFinderResult() {
-    let priVal = "code";
+    let priVal = "code-fast";
 
     priorityRadios.forEach(radio => { if (radio.checked) priVal = radio.value; });
 

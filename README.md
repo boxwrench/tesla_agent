@@ -72,6 +72,8 @@ Below are the actual measured results across the different configurations. *Comm
 
 > [!TIP]
 > For full reproducibility data, model checksums, evaluation methodologies, and detailed post-mortems of failed attempts (such as vLLM compilation timeouts and MoE speculative decoding latency overhead), see the [Reproducibility Matrix & Deep-Dive](reference/reproducibility-matrix.md).
+>
+> For the long-form research that informed these recommendations — Strix Halo backend tradeoffs, MoE integration architecture, prompt-architecture patterns — see the [Research](research/README.md) folder.
 
 ---
 
@@ -107,6 +109,16 @@ tesla_agent/
 │   ├── glossary.md                # Plain-language glossary of ML terms
 │   ├── architecture-diagram.md    # Mermaid stack diagram
 │   └── decision-tree.md           # Mermaid model chooser flowchart
+│
+├── research/                      # DEEP RESEARCH ARTIFACTS (Long-form)
+│   ├── README.md                  # Index, reading order, who-this-is-for
+│   ├── strategic-architecture-frontier-moe-strix-halo.md
+│   ├── cognitive-dual-stack-engineering-local-workflows.md
+│   ├── high-performance-orchestration-reasoning-architectures.md
+│   ├── american-stack-research-synthesis.md
+│   ├── american-stack-research-synthesis-round2.md
+│   ├── strix-halo-agentic-evaluation-report.md
+│   └── infrastructure-profiling-framework.md
 │
 ├── eval/                          # THE EVALUATION FRAMEWORK
 │   ├── README.md                  # Explanation of the testing approach
