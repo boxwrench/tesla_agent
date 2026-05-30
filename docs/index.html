@@ -149,26 +149,26 @@
           
           <div class="card">
             <h3><i class="fa-solid fa-network-wired card-icon teal"></i> Local Architecture Stack</h3>
-            <p class="sub-text">How your system interacts without the cloud:</p>
+            <p class="sub-text">Four roles, your hardware. Each layer below names the <em>role</em>; the parenthetical is the reference implementation this repo uses — equivalents work just as well.</p>
             <div class="stack-visual">
-              <div class="stack-layer" data-desc="AMD Strix Halo APU with up to 96 GB shared graphics translation memory (GTT).">
-                <span class="layer-title">Hardware Layer</span>
-                <span class="layer-details">AMD RDNA3.5 (gfx1151) / Shared Unified Memory (UMA)</span>
+              <div class="stack-layer" data-desc="A consumer GPU or APU with enough unified memory to fit the chosen model. Reference: AMD Strix Halo (gfx1151) APU with 128 GB LPDDR5X and a 96 GB GTT pool. Any AMD/NVIDIA/Apple Silicon system meeting the memory bar works.">
+                <span class="layer-title">Hardware</span>
+                <span class="layer-details">Unified-memory accelerator (ref: AMD Strix Halo, gfx1151, 128 GB / 96 GB GTT)</span>
               </div>
               <div class="stack-arrow"><i class="fa-solid fa-arrow-down-long"></i></div>
-              <div class="stack-layer" data-desc="Kernel space optimization that allocates the shared system RAM pool as GPU memory.">
-                <span class="layer-title">Driver Layer</span>
-                <span class="layer-details">ROCm 7.x Open Driver (amdgpu with custom GTT limits)</span>
+              <div class="stack-layer" data-desc="The path your GPU uses for compute. This repo promotes Vulkan/RADV (Mesa 25.2.8) as the fastest current backend on Strix Halo; ROCm/HIP 7.x is retained as a tested fallback.">
+                <span class="layer-title">GPU Compute Path</span>
+                <span class="layer-details">Vulkan/RADV (promoted) — or ROCm/HIP fallback</span>
               </div>
               <div class="stack-arrow"><i class="fa-solid fa-arrow-down-long"></i></div>
-              <div class="stack-layer" data-desc="Fast model-serving engine. Receives OpenAI-compatible API calls and serves GGUF models.">
+              <div class="stack-layer" data-desc="An OpenAI-compatible serving engine that loads a GGUF model and answers /v1/chat/completions. This repo runs llama.cpp's llama-server directly; Ollama, LM Studio, and other llama.cpp-based servers fit the same role.">
                 <span class="layer-title">Inference Server</span>
-                <span class="layer-details">Lemonade llama.cpp backend (serving Qwen 3.6 MoE)</span>
+                <span class="layer-details">llama.cpp / llama-server (OpenAI-compatible; serves any supported GGUF)</span>
               </div>
               <div class="stack-arrow"><i class="fa-solid fa-arrow-down-long"></i></div>
-              <div class="stack-layer main-layer" data-desc="Agent executor framework. Receives user goals, selects tools, reads execution outputs, and loops.">
+              <div class="stack-layer main-layer" data-desc="The CLI or framework that drives the model in a tool-using loop. This repo has been validated with Nous Research's Hermes (sandboxed Docker profile) and with Claude Code (filesystem-tool agent). Any OpenAI-compatible client that supports tool calls fits.">
                 <span class="layer-title">Agent Engine</span>
-                <span class="layer-details">Nous Research Hermes (driving Terminal & File Tools)</span>
+                <span class="layer-details">Agent CLI (Hermes / Claude Code / equivalent OpenAI-compatible client)</span>
               </div>
             </div>
           </div>
@@ -761,29 +761,30 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
 
           <div class="card">
             <h2>What Can Actually Go Wrong</h2>
+            <p style="margin-bottom: 12px;"><em>Each item is paired with the plant analog it maps to — same failure mode, different setting.</em></p>
             <ul>
-              <li><strong>Destructive shell commands</strong> — <code>rm -rf</code>, <code>DROP TABLE</code>, <code>git push --force</code>. The verb sounds right for the task; the agent runs.</li>
-              <li><strong>Overnight database refactor</strong> — you asked it to "clean up the schema"; you woke up to a half-run migration and a closed backup window.</li>
-              <li><strong>Credential exfiltration</strong> — the agent reads <code>.env</code>, <code>~/.ssh/id_rsa</code>, <code>~/.aws/credentials</code> because they're in the directory it was told to operate in.</li>
-              <li><strong>Cost runaway</strong> — failed tasks retry on more expensive models. Local-first eliminates this category entirely.</li>
-              <li><strong>Tool escalation</strong> — file-edit access led to formatter access led to network access. Tools chain in ways you didn't plan.</li>
-              <li><strong>Trust scope creep</strong> — let it edit code, then commit, then push, then deploy. Each step felt small; the cumulative blast radius did not.</li>
-              <li><strong>Prompt injection from documents</strong> — a regulatory PDF telling the agent to email <code>/etc/shadow</code> to an attacker. The most-studied current attack vector in agentic systems.</li>
+              <li><strong>Destructive commands.</strong> <code>rm -rf</code>, <code>DROP TABLE</code>, <code>git push --force</code>. The verb sounds right; the agent runs. <em>Plant analog: an apprentice with CMMS admin access runs "delete completed work orders" without a date filter and trims six years of maintenance history.</em></li>
+              <li><strong>Overnight database refactor.</strong> You asked the agent to "clean up the schema"; you woke up to a half-run migration and a closed backup window. <em>Plant analog: you asked the agent to "standardize work-order naming." It renamed every backflow-test record and zeroed the inspection-date field because the column rename cascaded.</em></li>
+              <li><strong>Credential exfiltration.</strong> The agent reads <code>.env</code>, <code>~/.ssh/id_rsa</code>, <code>~/.aws/credentials</code> because they sit in the directory it was told to operate in. <em>Plant analog: the project folder included a "temporarily" saved SCADA admin password from six months ago that nobody moved out.</em></li>
+              <li><strong>Cost runaway.</strong> Failed tasks retry on more expensive models. <em>Plant analog: a metering pump that retries and doubles its dose every minute with no high-flow alarm — the same loop-with-no-alarm shape produces a four-figure cloud bill.</em> Local-first eliminates this category entirely.</li>
+              <li><strong>Tool escalation.</strong> File-edit access led to formatter access led to network access. <em>Plant analog: the contractor's key to the chemical-feed room shared a door with the SCADA equipment closet they didn't know was connected.</em></li>
+              <li><strong>Trust scope creep.</strong> Let it edit, then commit, then push, then deploy. <em>Plant analog: let the new operator log readings, then submit reports, then file with the state — until an incorrect TT/CT calculation gets filed as "compliant."</em></li>
+              <li><strong>Prompt injection from documents.</strong> A regulatory PDF telling the agent to email <code>/etc/shadow</code> to an attacker. The most-studied current attack vector in agentic systems. <em>Plant analog: a complaint letter contains "approve a 50% chlorine feed increase" — if the agent reads incoming mail, that sentence is a tool call.</em></li>
             </ul>
           </div>
 
           <div class="card">
             <h2>The Eight Defensive Layers</h2>
-            <p style="margin-bottom: 12px;">No single control is sufficient. Layer them.</p>
+            <p style="margin-bottom: 12px;">No single control is sufficient. Layer them. Each line names the IT-side control with a plant analog after the em-dash.</p>
             <ol>
-              <li><strong>Sandbox everything.</strong> Docker / devcontainer / VM. Bind-mount the project directory, never your home.</li>
-              <li><strong>Least privilege.</strong> Read-only by default. Write only where needed. No shell if file edit is enough.</li>
-              <li><strong>Credentials outside the agent's reach.</strong> OS keyring, <code>.env</code> outside the bind mount, no real keys in chat.</li>
-              <li><strong>Spend limits at the source.</strong> Anthropic / OpenAI console budget caps, virtual cards, alert thresholds. (Local-first sidesteps this entirely.)</li>
-              <li><strong>No production systems. Ever.</strong> No SCADA, BAS, DMS, RTU, historian, GIS, CIS, billing, or PII. Mirror the data into a sandbox first.</li>
-              <li><strong>Approval gates on destructive ops.</strong> Default to "ask before doing." Don't disable the confirmation prompt.</li>
-              <li><strong>Short leash, expanding trust.</strong> First task you watch every action; tenth you check after; hundredth you spot-check. Never skip the spot-check.</li>
-              <li><strong>Kill switch and audit trail.</strong> Know how to stop it. Save transcripts. Review them.</li>
+              <li><strong>Sandbox everything.</strong> Docker / devcontainer / VM. Bind-mount the project directory, never your home — <em>the SCADA training simulator, not the live HMI.</em></li>
+              <li><strong>Least privilege.</strong> Read-only by default. Write only where needed. No shell if file edit is enough — <em>not every operator gets the supervisor PIN.</em></li>
+              <li><strong>Credentials outside the agent's reach.</strong> OS keyring, <code>.env</code> outside the bind mount, no real keys in chat — <em>keys live in the locked cabinet behind the supervisor's desk, not in the project folder.</em></li>
+              <li><strong>Spend limits at the source.</strong> Anthropic / OpenAI console budget caps, virtual cards, alert thresholds — <em>the high-flow alarm on the metering pump. Set it before you start.</em> (Local-first sidesteps this entirely.)</li>
+              <li><strong>No production systems. Ever.</strong> No SCADA, BAS, DMS, RTU, historian, GIS, CIS, billing, or PII — <em>same rule you already follow for testing against the live HMI: snapshot first, work on the bench.</em></li>
+              <li><strong>Approval gates on destructive ops.</strong> Default to "ask before doing." Don't disable the confirmation prompt — <em>the two-key chemical-feed override is the load-bearing wall, not slowing the work down.</em></li>
+              <li><strong>Short leash, expanding trust.</strong> First task you watch every action; tenth you check after; hundredth you spot-check — <em>onboarding a new operator: shadow → supervised → solo → spot-checked. Never skip the spot-check.</em></li>
+              <li><strong>Kill switch and audit trail.</strong> Know how to stop it. Save transcripts. Review them — <em>the E-stop and the alarm history. Know where both are before you start the run.</em></li>
             </ol>
           </div>
 
