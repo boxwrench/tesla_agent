@@ -8,7 +8,7 @@ Welcome to **tesla_agent**! This repository is a clean-room, plug-and-play templ
 
 This is the guide we wish we had when we started: verbose, explanatory, data-driven, and honest about what didn't work.
 
-For related writing on utility work, technology, and practical operations, see **[Water, Systems, and Strategy](https://www.title22.org/)**.
+For related writing on utility work, technology, and practical operations, see **[Title 22](https://www.title22.org/)** — *water, systems, strategy*.
 
 ---
 
