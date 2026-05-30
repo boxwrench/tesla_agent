@@ -21,6 +21,19 @@ For related writing on utility work, technology, and practical operations, see *
 
 ---
 
+## 🛑 Before You Start: The Apprentice Has the SCADA Keys
+
+> [!WARNING]
+> An agent with high-level permissions is three things at once: **an apprentice you've handed the SCADA console, a five-year-old with your phone, and a junior staffer with the corporate credit card.** Confident, eager, and unsupervised, it *will* do something you didn't intend.
+>
+> Before you give an agent write access to *anything* that matters, read **[Chapter 11 — Agent Safety](guide/11-agent-safety.md)**. It covers sandboxing, least-privilege access, credential isolation, spend limits, kill switches, and the incident playbook for when (not if) something goes sideways.
+>
+> The single most important control for cloud agents is a **hard spend cap set on the provider side, today, before the first run** — it's the difference between a $5 lesson and a $1,000 hole when an agent loops on a failing task overnight. (Every model in this repo runs locally specifically so this failure mode does not exist.)
+>
+> The cheapest hour you'll ever spend on this stack is the one you spend reading the safety chapter before you let an agent run unattended for the first time.
+
+---
+
 ## 📖 The Guide
 
 Start here and read in order — each chapter builds on the last. Written for water-treatment and utility professionals new to AI, not just engineers.
@@ -37,6 +50,7 @@ Start here and read in order — each chapter builds on the last. Written for wa
 | 08 | [Speed and Tuning](guide/08-speed-and-tuning.md) | Vulkan vs ROCm, reasoning budgets |
 | 09 | [Building Your Workflow](guide/09-building-your-workflow.md) | Putting it to work on real utility tasks |
 | 10 | [How Agents Work Together](guide/10-orchestrating-agents.md) | One agent vs pipelines, batch, and orchestrators |
+| 11 | [Agent Safety](guide/11-agent-safety.md) | Sandboxing, least privilege, spend limits, kill switches — read before write access |
 
 > Prefer a rendered, interactive version? See the [live site](https://boxwrench.github.io/tesla_agent/). For technical lookups, jump to the [Reference](reference/README.md).
 
@@ -102,7 +116,8 @@ tesla_agent/
 │   ├── 07-choosing-a-model.md     # Benchmarks and reasoning toggles
 │   ├── 08-speed-and-tuning.md     # Going faster: Vulkan vs ROCm, budgets
 │   ├── 09-building-your-workflow.md # Transition to real-world utility work
-│   └── 10-orchestrating-agents.md # One agent vs pipelines, batch, orchestrators
+│   ├── 10-orchestrating-agents.md # One agent vs pipelines, batch, orchestrators
+│   └── 11-agent-safety.md         # SAFETY: sandboxing, spend limits, kill switches
 │
 ├── reference/                     # TECHNICAL REFERENCE (Quick lookups)
 │   ├── README.md                  # Pinned versions, checksums, benchmarks

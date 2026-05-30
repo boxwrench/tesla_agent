@@ -16,26 +16,29 @@ function initNavigation() {
   const tabContents = document.querySelectorAll('.tab-content');
   const pageTitle = document.getElementById('page-title') || document.getElementById('main-title');
 
+  function switchToTab(targetTab) {
+    navItems.forEach(nav => {
+      nav.classList.toggle('active', nav.getAttribute('data-tab') === targetTab);
+    });
+    tabContents.forEach(content => {
+      content.classList.toggle('active', content.id === `tab-${targetTab}`);
+    });
+    if (pageTitle) {
+      const activeNav = document.querySelector(`.nav-item[data-tab="${targetTab}"]`);
+      if (activeNav) pageTitle.textContent = activeNav.textContent.trim();
+    }
+  }
+
   navItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const targetTab = item.getAttribute('data-tab');
+    item.addEventListener('click', () => switchToTab(item.getAttribute('data-tab')));
+  });
 
-      // Update Navigation buttons
-      navItems.forEach(nav => nav.classList.remove('active'));
-      item.classList.add('active');
-
-      // Update Tab Contents
-      tabContents.forEach(content => {
-        content.classList.remove('active');
-        if (content.id === `tab-${targetTab}`) {
-          content.classList.add('active');
-        }
-      });
-
-      // Update Title
-      if (pageTitle) {
-        pageTitle.textContent = item.textContent.trim();
-      }
+  // Inline links with data-tab-link="<name>" switch tabs (used by safety callout etc.)
+  document.querySelectorAll('[data-tab-link]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchToTab(link.getAttribute('data-tab-link'));
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
 }
@@ -310,7 +313,7 @@ function initBenchmarkChart() {
   });
 }
 
-/* ================= 10-Chapter Guide Logic ================= */
+/* ================= 11-Chapter Guide Logic ================= */
 function initGuideTab() {
   const chapters = [
     { file: '01-what-is-agentic-ai.md', title: 'Chapter 1: What is Agentic AI?' },
@@ -322,7 +325,8 @@ function initGuideTab() {
     { file: '07-choosing-a-model.md', title: 'Chapter 7: Choosing a Model' },
     { file: '08-speed-and-tuning.md', title: 'Chapter 8: Speed and Tuning' },
     { file: '09-building-your-workflow.md', title: 'Chapter 9: Building Your Workflow' },
-    { file: '10-orchestrating-agents.md', title: 'Chapter 10: Orchestrating Agents' }
+    { file: '10-orchestrating-agents.md', title: 'Chapter 10: Orchestrating Agents' },
+    { file: '11-agent-safety.md', title: 'Chapter 11: Agent Safety' }
   ];
 
   const menuContainer = document.getElementById('guide-chapters-menu');

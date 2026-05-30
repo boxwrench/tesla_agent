@@ -52,7 +52,10 @@
           <i class="fa-solid fa-chart-line"></i> Benchmarks
         </button>
         <button class="nav-item" data-tab="guide" id="btn-tab-guide">
-          <i class="fa-solid fa-graduation-cap"></i> 10-Chapter Guide
+          <i class="fa-solid fa-graduation-cap"></i> 11-Chapter Guide
+        </button>
+        <button class="nav-item" data-tab="safety" id="btn-tab-safety">
+          <i class="fa-solid fa-triangle-exclamation"></i> Safety
         </button>
         <button class="nav-item" data-tab="glossary" id="btn-tab-glossary">
           <i class="fa-solid fa-book"></i> Glossary
@@ -96,6 +99,14 @@
               <h3>Critical Infrastructure Warning & Legal Disclaimer</h3>
             </div>
             <p><strong>Educational Prototype Only:</strong> This interactive site, its guides, scripts, and recommended models are designed strictly for educational research on consumer hardware. They are <strong>NOT</strong> certified, tested, or safe for automated control, process adjustment, regulatory reporting, or direct operations of public drinking water, wastewater, SCADA, or any critical utility infrastructure. Use at your own risk.</p>
+          </div>
+
+          <div class="disclaimer-banner card">
+            <div class="disclaimer-header">
+              <i class="fa-solid fa-shield-halved disclaimer-icon"></i>
+              <h3>Read the safety brief before you give an agent write access</h3>
+            </div>
+            <p>An agent with high-level permissions is an apprentice handed the SCADA console, a five-year-old with your phone, and a junior staffer with the corporate credit card — all at once. Sandboxing, least-privilege scoping, credential isolation, and a hard spend cap on day one are not optional. The <a href="#" data-tab-link="safety"><strong>Safety</strong></a> tab and <a href="guide/11-agent-safety.md"><strong>Chapter 11</strong></a> are the cheapest hour you'll ever spend on this stack.</p>
           </div>
 
           <div class="welcome-card">
@@ -717,6 +728,96 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <!-- Chapter markdown rendered here -->
               </article>
             </div>
+          </div>
+        </section>
+
+        <!-- ================= SAFETY TAB ================= -->
+        <section id="tab-safety" class="tab-content">
+          <div class="card disclaimer-banner">
+            <div class="disclaimer-header">
+              <i class="fa-solid fa-triangle-exclamation disclaimer-icon"></i>
+              <h3>Read this before you give an agent write access to anything that matters</h3>
+            </div>
+            <p>An agent with high-level permissions is <strong>three things at once</strong>: an apprentice you've handed the SCADA console, a five-year-old with your phone, and a junior staffer with the corporate credit card. Confident, eager, and unsupervised — it <em>will</em> do something you didn't intend.</p>
+          </div>
+
+          <div class="card">
+            <h2>The Three Pictures</h2>
+            <div class="result-grid" style="margin-top: 12px;">
+              <div>
+                <h4><i class="fa-solid fa-industry"></i> Apprentice at the SCADA console</h4>
+                <p>Confident, eager, reads every screen. Will push the wrong setpoint at 2 AM and not call you. Difference vs a real apprentice: the agent doesn't get tired.</p>
+              </div>
+              <div>
+                <h4><i class="fa-solid fa-mobile-screen"></i> Five-year-old with your phone</h4>
+                <p>Will tap every button. Will discover some buttons buy things. Will accept every popup. Every tool in the agent's list is just another button.</p>
+              </div>
+              <div>
+                <h4><i class="fa-solid fa-credit-card"></i> Apprentice with the corporate card</h4>
+                <p>Cloud APIs charge per token. An agent looping on a failing task for six hours at 3 AM produces a four-figure bill. There is no "it was an agent" refund policy.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>What Can Actually Go Wrong</h2>
+            <ul>
+              <li><strong>Destructive shell commands</strong> — <code>rm -rf</code>, <code>DROP TABLE</code>, <code>git push --force</code>. The verb sounds right for the task; the agent runs.</li>
+              <li><strong>Overnight database refactor</strong> — you asked it to "clean up the schema"; you woke up to a half-run migration and a closed backup window.</li>
+              <li><strong>Credential exfiltration</strong> — the agent reads <code>.env</code>, <code>~/.ssh/id_rsa</code>, <code>~/.aws/credentials</code> because they're in the directory it was told to operate in.</li>
+              <li><strong>Cost runaway</strong> — failed tasks retry on more expensive models. Local-first eliminates this category entirely.</li>
+              <li><strong>Tool escalation</strong> — file-edit access led to formatter access led to network access. Tools chain in ways you didn't plan.</li>
+              <li><strong>Trust scope creep</strong> — let it edit code, then commit, then push, then deploy. Each step felt small; the cumulative blast radius did not.</li>
+              <li><strong>Prompt injection from documents</strong> — a regulatory PDF telling the agent to email <code>/etc/shadow</code> to an attacker. The most-studied current attack vector in agentic systems.</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h2>The Eight Defensive Layers</h2>
+            <p style="margin-bottom: 12px;">No single control is sufficient. Layer them.</p>
+            <ol>
+              <li><strong>Sandbox everything.</strong> Docker / devcontainer / VM. Bind-mount the project directory, never your home.</li>
+              <li><strong>Least privilege.</strong> Read-only by default. Write only where needed. No shell if file edit is enough.</li>
+              <li><strong>Credentials outside the agent's reach.</strong> OS keyring, <code>.env</code> outside the bind mount, no real keys in chat.</li>
+              <li><strong>Spend limits at the source.</strong> Anthropic / OpenAI console budget caps, virtual cards, alert thresholds. (Local-first sidesteps this entirely.)</li>
+              <li><strong>No production systems. Ever.</strong> No SCADA, BAS, DMS, RTU, historian, GIS, CIS, billing, or PII. Mirror the data into a sandbox first.</li>
+              <li><strong>Approval gates on destructive ops.</strong> Default to "ask before doing." Don't disable the confirmation prompt.</li>
+              <li><strong>Short leash, expanding trust.</strong> First task you watch every action; tenth you check after; hundredth you spot-check. Never skip the spot-check.</li>
+              <li><strong>Kill switch and audit trail.</strong> Know how to stop it. Save transcripts. Review them.</li>
+            </ol>
+          </div>
+
+          <div class="card">
+            <h2>Why Local-First Is Half the Safety Story</h2>
+            <p>Every model recommended in this repo runs on your hardware. That means:</p>
+            <ul>
+              <li><strong>No agent loop bills an API meter.</strong> A retry storm costs electricity, not $1,000.</li>
+              <li><strong>No data leaves your machine.</strong> Customer records, operations data, draft reports — none of it is sent anywhere by default.</li>
+              <li><strong>No third party can change the model under you.</strong> The GGUF on your disk doesn't move unless you move it.</li>
+            </ul>
+            <p style="margin-top: 12px;">If you only follow one principle from this chapter: <strong>start local, stay local until you have a concrete reason to leave.</strong></p>
+          </div>
+
+          <div class="card">
+            <h2>Before You Turn It Loose — Checklist</h2>
+            <p style="margin-bottom: 12px;">Print this. Tape it next to your monitor.</p>
+            <ul style="list-style: none; padding-left: 0;">
+              <li>☐ Agent is in a sandbox. Its <code>/root/</code> is <strong>not</strong> my <code>/home/</code>.</li>
+              <li>☐ Agent has access only to the directory it needs for this task.</li>
+              <li>☐ No real credentials are inside that directory.</li>
+              <li>☐ If using cloud APIs: a hard spend cap is set on the provider side. Today.</li>
+              <li>☐ No production SCADA / BAS / RTU / historian / GIS / CIS / billing / PII is reachable.</li>
+              <li>☐ Destructive operations require my explicit approval, every time.</li>
+              <li>☐ I know the exact command to stop the agent.</li>
+              <li>☐ Transcripts are being saved.</li>
+              <li>☐ Worst-case mistake on this task is recoverable in under an hour.</li>
+            </ul>
+            <p style="margin-top: 12px;">If you can't check every box, <strong>narrow the scope until you can.</strong></p>
+          </div>
+
+          <div class="card" style="text-align: center;">
+            <p>The full chapter — failure-mode catalog, scenario walkthrough, incident playbook, and further reading — lives in the guide.</p>
+            <p style="margin-top: 12px;"><a href="guide/11-agent-safety.md" class="btn-primary"><i class="fa-solid fa-graduation-cap"></i> Read Chapter 11 — Agent Safety</a></p>
           </div>
         </section>
 
