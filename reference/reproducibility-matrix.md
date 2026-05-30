@@ -79,17 +79,17 @@ Benchmarks are measured in tokens/second (generation/decode speed) and quality s
 
 | Model Configuration | Inference Backend | Quality Score | Decode Speed | Prefill Speed | GTT Memory Allocation | Nonce Gate Result |
 |---|---|---|---|---|---|---|
-| **gpt-oss-120B MXFP4** — QUALITY baseline | **Vulkan RADV** | **Pairwise 5-1 vs Qwen 35B; 4-2 vs Qwen 122B** | **~46 tok/s** | — | ~63 GB | **3 / 3 Pass** |
-| **Gemma 4 31B IT Q6_K** — CODE Gemma peer | **Vulkan RADV** | **Pairwise 4-2 vs Gemma 26B-A4B** | **43-48 tok/s** | — | 25.2 GB | **3 / 3 Pass** |
+| **gpt-oss-120B MXFP4** — QUALITY baseline | **Vulkan RADV** | **Pairwise 5-1 vs Qwen 35B; 4-2 vs Qwen 122B** | **~46 tok/s** | not captured in stable run | ~63 GB | **3 / 3 Pass** |
+| **Gemma 4 31B IT Q6_K** — CODE Gemma peer | **Vulkan RADV** | **Pairwise 4-2 vs Gemma 26B-A4B** | **43-48 tok/s** | not captured in stable run | 25.2 GB | **3 / 3 Pass** |
 | **Qwen 3.6 35B MoE (Think-On)** — **default** | **Vulkan RADV** | **82 / 84** | **50.1 tok/s** | **932.1 tok/s** | 21.7 GB | **3 / 3 Pass** |
 | **Qwen 3.6 35B MoE (Think-On)** — fallback | ROCm 7.2.x | **82 / 84** | **44.2 tok/s** | ~628.1 tok/s | 21.7 GB | **3 / 3 Pass** |
 | **Qwen 3.6 35B MoE (Think-Off)** | ROCm 7.2.x | **82 / 84** | **43.7 tok/s** | ~628.1 tok/s | 21.7 GB | **3 / 3 Pass** |
 | **Qwen 3.5 122B MoE (Think-On)** — QUALITY spot-specialist | ROCm 7.2.x | **80 / 84** | **19.4 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
 | **Qwen 3.5 122B MoE (Think-Off)** | ROCm 7.2.x | **81 / 84** | **19.5 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
-| **Gemma 4 26B-A4B IT UD-Q6_K_XL** *(queued, not Stable Stack)* | Vulkan RADV | **Pairwise 2-4 vs Gemma 31B** | **40.11 tok/s mean** | — | 21.2 GB | **3 / 3 Pass** |
-| **Qwen 3.6 27B Dense (Think-On)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | **0-6 vs Qwen 122B** | **9.6-11.5 tok/s** tested normal decode | — | 16.4 GB | **3 / 3 Pass** (coding 3/3) |
-| **Qwen 3.6 27B Dense (Think-Off)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | — | **9.6-11.5 tok/s** tested normal decode | — | 16.4 GB | **3 / 3 Pass** (coding 1/3) |
-| **Qwen 3.6 27B Dense + DFlash spec.** *(experimental)* | Lucebox HIP (Q4_K_M draft) | — | **~31.3 tok/s (2.82×)** | — | ~16 GB | discipline-limited |
+| **Gemma 4 26B-A4B IT UD-Q6_K_XL** *(queued, not Stable Stack)* | Vulkan RADV | **Pairwise 2-4 vs Gemma 31B** | **40.11 tok/s mean** | not captured in stable run | 21.2 GB | **3 / 3 Pass** |
+| **Qwen 3.6 27B Dense (Think-On)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | **0-6 vs Qwen 122B** | **9.6-11.5 tok/s** tested normal decode | not captured in stable run | 16.4 GB | **3 / 3 Pass** (coding 3/3) |
+| **Qwen 3.6 27B Dense (Think-Off)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | — | **9.6-11.5 tok/s** tested normal decode | not captured in stable run | 16.4 GB | **3 / 3 Pass** (coding 1/3) |
+| **Qwen 3.6 27B Dense + DFlash spec.** *(experimental)* | Lucebox HIP (Q4_K_M draft) | — | **~31.3 tok/s (2.82×)** | see acceptance table below | ~16 GB | discipline-limited |
 | **Qwen 3.5 35B MoE (Think-On)** | ROCm 7.2.x | **79 / 84** | **47.3 tok/s** | ~562.9 tok/s | 21.0 GB | **3 / 3 Pass** |
 | **Qwen3-Coder-Next (Think-On)** | ROCm 7.2.x | — | **34.6 tok/s** | ~127.0 tok/s | 49.6 GB | **3 / 3 Pass** |
 
@@ -98,6 +98,33 @@ Benchmarks are measured in tokens/second (generation/decode speed) and quality s
 > **Status: the dense Qwen 3.6 27B is benchmarked but NOT in the production stack.** Community consensus often treats it as a strong reasoner, but local Strix Halo testing did not support that routing choice: blind pairwise was 0-6 vs the 122B on the standard 6-prompt set, and normal decode tested around 9.6-11.5 tok/s across backends. It is retained as a break-glass *"arrow in the quiver"* for tough, blocked projects — not a first- or second-line model. The speculative-decoding result below is kept as a technical finding.
 >
 > **DFlash speculative decoding on the dense 27B** lifts the dense route to **~31.3 tok/s (2.82×)** using a footprint-minimized Q4_K_M draft (HumanEval 2.57×, mean acceptance length 6.67, DDTree budget 22 — the gfx1151 sweet spot). Counter-intuitively the *smaller* Q4_K_M draft (1.03 GB) beats a larger Q8_0 draft (1.84 GB, only 1.49×): on this bandwidth-bound APU the draft's own weight reads compete for the same memory bus the target needs to verify, so minimizing draft footprint wins. This is the inverse of the MoE speculative-decoding result (post-mortem #3) — speculation succeeds on **dense** models because there is no expert router to thrash. *Speed is verified; pairing this speed with full tool-call discipline on the same Q4_K_M build is still in validation (the verified 27B tool-call/coding passes above are on the UD-Q4_K_XL build).*
+
+### D. Prefill and Speculative-Acceptance Coverage
+
+The table above keeps missing instrumentation explicit. Decode rates are the main stable-run metric for the newly added Gemma and gpt-oss rows; prefill was not captured in those stable gate records. A separate research note mentions a gpt-oss prompt-processing figure, but because it is not tied to the stable graduation protocol used above, it is not promoted into this matrix.
+
+| Metric | Model / configuration | Captured value | Notes |
+|---|---|---:|---|
+| Prefill speed | Qwen 3.6 35B-A3B MXFP4, Vulkan/RADV | 932.1 tok/s | `pp8192` benchmark |
+| Prefill speed | Qwen 3.6 35B-A3B MXFP4, ROCm | ~628.1 tok/s | `pp8192` benchmark |
+| Prefill speed | Qwen 3.5 122B-A10B MXFP4, ROCm | ~136.0 tok/s | quality route benchmark |
+| Prefill speed | Qwen 3.5 35B-A3B MXFP4, ROCm | ~562.9 tok/s | planning route benchmark |
+| Prefill speed | Qwen3-Coder-Next UD-Q4_K_XL, ROCm | ~127.0 tok/s | coding challenger benchmark |
+| Prefill speed | gpt-oss-120B MXFP4, Gemma 4 31B, Gemma 4 26B-A4B | not captured | rerun under the same protocol before publishing a value |
+| Speculative acceptance length | Qwen 3.6 27B Dense + Q4_K_M DFlash draft | AL = 6.67 | HumanEval mean at DDTree budget 22 |
+| Speculative acceptance percentage | Qwen 3.6 27B Dense + Q4_K_M DFlash draft | not captured | do not derive a percent from AL; rerun if acceptance-rate counters are needed |
+| Speculative acceptance length | Qwen 3.6 27B Dense + Q8_0 DFlash draft | not captured | speedup was captured, but AL / acceptance percent were not |
+
+DDTree budget sweep for the dense 27B Q4_K_M draft:
+
+| Budget | Mean acceptance length | Decode speed |
+|---:|---:|---:|
+| 8 | 4.56 | 26.26 tok/s |
+| 16 | 5.59 | 24.22 tok/s |
+| 22 | 6.67 | 27.99 tok/s |
+| 32 | 6.69 | 23.68 tok/s |
+| 45 | 6.72 | 22.64 tok/s |
+| 64 | 7.06 | 17.62 tok/s |
 
 ---
 
