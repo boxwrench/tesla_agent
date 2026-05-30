@@ -724,7 +724,7 @@ body {
   font-size: 12px;
   font-family: monospace;
   overflow-x: auto;
-  color: #c4b5fd;
+  color: #000000;
 }
 
 .failure-box {
@@ -1435,5 +1435,4 @@ body {
   font-family: var(--font-display);
   font-size: 15px;
 }
-
 
