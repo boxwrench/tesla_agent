@@ -356,6 +356,17 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
+.blog-note {
+  margin-top: 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.blog-note a {
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
 /* Grid Layouts */
 .grid-2col {
   display: grid;
@@ -1435,4 +1446,3 @@ body {
   font-family: var(--font-display);
   font-size: 15px;
 }
-
