@@ -147,14 +147,14 @@ function initModelFinder() {
     },
     'code-peer': {
       name: "Gemma 4 31B IT (Q6_K)",
-      mode: "CODE — Gemma peer (orchestrated)",
+      mode: "EXPERIMENT — Gemma dense (orchestrated; ~8 tok/s decode)",
       file: "gemma-4-31B-it-Q6_K.gguf",
       size: "25.2 GB",
-      speed: "43-48 tokens/sec (Vulkan/RADV)",
+      speed: "~8.25 tok/s tg128; ~7.7 tok/s sustained (Vulkan/RADV) — pp8192 prefill ~133.6 tok/s",
       reasoning: "On for coding; use orchestrated multi-step pattern",
-      command: "bash scripts/serving/serve_vulkan.sh --model gemma-4-31B-it-Q6_K.gguf",
+      command: "bash scripts/serving/serve_vulkan.sh --model gemma-4-31B-it-Q6_K.gguf --cache-type-k f16 --cache-type-v f16",
       hermes: "max_tokens: 8192",
-      rationale: "Cross-family second opinion when a single long coding episode degrades, or for tasks where Qwen's style has plateaued. Cleared nonce 3/3 (think-off and think-on) and orchestrated coding 3/3 E2E; the orchestrated/staged path is what graduated, not single-episode. Won 4-2 quality pairwise vs Gemma 4 26B-A4B (System Development Charge, AWWA M36, P&ID-level engineering specificity)."
+      rationale: "Cross-family second opinion when a single long coding episode degrades, or for tasks where Qwen's style has plateaued. Cleared nonce 3/3 (think-off and think-on) and orchestrated coding 3/3 E2E; the orchestrated/staged path is what graduated, not single-episode. Won 4-2 quality pairwise vs Gemma 4 26B-A4B. SPEED NOTE: Gemma 31B is a dense model — every token reads all 31B parameters. Decode is ~8 tok/s, far slower than Qwen 35B MoE (~50 tok/s) or gpt-oss-120B (~46 tok/s). Prefill is fast (~133.6 tok/s pp8192). Use on the orchestrated path for quality verification, not as a speed-first workhorse."
     },
     'extract': {
       name: "Qwen 3.6 35B Mixture-of-Experts (MXFP4 Quant)",
@@ -162,10 +162,10 @@ function initModelFinder() {
       file: "Qwen3.6-35B-A3B-MXFP4_MOE.gguf",
       size: "21.7 GB",
       speed: "~43.7 tokens/sec (faster wall-time by avoiding reasoning decode)",
-      reasoning: "Disabled via template parameters (enable_thinking: false)",
-      command: "bash scripts/serving/serve_rocm.sh --jinja --chat-template-kwargs '{\"enable_thinking\":false}'",
-      hermes: "thinking_budget_tokens: 0\nmax_tokens: 4096",
-      rationale: "Simple telemetry extraction and log parsing do not require reasoning. Disabling thinking through template kwargs saves 50%+ wall-clock time and guarantees tool-use calls fire directly. Note: --reasoning-budget 0 is broken upstream and must not be used; rely on the template kwarg."
+      reasoning: "Disabled via server reasoning flag (--reasoning off)",
+      command: "bash scripts/serving/serve_rocm.sh --reasoning off",
+      hermes: "max_tokens: 4096",
+      rationale: "Simple telemetry extraction and log parsing do not require reasoning. Disabling thinking using --reasoning off on current builds saves 50%+ wall-clock time and guarantees tool-use calls fire directly. Note: --reasoning-budget 0 is broken upstream and must not be used (causes empty responses). The older template-kwarg method ('enable_thinking: false') is deprecated and prints warnings."
     },
     'synthesis-baseline': {
       name: "gpt-oss-120B (MXFP4, 3 shards)",
@@ -194,11 +194,11 @@ function initModelFinder() {
       mode: "COMPANION — small-footprint MoE",
       file: "gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf",
       size: "21.2 GB",
-      speed: "40.11 tokens/sec mean (Vulkan/RADV)",
+      speed: "~40.11 tokens/sec mean (Vulkan/RADV) [Not verified in public repo]",
       reasoning: "Off in tested gate (think-on variant also cleared nonce 3/3)",
-      command: "bash scripts/serving/serve_vulkan.sh --model gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf",
+      command: "bash scripts/serving/serve_vulkan.sh --model gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf --cache-type-k f16 --cache-type-v f16",
       hermes: "max_tokens: 8192",
-      rationale: "Cleared the coding gate (nonce 3/3, orchestrated pass^3) but did NOT graduate to the Stable Stack because Gemma 4 31B is both faster and higher quality (4-2 pairwise loss). Use case: when GPU memory pressure matters and you want concurrent loads — 26B-A4B + gpt-oss-120B fits where 31B + 120B does not. Also a step-1 file-analysis fallback for prompts where 31B's empty-exceedances bug recurs (orchestrated coding step 1 PASSed across all four runs)."
+      rationale: "Cleared the coding gate (nonce 3/3, orchestrated pass^3) but did NOT graduate to the Stable Stack based on quality pairwise (2-4 loss to Gemma 31B). Use case: when GPU memory pressure matters and you want concurrent loads — 26B-A4B + gpt-oss-120B fits where 31B + 120B does not. Also a step-1 file-analysis fallback for prompts where 31B's empty-exceedances bug recurs (orchestrated coding step 1 PASSed across all four runs). Speed note: 40.11 tok/s was reported in source benchmarks but has not been independently verified in the public repo."
     },
     'arrow': {
       name: "Qwen 3.6 27B Dense (UD-Q4_K_XL)",
@@ -253,16 +253,15 @@ function initBenchmarkChart() {
     labels: [
       'Qwen 35B',
       'gpt-oss 120B',
-      'Gemma 31B',
-      'Gemma 26B-A4B',
       'Qwen3-Coder',
       'Qwen 122B',
-      'Qwen 27B Dense'
+      'Qwen 27B Dense',
+      'Gemma 31B (dense)'
     ],
     datasets: [{
       label: 'Decode tok/s',
-      data: [50.1, 46, 43, 40.11, 34.6, 19.4, 9.6],
-      backgroundColor: ['#2b6cb0', '#14532d', '#3182ce', '#718096', '#718096', '#7c2d12', '#7f1d1d'],
+      data: [50.1, 46, 34.6, 19.4, 9.6, 8.25],
+      backgroundColor: ['#2b6cb0', '#14532d', '#718096', '#7c2d12', '#7f1d1d', '#553c7b'],
       borderRadius: 6
     }]
   };
@@ -303,7 +302,7 @@ function initBenchmarkChart() {
         tooltip: {
           callbacks: {
             label: function(context) {
-              const speedLabels = ['50.1', '~46', '43-48', '40.11 mean', '34.6', '19.4', '9.6-11.5'];
+              const speedLabels = ['50.1', '~46', '34.6', '19.4', '9.6-11.5', '~8.25 tg128 (dense)'];
               return `${context.label}: ${speedLabels[context.dataIndex]} tok/s`;
             }
           }

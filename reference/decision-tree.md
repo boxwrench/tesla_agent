@@ -9,7 +9,7 @@ graph TD
     Start -->|Coding & Multi-Step Logic| Code["Qwen 3.6 35B MoE (Vulkan RADV)<br/>• CODE/general baseline<br/>• think-on, uncapped"]
     style Code fill:#ebf8ff,stroke:#2b6cb0,stroke-width:2px,color:#1a1f36
 
-    Start -->|Cross-family coding check| GemmaCode["Gemma 4 31B IT Q6_K<br/>• CODE Gemma peer<br/>• use orchestrated path"]
+    Start -->|Cross-family second-opinion check| GemmaCode["Gemma 4 31B IT Q6_K<br/>• second-opinion lane (dense — slow decode)<br/>• use orchestrated path"]
     
     Start -->|Formal Report Synthesis| Synth["gpt-oss-120B MXFP4<br/>• QUALITY baseline<br/>• use draft-with-assumptions system prompt"]
 
@@ -23,7 +23,7 @@ graph TD
 ---
 
 ### Key Takeaway for Strix Halo (APU)
-* **Measured local gates now set the ladder.** Qwen remains a strong reasoning family and stays available, but the 2026-05-30 Strix Halo results promote gpt-oss-120B as the general QUALITY baseline and Gemma 4 31B as a cross-family CODE peer.
+* **Measured local gates now set the ladder.** Qwen remains a strong reasoning family and stays available, but the 2026-05-30 Strix Halo results promote gpt-oss-120B as the general QUALITY baseline and Gemma 4 31B as the second-opinion lane for quality verification (dense model — ~8 tok/s decode; use on orchestrated path, not as a throughput pick).
 * **Qwen 122B is no longer the default quality target.** It stays useful as a spot-specialist for regulatory-currency tasks and incisive plan review.
-* **Gemma 26B-A4B is queued, not graduated.** It cleared the coding gate and has a narrow file-analysis niche, but Gemma 31B was faster and won the quality pairwise 4-2.
+* **Gemma 26B-A4B is queued, not graduated.** It cleared the coding gate and has a narrow file-analysis niche, but Gemma 31B won the quality pairwise 4-2.
 * **Reasoning budgets are a *planning* lever, not a coding one.** Capping `thinking_budget_tokens` cuts wall-clock on prose/planning, but a budget sweep showed *any* cap drops the stateful coding gate to 1–2/3 (only uncapped think-on holds 3/3). Leave the coding route uncapped.

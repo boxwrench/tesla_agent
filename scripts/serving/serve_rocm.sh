@@ -59,7 +59,12 @@ echo "  Context:     ${CTX_SIZE}"
 echo "  Server Bin:  ${LLAMA_SERVER}"
 echo "======================================================================"
 
-# Run server with recommended parameters for MoE tool-calling stability
+# KV cache quantization — default q8_0 is safe for Qwen MoE and gpt-oss-120B.
+# GEMMA 4 EXCEPTION: Do NOT use q8_0 or q4_0 cache quantization on Gemma.
+# Local benchmarks show q8_0 KV on Gemma 4 causes significant KL-divergence (0.108 for 31B,
+# and 0.377 for 26B-A4B) which degrades tool use. Because the Strix Halo has a massive 96 GB 
+# memory pool, F16 KV is preferred to preserve reasoning quality. Override via $@:
+# add --cache-type-k f16 --cache-type-v f16 to your launch command.
 exec "${LLAMA_SERVER}" \
   --host 127.0.0.1 \
   --port "${PORT}" \

@@ -20,18 +20,18 @@ The following table summarizes the speed and quality benchmarks run on the host 
 | Model & Quantization | Size | Context Size | Quality Evidence | Generation Speed | Nonce Gate | Status / Verdict |
 |---|---|---|---|---|---|---|
 | **gpt-oss-120B MXFP4 (3 shards)** | ~63 GB | 32,768 | **5-1 vs Qwen 35B; 4-2 vs Qwen 122B** | **~46 tok/s** (RADV) | **3 / 3 Pass** | **QUALITY baseline (general)**; requires the draft-with-assumptions system prompt to avoid checklist deflection |
-| **Gemma 4 31B IT Q6_K** | 25.2 GB | 32,768 | **4-2 vs Gemma 26B-A4B** | **43-48 tok/s** (RADV) | **3 / 3 Pass** | **CODE Gemma peer**; orchestrated coding path required |
+| **Gemma 4 31B IT Q6_K** | 25.2 GB | 32,768 | **4-2 vs Gemma 26B-A4B** | **~8.25 tok/s tg128; ~7.7 tok/s sustained** (Vulkan; pp8192 ~133.6 tok/s) | **3 / 3 Pass** | **Second-opinion lane (dense — slow decode)**; orchestrated coding path required |
 | **Qwen 3.6 35B MoE (Vulkan RADV)** | 21.7 GB | 32,768 | **82 / 84** | **50.1 tok/s** (RADV) | **3 / 3 Pass** | **CODE/general baseline** (+51% prefill, +13.5% decode vs ROCm) |
 | **Qwen 3.6 35B MoE (ROCm)** | 21.7 GB | 32,768 | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | ROCm fallback backend |
 | **Qwen 3.5 122B MoE (MXFP4)** | 70.0 GB | 12,288 | **80 / 84** | **19.4 tok/s** (ROCm) | **3 / 3 Pass** | **QUALITY spot-specialist** for regulatory currency and sharp plan reviews |
 | **Qwen 3.5 122B MoE (MXFP4)** *think-off* | 70.0 GB | 12,288 | **81 / 84** | **19.5 tok/s** | **3 / 3 Pass** | Holds 3/3 coding even think-off |
-| **Gemma 4 26B-A4B IT UD-Q6_K_XL** | 21.2 GB | 32,768 | **2-4 vs Gemma 31B** | **40.11 tok/s** mean | **3 / 3 Pass** | *Queued candidate only.* Coding gate cleared; not Stable Stack |
+| **Gemma 4 26B-A4B IT UD-Q6_K_XL** | 21.2 GB | 32,768 | **2-4 vs Gemma 31B** | **40.11 tok/s** mean *(not independently verified in public repo)* | **3 / 3 Pass** | *Queued candidate only.* Coding gate cleared; not Stable Stack |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** *think-on* | 16.4 GB | 32,768 | 0-6 vs 122B | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in stack;* break-glass option. DFlash → ~31 tok/s (2.82×) |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** *think-off* | 16.4 GB | 32,768 | — | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in stack* |
 | **Qwen 3.5 35B MoE (MXFP4)** | 21.0 GB | 8,192 | **79 / 84** | **47.3 tok/s** (ROCm) | **3 / 3 Pass** | Retained for regression tests |
 | **Qwen3-Coder-Next (UD-Q4_K_XL)** | 49.6 GB | 16,384 | — | 34.6 tok/s (ROCm) | 3 / 3 Pass | CODE challenger (128GB-class) |
 
-**Recommendation note:** Qwen remains a strong and widely favored reasoning family, but this guide's default ladder follows the local Strix Halo agent gates. As of the 2026-05-30 update, gpt-oss-120B is the measured general QUALITY baseline, Gemma 4 31B is the cross-family CODE peer, Qwen 3.6 35B remains the CODE/general baseline, and Qwen 122B moves to a spot-specialist role.
+**Recommendation note:** Qwen remains a strong and widely favored reasoning family, but this guide's default ladder follows the local Strix Halo agent gates. As of the 2026-05-30 update, gpt-oss-120B is the measured general QUALITY baseline, Gemma 4 31B is the second-opinion lane (dense model — slow decode, ~8 tok/s; use on orchestrated path for quality verification), Qwen 3.6 35B remains the CODE/general baseline, and Qwen 122B moves to a spot-specialist role.
 
 ---
 
@@ -43,7 +43,7 @@ To reproduce these results, use the exact pinned versions below:
 The public setup guide starts with the 35B-class CODE baseline because it is the easiest reproducible lane for most 128 GB Strix Halo users. The full verified model set is listed in the reproducibility matrix.
 
 * **Primary CODE baseline:** Qwen 3.6 35B-A3B MXFP4, SHA256 `2fdd20997c4d88ee25f70f500c61f8b999378d92ab055f9d450fc70d617158d3`
-* **CODE Gemma peer:** Gemma 4 31B IT Q6_K, SHA256 `abd0be03a2bc3f3c9d8e018cbb4ff5b553c340c65d49b6b346c48be5a1efde28`
+* **Second-opinion lane (dense):** Gemma 4 31B IT Q6_K, SHA256 `abd0be03a2bc3f3c9d8e018cbb4ff5b553c340c65d49b6b346c48be5a1efde28`
 * **QUALITY baseline:** gpt-oss-120B MXFP4, three shards with per-shard SHA256 pins in [reproducibility-matrix.md](reproducibility-matrix.md)
 * **Queued candidate:** Gemma 4 26B-A4B IT UD-Q6_K_XL, SHA256 `5cfb7ab424c01388538005f26573f3bd374d3140cc021a1c44249e69928882a4`
 
@@ -97,6 +97,6 @@ Run models with the parameters below to prevent memory leaks and context degrada
 * `--gpu-layers all`: Offloads all calculations to graphics memory.
 * `--no-mmap`: Prevents lazy loading disk crashes on large files.
 * `--flash-attn on`: Accelerates self-attention operations.
-* `--cache-type-k q8_0` & `--cache-type-v q8_0`: Quantizes the key/value cache to save graphics memory.
+* `--cache-type-k q8_0` & `--cache-type-v q8_0`: Quantizes the key/value cache to save graphics memory. *Gemma 4 Exception:* Do not use `q8_0`, `q4_0` or `turbo3` for Gemma 4. On ROCm, quantizing Gemma's KV cache introduces severe KL-divergence (up to 0.377) which degrades reasoning; on Vulkan, quantizing introduces kernel block-alignment corruption issues. Use unquantized F16 KV (`--cache-type-k f16 --cache-type-v f16`) instead.
 * `--batch-size 2048` & `--ubatch-size 2048`: Recommended chunk limits.
 * `--parallel 1`: Limits parallel execution slots (required for stable tool calling).

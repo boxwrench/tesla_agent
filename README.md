@@ -65,16 +65,19 @@ All benchmarks were run on local consumer hardware with the following configurat
 ## 📊 Model Performance Matrix
 Below are the actual measured results across the different configurations. *Community consensus still rates Qwen models highly for reasoning, and Qwen remains available in this stack. The recommendations below follow the local Strix Halo agent-workflow gates and pairwise results measured for this repository.*
 
+> [!WARNING]
+> **Correction (2026-05-31):** An earlier version of this table listed Gemma 4 31B IT Q6_K at "43-48 tok/s" — that number was misattributed and belonged to gpt-oss-120B Vulkan quality runs. The corrected Gemma 31B figure is below. Gemma 31B is a **dense** model; it reads the full weight set each token, making it memory-bound slow on this APU. MoE models (Qwen 35B, 122B, gpt-oss) route fewer active parameters per token and are correspondingly faster.
+
 | Model & Quantization | RAM Footprint | Context Window | Think Toggle | Planning Quality (Scorecard) | Generation Speed (Decode) | Nonce Gate (Tool Use) | Verdict / Fit |
 |---|---|---|---|---|---|---|---|
 | **gpt-oss-120B (MXFP4, 3 shards)** | **~63 GB** | 32,768 | High reasoning | **Pairwise: 5-1 vs Qwen 35B; 4-2 vs Qwen 122B** | **~46 tok/s** (Vulkan) | **3 / 3 Pass** | **QUALITY baseline (general)** |
-| **Gemma 4 31B IT (Q6_K)** | **25.2 GB** | 32,768 | On for coding | Pairwise: **4-2 vs Gemma 26B-A4B** | **43-48 tok/s** (Vulkan) | **3 / 3 Pass** | **CODE Gemma peer; use orchestrated path** |
+| **Gemma 4 31B IT (Q6_K)** | **25.2 GB** | 32,768 | On for coding | Pairwise: **4-2 vs Gemma 26B-A4B** | **~8.25 tok/s tg128; ~7.7 tok/s sustained** (Vulkan; pp8192 ~133.6 tok/s) | **3 / 3 Pass** | **Second-opinion lane (dense — slow decode); use orchestrated path** |
 | **Qwen 3.6 35B MoE (Vulkan RADV)** | **21.7 GB** | 32,768 | **On** | **82 / 84** | **50.1 tok/s** (Vulkan) | **3 / 3 Pass** | **CODE/general baseline** |
 | **Qwen 3.6 35B MoE (ROCm)** | **21.7 GB** | 32,768 | **On** | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | ROCm fallback backend |
 | **Qwen 3.6 35B MoE (ROCm)** | **21.7 GB** | 32,768 | **Off** | **82 / 84** | **43.7 tok/s** | **3 / 3 Pass** | Cuts wall-time in half for prose (falls to 1/3 coding E2E) |
 | **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **On** | **80 / 84** | **19.4 tok/s** (ROCm) | **3 / 3 Pass** | **QUALITY spot-specialist: regulatory currency and sharp plan review** |
 | **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **Off** | **81 / 84** | **19.5 tok/s** | **3 / 3 Pass** | Holds 3/3 coding even think-off |
-| **Gemma 4 26B-A4B IT (UD-Q6_K_XL)** | **21.2 GB** | 32,768 | Off in tested gate | Pairwise: 2-4 vs Gemma 31B | **40.11 tok/s** mean | **3 / 3 Pass** | **Queued candidate only; coding gate cleared, not Stable Stack** |
+| **Gemma 4 26B-A4B IT (UD-Q6_K_XL)** | **21.2 GB** | 32,768 | Off in tested gate | Pairwise: 2-4 vs Gemma 31B | **40.11 tok/s** mean *(not independently verified in public repo; do not treat as confirmed)* | **3 / 3 Pass** | **Queued candidate only; coding gate cleared, not Stable Stack** |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **On** | 0-6 vs Qwen 122B | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in the stack (see note)* |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **Off** | — | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in the stack* |
 | **Qwen3-Coder-Next (UD-Q4_K_XL)** | **49.6 GB** | 16,384 | **On** | — | **34.6 tok/s** (ROCm) | **3 / 3 Pass** | 128GB Coder Challenger |
@@ -83,6 +86,9 @@ Below are the actual measured results across the different configurations. *Comm
 > **The dense Qwen 3.6 27B is benchmarked but NOT in the production stack** — community discussion often treats it as a strong reasoner, but the local Strix Halo gates did not corroborate that for this workflow. A blind quality pairwise put it 0-6 against the 122B on the standard prompt set, and tested backends remained around 9.6-11.5 tok/s for normal decode. It remains a break-glass *"arrow in the quiver"* for tough, blocked projects where trying a different dense trace might help, **not a first- or second-line choice.**
 >
 > *Technical aside (why it's interesting even though unshipped):* DFlash speculative decoding lifts the dense route to **~31 tok/s (2.82×)** with a footprint-minimized Q4_K_M draft — the inverse of the MoE result below, because a dense model has no expert router to thrash during draft verification.
+
+> [!NOTE]
+> **Why is Gemma 4 31B so much slower than Qwen 35B MoE?** Both are ~25 GB models, but they have very different internal architectures. Qwen 3.6 35B is a Mixture-of-Experts model that activates only ~3B parameters per token — so each decode step reads far less weight data from memory. Gemma 4 31B is a **dense** model: every one of its 31B parameters must be read for every token generated. On a memory-bandwidth-bound APU like Strix Halo, this difference dominates, producing ~8 tok/s for the dense Gemma vs ~50 tok/s for the MoE Qwen on the same hardware.
 
 > [!TIP]
 > For full reproducibility data, model checksums, evaluation methodologies, and detailed post-mortems of failed attempts (such as vLLM compilation timeouts and MoE speculative decoding latency overhead), see the [Reproducibility Matrix & Deep-Dive](reference/reproducibility-matrix.md).

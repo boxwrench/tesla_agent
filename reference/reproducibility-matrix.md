@@ -80,20 +80,20 @@ Benchmarks are measured in tokens/second (generation/decode speed) and quality s
 | Model Configuration | Inference Backend | Quality Score | Decode Speed | Prefill Speed | GTT Memory Allocation | Nonce Gate Result |
 |---|---|---|---|---|---|---|
 | **gpt-oss-120B MXFP4** — QUALITY baseline | **Vulkan RADV** | **Pairwise 5-1 vs Qwen 35B; 4-2 vs Qwen 122B** | **~46 tok/s** | not captured in stable run | ~63 GB | **3 / 3 Pass** |
-| **Gemma 4 31B IT Q6_K** — CODE Gemma peer | **Vulkan RADV** | **Pairwise 4-2 vs Gemma 26B-A4B** | **43-48 tok/s** | not captured in stable run | 25.2 GB | **3 / 3 Pass** |
+| **Gemma 4 31B IT Q6_K** — second-opinion lane (dense — slow decode) | **Vulkan RADV** | **Pairwise 4-2 vs Gemma 26B-A4B** | **~8.25 tok/s tg128; ~7.7 tok/s sustained long completions** | pp8192 ~133.6 tok/s (verified) | 25.2 GB | **3 / 3 Pass** |
 | **Qwen 3.6 35B MoE (Think-On)** — **default** | **Vulkan RADV** | **82 / 84** | **50.1 tok/s** | **932.1 tok/s** | 21.7 GB | **3 / 3 Pass** |
 | **Qwen 3.6 35B MoE (Think-On)** — fallback | ROCm 7.2.x | **82 / 84** | **44.2 tok/s** | ~628.1 tok/s | 21.7 GB | **3 / 3 Pass** |
 | **Qwen 3.6 35B MoE (Think-Off)** | ROCm 7.2.x | **82 / 84** | **43.7 tok/s** | ~628.1 tok/s | 21.7 GB | **3 / 3 Pass** |
 | **Qwen 3.5 122B MoE (Think-On)** — QUALITY spot-specialist | ROCm 7.2.x | **80 / 84** | **19.4 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
 | **Qwen 3.5 122B MoE (Think-Off)** | ROCm 7.2.x | **81 / 84** | **19.5 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
-| **Gemma 4 26B-A4B IT UD-Q6_K_XL** *(queued, not Stable Stack)* | Vulkan RADV | **Pairwise 2-4 vs Gemma 31B** | **40.11 tok/s mean** | not captured in stable run | 21.2 GB | **3 / 3 Pass** |
+| **Gemma 4 26B-A4B IT UD-Q6_K_XL** *(queued, not Stable Stack)* | Vulkan RADV | **Pairwise 2-4 vs Gemma 31B** | **40.11 tok/s mean** *(not independently verified in public repo — sourced from private benchmarks; treat as directional)* | not captured in stable run | 21.2 GB | **3 / 3 Pass** |
 | **Qwen 3.6 27B Dense (Think-On)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | **0-6 vs Qwen 122B** | **9.6-11.5 tok/s** tested normal decode | not captured in stable run | 16.4 GB | **3 / 3 Pass** (coding 3/3) |
 | **Qwen 3.6 27B Dense (Think-Off)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | — | **9.6-11.5 tok/s** tested normal decode | not captured in stable run | 16.4 GB | **3 / 3 Pass** (coding 1/3) |
 | **Qwen 3.6 27B Dense + DFlash spec.** *(experimental)* | Lucebox HIP (Q4_K_M draft) | — | **~31.3 tok/s (2.82×)** | see acceptance table below | ~16 GB | discipline-limited |
 | **Qwen 3.5 35B MoE (Think-On)** | ROCm 7.2.x | **79 / 84** | **47.3 tok/s** | ~562.9 tok/s | 21.0 GB | **3 / 3 Pass** |
 | **Qwen3-Coder-Next (Think-On)** | ROCm 7.2.x | — | **34.6 tok/s** | ~127.0 tok/s | 49.6 GB | **3 / 3 Pass** |
 
-> **Stable Stack update (2026-05-30):** gpt-oss-120B is now the general QUALITY baseline after blinded pairwise wins of 5-1 vs Qwen 35B and 4-2 vs Qwen 122B. Qwen 122B is retained as a QUALITY spot-specialist for regulatory-currency work and sharp plan reviews. Gemma 4 31B is the cross-family CODE peer; Gemma 26B-A4B cleared the coding gate but did not graduate because Gemma 31B was both faster and higher quality in pairwise.
+> **Stable Stack update (2026-05-30):** gpt-oss-120B is now the general QUALITY baseline after blinded pairwise wins of 5-1 vs Qwen 35B and 4-2 vs Qwen 122B. Qwen 122B is retained as a QUALITY spot-specialist for regulatory-currency work and sharp plan reviews. Gemma 4 31B is the cross-family second-opinion lane (coding experiment — quality verification, not throughput); Gemma 26B-A4B cleared the coding gate but did not graduate based on the quality pairwise result (2-4 loss to Gemma 31B). **Speed correction:** a previous draft listed Gemma 31B at 43-48 tok/s, which was a misattribution of the gpt-oss-120B Vulkan speed. Verified Gemma 31B decode is ~8.25 tok/s tg128 / ~7.7 tok/s sustained (dense model; full weights read every token). For tasks where decode speed matters, prefer Qwen 3.6 35B MoE (~50 tok/s Vulkan) or gpt-oss-120B (~46 tok/s Vulkan).
 >
 > **Status: the dense Qwen 3.6 27B is benchmarked but NOT in the production stack.** Community consensus often treats it as a strong reasoner, but local Strix Halo testing did not support that routing choice: blind pairwise was 0-6 vs the 122B on the standard 6-prompt set, and normal decode tested around 9.6-11.5 tok/s across backends. It is retained as a break-glass *"arrow in the quiver"* for tough, blocked projects — not a first- or second-line model. The speculative-decoding result below is kept as a technical finding.
 >
@@ -110,7 +110,8 @@ The table above keeps missing instrumentation explicit. Decode rates are the mai
 | Prefill speed | Qwen 3.5 122B-A10B MXFP4, ROCm | ~136.0 tok/s | quality route benchmark |
 | Prefill speed | Qwen 3.5 35B-A3B MXFP4, ROCm | ~562.9 tok/s | planning route benchmark |
 | Prefill speed | Qwen3-Coder-Next UD-Q4_K_XL, ROCm | ~127.0 tok/s | coding challenger benchmark |
-| Prefill speed | gpt-oss-120B MXFP4, Gemma 4 31B, Gemma 4 26B-A4B | not captured | rerun under the same protocol before publishing a value |
+| Prefill speed | gpt-oss-120B MXFP4, Gemma 4 26B-A4B | not captured | rerun under the same protocol before publishing a value |
+| Prefill speed | Gemma 4 31B IT Q6_K | **pp8192 ~133.6 tok/s** (controlled local GPU benchmark, b9247 57ebaf4e) | verified; decode ~8.25 tok/s tg128, ~7.7 tok/s sustained |
 | Speculative acceptance length | Qwen 3.6 27B Dense + Q4_K_M DFlash draft | AL = 6.67 | HumanEval mean at DDTree budget 22 |
 | Speculative acceptance percentage | Qwen 3.6 27B Dense + Q4_K_M DFlash draft | not captured | do not derive a percent from AL; rerun if acceptance-rate counters are needed |
 | Speculative acceptance length | Qwen 3.6 27B Dense + Q8_0 DFlash draft | not captured | speedup was captured, but AL / acceptance percent were not |

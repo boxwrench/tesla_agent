@@ -70,19 +70,31 @@ cmake --build build-vulkan --config Release --target llama-server
    ```
 This script automatically exports `HIP_VISIBLE_DEVICES=-1` (hiding the GPU from ROCm, forcing Vulkan selection) and sets the ICD to `RADV` (Mesa Vulkan driver). Retesting shows a **+13% to +19% speedup** in token decoding with zero quality loss.
 
-### Current Decode Leaderboard
+### Decode Speed Reference
 
-All values below are local Strix Halo results from the verified stack. They are not universal model rankings.
+All values below are local Strix Halo results from the verified stack. Not universal model rankings. Sorted by decode speed (fastest first); quality lane labels are for routing, not ranking.
 
-| Model | Decode speed | Role |
+**Verified stack entries:**
+
+| Model | Decode speed | Quality lane |
 |---|---:|---|
-| Qwen 3.6 35B-A3B MXFP4 | 50.1 tok/s | CODE/general baseline |
-| gpt-oss-120B MXFP4 | ~46 tok/s | QUALITY baseline |
-| Gemma 4 31B IT Q6_K | 43-48 tok/s | CODE Gemma peer |
-| Gemma 4 26B-A4B UD-Q6_K_XL | 40.11 tok/s mean | Queued candidate |
-| Qwen3-Coder-Next UD-Q4_K_XL | 34.6 tok/s | hard-coding challenger |
-| Qwen 122B-A10B MXFP4 | ~19 tok/s | QUALITY spot-specialist |
-| Qwen 3.6 27B Dense UD-Q4_K_XL | 9.6-11.5 tok/s normal decode | break-glass only |
+| Qwen 3.6 35B-A3B MXFP4 (Vulkan/RADV) | **50.1 tok/s** | CODE/general baseline |
+| Qwen 3.5 35B-A3B MXFP4 (ROCm) | 47.3 tok/s | retained for regression tests |
+| gpt-oss-120B MXFP4 (Vulkan/RADV) | **~46 tok/s** | QUALITY baseline |
+| Qwen 3.6 35B-A3B MXFP4 (ROCm fallback) | ~44.2 tok/s | CODE baseline ROCm fallback |
+| Qwen3-Coder-Next UD-Q4_K_XL (ROCm) | 34.6 tok/s | hard-coding challenger |
+| Qwen 3.5 122B-A10B MXFP4 (ROCm) | ~19.4 tok/s | QUALITY spot-specialist |
+| Qwen 3.6 27B Dense UD-Q4_K_XL | 9.6–11.5 tok/s normal decode | break-glass only |
+| **Gemma 4 31B IT Q6_K (Vulkan/RADV)** | **~8.25 tok/s tg128; ~7.7 tok/s sustained** | second-opinion lane (dense — see note) |
+
+**Unverified / queued candidates** *(speed numbers sourced from private benchmarks not reproduced in this public repo — treat as directional only):*
+
+| Model | Reported speed | Status |
+|---|---:|---|
+| Gemma 4 26B-A4B UD-Q6_K_XL | 40.11 tok/s mean *(not verified in public repo)* | Queued candidate — coding gate cleared, not Stable Stack |
+
+> [!NOTE]
+> **Why is Gemma 4 31B the slowest model in the verified stack?** Both Gemma 31B and Qwen 35B are roughly 25 GB in size, yet Qwen 35B runs ~6× faster on the same hardware. The reason is architecture: Qwen 35B is a Mixture-of-Experts model that activates only ~3B parameters per token, so each decode step reads far less weight data from memory. Gemma 31B is a **dense** model: every token requires reading all 31B parameters from the same bandwidth-constrained unified memory. On a memory-bandwidth-bound APU like Strix Halo, that difference collapses decode speed from ~50 tok/s (MoE) to ~8 tok/s (dense). Gemma 31B earns its place in the stack as a second-opinion lane for quality verification and cross-family comparison — not as a throughput model. Use it on the orchestrated path where quality of each step matters more than wall-clock time.
 
 ---
 

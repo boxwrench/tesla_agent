@@ -117,8 +117,8 @@ graph LR
 * **Analogy:** The slow, careful senior reviewer lane became faster than expected on Strix Halo, so it moved from "special escalation" into the main quality chair.
 
 ### **Gemma 4**
-* **ELI5 Explanation:** A separate model family from Google. In this stack, Gemma 4 31B is kept as a cross-family coding peer to the Qwen workhorse.
-* **Analogy:** A second contractor with a different working style. It can catch different mistakes than the usual crew, so it is useful even when the original tool still works.
+* **ELI5 Explanation:** A separate model family from Google. In this stack, Gemma 4 31B is a cross-family coding experiment used for quality verification — not a throughput model. As a dense model (all 31B parameters read every token), it runs at ~8 tok/s on Strix Halo, much slower than the MoE models. Its value is a different "working style" for catching mistakes, not speed.
+* **Analogy:** A second expert reviewer from a different firm. Slower to consult, but worth it for a second opinion on a tricky plan — not someone you route every job to.
 
 ---
 

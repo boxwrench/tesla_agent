@@ -364,7 +364,7 @@ lemonade backends install llamacpp:rocm</code></pre>
               <!-- STEP 5 -->
               <div class="setup-step-content" id="setup-step-5">
                 <h2>Step 5: Download the Recommended Model</h2>
-                <p class="step-intro">The starter setup uses the 21.7 GB Qwen 3.6 35B Mixture-of-Experts (MoE) model because it is compact, fast, and still the CODE/general baseline. The full ladder now also includes gpt-oss-120B for quality synthesis and Gemma 4 31B as a cross-family coding peer; use the Model Finder after this baseline is working.</p>
+                <p class="step-intro">The starter setup uses the 21.7 GB Qwen 3.6 35B Mixture-of-Experts (MoE) model because it is compact, fast, and still the CODE/general baseline. The full ladder now also includes gpt-oss-120B for quality synthesis and Gemma 4 31B as a cross-family coding experiment (dense model — slow decode at ~8 tok/s; use on orchestrated path for a second opinion, not as a throughput replacement). Use the Model Finder after this baseline is working.</p>
                 
                 <div class="console-box">
                   <div class="console-header">
@@ -489,8 +489,8 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="code-peer">
-                    <span class="radio-title">CODE — Gemma peer (orchestrated)</span>
-                    <span class="radio-desc">Cross-family second opinion; orchestrated multi-step pattern required. Gemma 4 31B IT. 43–48 t/s.</span>
+                    <span class="radio-title">EXPERIMENT — Gemma dense (orchestrated, slow decode)</span>
+                    <span class="radio-desc">Cross-family second opinion; orchestrated multi-step pattern required. Gemma 4 31B IT. ~8.25 tok/s decode (dense model — slow; prefill ~133.6 tok/s).</span>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="extract">
@@ -510,7 +510,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="companion">
                     <span class="radio-title">COMPANION — small-footprint MoE</span>
-                    <span class="radio-desc">For concurrent loads (e.g. 26B + 120B fits where 31B + 120B doesn't). Gemma 4 26B-A4B IT. 40.11 t/s. Queued, not Stable Stack.</span>
+                    <span class="radio-desc">For concurrent loads (e.g. 26B + 120B fits where 31B + 120B doesn't). Gemma 4 26B-A4B IT. ~40 t/s mean <em>(not verified in public repo)</em>. Queued, not Stable Stack.</span>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="arrow">
@@ -600,10 +600,10 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                       <td class="pass">3 / 3</td>
                     </tr>
                     <tr class="highlighted-row">
-                      <td>Gemma 4 31B IT Q6_K — CODE Gemma peer</td>
+                      <td>Gemma 4 31B IT Q6_K — second-opinion lane <small style="opacity:0.7">(dense — slow decode)</small></td>
                       <td>25.2 GB</td>
                       <td>4-2 vs Gemma 26B-A4B</td>
-                      <td>43-48 t/s</td>
+                      <td>~8.25 tok/s tg128; ~7.7 tok/s sustained<br><small style="opacity:0.7">(dense; pp8192 ~133.6 tok/s)</small></td>
                       <td class="pass">3 / 3</td>
                     </tr>
                     <tr class="highlighted-row">
@@ -652,7 +652,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                        <td>Gemma 4 26B-A4B IT (UD-Q6_K_XL) <em>— queued, not Stable Stack</em></td>
                        <td>21.2 GB</td>
                        <td>2-4 vs Gemma 31B</td>
-                       <td>40.11 t/s mean</td>
+                       <td>40.11 t/s mean <em style="opacity:0.7">(not verified in public repo)</em></td>
                        <td class="pass">3 / 3</td>
                      </tr>
                      <tr style="opacity:0.7;">
@@ -937,8 +937,8 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <div class="glossary-item">
                   <dt>Gemma 4</dt>
                   <dd>
-                    <p><strong>ELI5:</strong> A separate model family now used here as a cross-family coding peer to the Qwen baseline.</p>
-                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A second qualified reviewer with a different working style, useful for catching different mistakes.</p>
+                    <p><strong>ELI5:</strong> A separate model family from Google. In this stack, Gemma 4 31B is a cross-family coding <em>experiment</em> — used for quality verification and second-opinion checks, not as a throughput workhorse. It is a <strong>dense</strong> model: every token reads all 31B parameters, so decode runs at ~8 tok/s on Strix Halo, much slower than the MoE models (~46–50 tok/s).</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A specialist reviewer from a different firm — slower to consult, but valuable for a second opinion on tricky plans. Not someone you route every job to.</p>
                   </dd>
                 </div>
                 <div class="glossary-item">

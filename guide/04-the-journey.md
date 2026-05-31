@@ -70,9 +70,9 @@ A second adjustment is the **Reasoning Budget** (the `thinking_budget_tokens` fl
 Later benchmarks added two important model families to the stack.
 
 * **gpt-oss-120B became the general QUALITY baseline.** After the draft-with-assumptions system prompt fixed its checklist-deflection behavior, it won blinded pairwise tests 5-1 vs Qwen 35B and 4-2 vs Qwen 122B, while decoding around 46 tok/s on Vulkan/RADV.
-* **Gemma 4 31B became the cross-family CODE peer.** It cleared nonce and orchestrated coding gates, then beat Gemma 26B-A4B 4-2 on the quality battery.
+* **Gemma 4 31B became the cross-family coding experiment.** It cleared nonce and orchestrated coding gates, then beat Gemma 26B-A4B 4-2 on the quality battery. **Important caveat:** Gemma 31B is a dense model — verified decode is ~8.25 tok/s (tg128), far slower than the MoE models in the stack. It earns its place for quality verification and cross-family comparison, not for throughput.
 * **Qwen stayed in the stack, but with narrower roles.** Qwen 3.6 35B remains the CODE/general baseline, and Qwen 122B is retained as a QUALITY spot-specialist for regulatory-currency and sharp plan-review tasks.
 
-This is not a claim that Qwen is "bad." Online consensus still treats Qwen as a strong reasoning family, and the local Qwen routes remain useful. The change is narrower: on this Strix Halo hardware, with these agentic utility workflows, the latest local gates favor gpt-oss-120B and Gemma 4 31B for the main quality and cross-family coding lanes.
+This is not a claim that Qwen is "bad." Online consensus still treats Qwen as a strong reasoning family, and the local Qwen routes remain useful. The change is narrower: on this Strix Halo hardware, with these agentic utility workflows, the latest local gates added gpt-oss-120B as the general quality baseline and Gemma 4 31B as a cross-family coding experiment. For throughput, Qwen 3.6 35B MoE (~50 tok/s Vulkan) and gpt-oss-120B (~46 tok/s Vulkan) remain the speed leaders; Gemma 31B runs at ~8 tok/s on this hardware and is used on the orchestrated path where quality matters more than wall-clock time.
 
 In the next chapter, we will build this exact, simplified stack step-by-step.

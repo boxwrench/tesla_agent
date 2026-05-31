@@ -62,7 +62,13 @@ echo "  Server Bin:  ${VULKAN_SERVER}"
 echo "  ICD:         ${AMD_VULKAN_ICD}"
 echo "======================================================================"
 
-# Run server with Vulkan parameters (gpu-layers all, cache K/V quantized)
+# KV cache quantization — default q8_0 is the safe default for Qwen MoE and gpt-oss-120B.
+# GEMMA 4 EXCEPTION: Do NOT use q8_0, q4_0, or turbo3 KV for Gemma 4 models.
+# Gemma 4's global-attention layers tile at 512 tokens; Vulkan's WHT-rotated quantized KV kernels
+# use power-of-2 block alignments (128/256), causing write-side memory corruption that
+# produces immediate gibberish on Gemma 31B and 26B-A4B (reported: llama-cpp-turboquant
+# issue #137). For Gemma 4, F16 KV is required; override via $@:
+# add --cache-type-k f16 --cache-type-v f16 to the launch command.
 exec "${VULKAN_SERVER}" \
   --host 127.0.0.1 \
   --port "${PORT}" \
