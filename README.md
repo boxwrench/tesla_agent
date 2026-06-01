@@ -97,6 +97,24 @@ Below are the actual measured results across the different configurations. *Comm
 
 ---
 
+## 🧪 Does It Actually Work on Real Plant Data?
+
+The benchmarks above measure the *model*. A separate, ongoing evaluation measures the **whole agent** doing real operational work: given a plain operator question and a pointer to data, can the local stack read the data itself, write and run its own analysis, and reach a sound, operator-facing conclusion — **entirely on the local machine, with nothing leaving the box?**
+
+We test it against the public **SWaT** water-treatment dataset across three different kinds of problem:
+
+* **Pump short-cycling** — *event detection* (a duty-cycle fault)
+* **Membrane fouling** — *trend fitting* (a slow pressure-rise trend on real, cyclically-cleaned data)
+* **pH / acid-dosing control** — *control-loop tracking* (is the controlled variable holding its band against its actuator?)
+
+**The short answer: it basically works — as a supervised assistant, with caveats.** The local agent (Qwen 3.6 35B-A3B MoE) reliably runs the full loop to completion, reproduces hand-computed ground-truth numbers to several significant figures on clean data, and writes clear operator briefs. Fully local is verified per run, not assumed.
+
+The most interesting finding is one we didn't expect: **on real, messy data the agent repeatedly out-reasoned our hand-built answer key.** On the membrane data it discovered the clean-in-place cycles on its own and analyzed the steady trend between them — a more correct method than our first ground truth. On the pH data it caught a 3-minute acid-pump dropout that crashed pH to 6.0, flagged it as a water-quality event, and **disagreed with our rubric — which a domain expert then confirmed the agent had gotten right.** Four times the evaluation ended up auditing *us*, not the model.
+
+It is not an unsupervised operator. The honest caveats — a single yes/no verdict on a borderline case can flip between runs; most results are one MoE model; real-data windows are still short — are documented alongside the wins, because the goal here is to help people *learn to work with a new tool*, not to sell one. Chapter [04 — The Journey](guide/04-the-journey.md) and [11 — Agent Safety](guide/11-agent-safety.md) carry that same "what failed and why" spirit.
+
+---
+
 ## 1. Core Objectives
 * **100% Data Privacy:** Run models completely offline. Your local logs, documents, and sensitive data files never leave your workstation.
 * **Plug-and-Play Setup:** Built specifically for the **AMD Strix Halo (gfx1151)** Unified Memory Architecture.
