@@ -10,6 +10,8 @@ This is the guide we wish we had when we started: verbose, explanatory, data-dri
 
 For related writing on utility work, technology, and practical operations, see **[Title 22](https://www.title22.org/)** — *water, systems, strategy*.
 
+Tracking the wider field? **[Of Agents and Aquifers](https://boxwrench.github.io/of-agents-and-aquifers/)** is a running, curated collection of research papers, repositories, and notable finds at the intersection of **AI / agentic systems and utilities** — the reading list behind this work ([source repo](https://github.com/boxwrench/of-agents-and-aquifers)).
+
 ---
 
 ## ⚠️ Legal Disclaimer & Warning
