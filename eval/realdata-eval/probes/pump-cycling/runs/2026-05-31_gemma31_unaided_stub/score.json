@@ -1,0 +1,37 @@
+{
+  "ok": false,
+  "checks": {
+    "starts_per_hour": {
+      "ok": true,
+      "truth": 1.189,
+      "answer": 1.189,
+      "rel_err": 0.0
+    },
+    "level_band": {
+      "ok": true,
+      "truth": [
+        45.16,
+        79.86
+      ],
+      "answer": [
+        43.9,
+        80.0
+      ]
+    },
+    "short_cycle_windows": {
+      "ok": false,
+      "expected": 1,
+      "reported": 0,
+      "matches": [
+        {
+          "truth": {
+            "start_ts": "2026-01-05T04:42:00",
+            "end_ts": "2026-01-05T08:33:00",
+            "peak_starts_per_hour": 25
+          },
+          "matched": false
+        }
+      ]
+    }
+  }
+}

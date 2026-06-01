@@ -1,0 +1,14 @@
+probe:      pump-cycling
+data:       stub  (/data/stubs/pump_cycling_v1.parquet)
+profile:    realdata-eval-moe
+model_tag:  qwen36
+method:     unaided
+note:       (none)
+timestamp:  2026-05-31T08:59:35-07:00
+git_sha:    1892c68
+hermes:     Hermes Agent v0.14.0 (2026.5.16)
+decode_stamp: 55.2 tok/s decode / 180.3 tok/s prefill
+elapsed_s: 684
+exit_code: 0
+session: session_20260531_090651_49ed73.json
+session_summary: turns=8 tool_turns=7 reasoning_chars=8137 final_answer_chars=4036

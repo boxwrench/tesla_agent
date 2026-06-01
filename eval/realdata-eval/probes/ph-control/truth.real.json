@@ -1,0 +1,48 @@
+{
+  "data_source": "../../data/real_slices/ph_control_real_v1.parquet",
+  "span": {
+    "start": "2015-12-28T10:00:00",
+    "end": "2015-12-28T20:00:00",
+    "rows": 36001,
+    "hours": 10.0
+  },
+  "operating_envelope": {
+    "baseline_ph": 8.371,
+    "band_low": 8.071,
+    "band_high": 8.671,
+    "note": "data-driven (median \u00b1 max(3\u00b7MAD-sigma, 0.3)), NOT a textbook band"
+  },
+  "metrics": {
+    "ph_mean": 8.3733,
+    "ph_min": 6.0,
+    "ph_max": 8.4708,
+    "dosing_duty_pct": 74.25,
+    "control_fault_detected": true
+  },
+  "tolerances": {
+    "ph_mean_rel": 0.05,
+    "ph_min_rel": 0.05,
+    "ph_max_rel": 0.05,
+    "dosing_duty_abs": 10.0
+  },
+  "fault_gate": {
+    "min_minutes": 30.0,
+    "min_dev_ph": 0.5,
+    "envelope_k": 3.0,
+    "envelope_floor": 0.3,
+    "acute_abs_low": 6.5,
+    "acute_abs_high": 9.0
+  },
+  "fault_trigger": "acute_breach",
+  "acute_breach_samples": 199,
+  "excursions": [
+    {
+      "start": "2015-12-28T12:00:33",
+      "end": "2015-12-28T12:03:51",
+      "duration_min": 3.3,
+      "peak_dev_ph": 2.071,
+      "direction": "low"
+    }
+  ],
+  "sustained_excursions": []
+}

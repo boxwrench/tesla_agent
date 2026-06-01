@@ -1,0 +1,33 @@
+{
+  "data_source": "../../data/stubs/pump_cycling_v1.parquet",
+  "span": {
+    "start": "2026-01-01T00:00:00",
+    "end": "2026-01-11T23:59:55",
+    "rows": 190080,
+    "hours": 264.0
+  },
+  "cycles": {
+    "total": 314,
+    "median_run_s": 1777.5,
+    "median_off_s": 3995.0
+  },
+  "starts_per_hour_overall": 1.189,
+  "level_band": {
+    "low_pct": 45.16,
+    "high_pct": 79.86,
+    "unit": "percent",
+    "pump_action": "fill (on when low)"
+  },
+  "short_cycle_windows": [
+    {
+      "start_ts": "2026-01-05T04:42:00",
+      "end_ts": "2026-01-05T08:33:00",
+      "peak_starts_per_hour": 25
+    }
+  ],
+  "tolerances": {
+    "starts_per_hour_rel": 0.05,
+    "band_pct_abs": 2.0,
+    "short_cycle_window_minutes": 30
+  }
+}

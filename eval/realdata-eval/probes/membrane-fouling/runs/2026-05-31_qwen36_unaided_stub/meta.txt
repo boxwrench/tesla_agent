@@ -1,0 +1,14 @@
+probe:      membrane-fouling
+data:       stub  (/data/stubs/membrane_fouling_v1.parquet)
+profile:    realdata-eval-moe
+model_tag:  qwen36
+method:     unaided
+note:       (none)
+timestamp:  2026-05-31T13:12:51-07:00
+git_sha:    d43b378
+hermes:     Hermes Agent v0.14.0 (2026.5.16)
+decode_stamp: 54.3 tok/s decode / 176.2 tok/s prefill
+elapsed_s: 99
+exit_code: 0
+session: session_20260531_131255_85c1be.json
+session_summary: turns=7 tool_turns=6 reasoning_chars=1281 final_answer_chars=2201

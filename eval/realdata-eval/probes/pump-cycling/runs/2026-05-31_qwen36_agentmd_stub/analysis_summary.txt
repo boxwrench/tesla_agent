@@ -1,0 +1,36 @@
+======================================================================
+PUMP C-101 / LIT-101 HISTORIAN ANALYSIS
+Period: 2026-01-01 to 2026-01-11 (11 days)
+Sampling: 5-second intervals  |  Total samples: 190,080
+======================================================================
+
+1. PUMP CYCLING LOGIC (normal operation)
+   - P-101 ON  when LIT-101 drops to ~44-46% (low setpoint)
+   - P-101 OFF when LIT-101 rises to ~79-80% (high cutoff)
+   - Normal run duration:  ~30-40 minutes (median 2,955 s)
+   - Normal idle duration: ~20-30 minutes (median 1,520 s)
+   - Pump is ON 55.5% of the time, OFF 44.5%
+
+2. MONDAY MORNING FORCED RUNS (anomaly)
+   - Date: Jan 5, 2026 (Monday) only
+   - Time window: 04:00 - 07:00 AM
+   - 90 very short ON cycles (~100-105 s each)
+   - Occur at high level (~76-77%), not low
+   - Pump stays ON for only ~2 minutes, then OFF ~37-40 s
+   - Repeats ~6 times per hour, ~4.5 hours total
+   - Monday total ON cycles: 107 vs. 20-21 on other days
+
+3. LEVEL RANGE
+   - Overall: 43.9% to 81.3%
+   - 99% of readings between 44% and 81%
+   - No spikes beyond 3 std deviations
+   - Monday avg level (65.1%) slightly higher than other days (~62.4%)
+
+4. NO CONCERNING PATTERNS DETECTED
+   - No rapid cycling (bounce) outside the Monday forced runs
+   - No level excursions outside 43-82% range
+   - No missing data or gaps in the historian record
+   - Level-at-OFF cutoff is consistent (76-81%, mostly 78-81%)
+   - Level-at-ON setpoint is consistent (44-46% for normal runs)
+
+======================================================================

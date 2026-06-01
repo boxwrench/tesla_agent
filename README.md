@@ -113,6 +113,15 @@ The most interesting finding is one we didn't expect: **on real, messy data the 
 
 It is not an unsupervised operator. The honest caveats — a single yes/no verdict on a borderline case can flip between runs; most results are one MoE model; real-data windows are still short — are documented alongside the wins, because the goal here is to help people *learn to work with a new tool*, not to sell one. Chapter [04 — The Journey](guide/04-the-journey.md) and [11 — Agent Safety](guide/11-agent-safety.md) carry that same "what failed and why" spirit.
 
+**Read it / audit it yourself:**
+
+* 📋 **[The field guide](eval/realdata-eval/REPORT.md)** — the full write-up: the scenario, the verbatim prompts, the agent's own output, and where it stumbled and what we changed.
+* 🧪 **[The evaluation bundle](eval/realdata-eval/)** — the probes, scorers, synthetic stubs, derived real-data slices, and every captured run (prompt sent, transcript, answer, chart, score) behind each claim.
+* 💡 **[Insights](eval/realdata-eval/INSIGHTS.md)** — the transferable lessons (a benchmark number physics says is impossible; why decode speed didn't pick the winner; "detected ≠ diagnosed"; the day a domain expert sided with the agent over our own answer key).
+* 📊 **[Scoreboard](eval/realdata-eval/results/matrix.md)** — one row per run, across all probes.
+
+> The full SWaT dataset (~128 MB) is not redistributed here; get it from the [public source](https://itrust.sutd.edu.sg/itrust-labs_datasets/). The synthetic stubs and the exact real-data *slices* the agent saw **are** committed, so the results reproduce without it.
+
 ---
 
 ## 1. Core Objectives

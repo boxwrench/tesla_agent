@@ -1,0 +1,23 @@
+{
+  "data_source": "../../data/stubs/membrane_fouling_v1.parquet",
+  "span": {
+    "start": "2026-02-01T00:00:00",
+    "end": "2026-02-07T23:59:00",
+    "rows": 10080,
+    "usable_rows": 10080,
+    "hours": 167.98
+  },
+  "metrics": {
+    "dpit_slope_per_day": 1.6335,
+    "normalized_dpit_slope_per_day": 0.3782,
+    "fit_mean": 2.0999,
+    "dpit_change_pct": 78.16,
+    "fouling_detected": true
+  },
+  "tolerances": {
+    "slope_rel": 0.1,
+    "normalized_slope_rel": 0.1,
+    "fit_mean_rel": 0.05,
+    "change_pct_abs": 5.0
+  }
+}

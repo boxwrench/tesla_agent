@@ -1,0 +1,7 @@
+{
+  "dpit_slope_per_day": 0.1,
+  "normalized_dpit_slope_per_day": 0.02,
+  "fit_mean": 1.0,
+  "dpit_change_pct": 5.0,
+  "fouling_detected": false
+}

@@ -1,0 +1,39 @@
+{
+  "data_source": "../../data/real_slices/membrane_real_v1.parquet",
+  "span": {
+    "start": "2015-12-29T00:00:00",
+    "end": "2015-12-29T06:00:00",
+    "rows": 21601,
+    "usable_rows": 17956,
+    "hours": 6.0
+  },
+  "metrics": {
+    "dpit_slope_per_day": 0.2748,
+    "normalized_dpit_slope_per_day": 0.1161,
+    "fit_mean": 2.2086,
+    "dpit_change_pct": 0.82,
+    "fouling_detected": false
+  },
+  "tolerances": {
+    "slope_rel": 0.1,
+    "normalized_slope_rel": 0.1,
+    "fit_mean_rel": 0.05,
+    "change_pct_abs": 5.0
+  },
+  "model": "cleaning-aware",
+  "cleaning": {
+    "threshold_bar": 9.917,
+    "cleaning_events": 10,
+    "operating_fraction": 0.8153,
+    "steady_state_dpit_slope_per_day": 0.6518,
+    "steady_state_r2": 0.0042,
+    "modeled_rise_bar": 0.1629,
+    "window_hours": 6.0
+  },
+  "fouling_gate": {
+    "min_slope": 0.5,
+    "min_r2": 0.5,
+    "min_rise_bar": 1.0,
+    "min_hours": 24.0
+  }
+}

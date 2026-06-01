@@ -1,0 +1,14 @@
+probe:      pump-cycling
+data:       stub  (/data/stubs/pump_cycling_v1.parquet)
+profile:    realdata-eval-moe
+model_tag:  qwen36
+method:     agentmd
+note:       Note on the environment: each shell command runs in a fresh process — variables and loaded data do NOT persist between commands. If you compute something you will reuse (a cleaned table, segment list, summary stats), save it to /out and reload it, rather than re-reading and recomputing from the raw data on every command.
+timestamp:  2026-05-31T09:20:28-07:00
+git_sha:    1892c68
+hermes:     Hermes Agent v0.14.0 (2026.5.16)
+decode_stamp: 57.1 tok/s decode / 182.3 tok/s prefill
+elapsed_s: 328
+exit_code: 0
+session: session_20260531_092031_14022d.json
+session_summary: turns=16 tool_turns=15 reasoning_chars=8477 final_answer_chars=3313

@@ -1,0 +1,42 @@
+{
+  "ok": true,
+  "gating_checks": [
+    "control_fault_detected",
+    "ph_mean"
+  ],
+  "checks": {
+    "ph_mean": {
+      "ok": true,
+      "gating": true,
+      "truth": 8.3733,
+      "answer": 8.37,
+      "rel_err": 0.0004
+    },
+    "ph_min": {
+      "ok": true,
+      "gating": false,
+      "truth": 6.0,
+      "answer": 6.0,
+      "rel_err": 0.0
+    },
+    "ph_max": {
+      "ok": true,
+      "gating": false,
+      "truth": 8.4708,
+      "answer": 8.4708,
+      "rel_err": 0.0
+    },
+    "dosing_duty_pct": {
+      "ok": true,
+      "gating": false,
+      "truth": 74.25,
+      "answer": 74.25
+    },
+    "control_fault_detected": {
+      "ok": true,
+      "gating": true,
+      "truth": true,
+      "answer": true
+    }
+  }
+}

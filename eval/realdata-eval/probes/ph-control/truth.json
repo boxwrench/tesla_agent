@@ -1,0 +1,56 @@
+{
+  "data_source": "../../data/stubs/ph_control_v1.parquet",
+  "span": {
+    "start": "2026-03-01T00:00:00",
+    "end": "2026-03-07T23:59:00",
+    "rows": 10080,
+    "hours": 167.98
+  },
+  "operating_envelope": {
+    "baseline_ph": 7.548,
+    "band_low": 7.248,
+    "band_high": 7.848,
+    "note": "data-driven (median \u00b1 max(3\u00b7MAD-sigma, 0.3)), NOT a textbook band"
+  },
+  "metrics": {
+    "ph_mean": 7.509,
+    "ph_min": 5.5292,
+    "ph_max": 7.7215,
+    "dosing_duty_pct": 36.74,
+    "control_fault_detected": true
+  },
+  "tolerances": {
+    "ph_mean_rel": 0.05,
+    "ph_min_rel": 0.05,
+    "ph_max_rel": 0.05,
+    "dosing_duty_abs": 10.0
+  },
+  "fault_gate": {
+    "min_minutes": 30.0,
+    "min_dev_ph": 0.5,
+    "envelope_k": 3.0,
+    "envelope_floor": 0.3,
+    "acute_abs_low": 6.5,
+    "acute_abs_high": 9.0
+  },
+  "fault_trigger": "both",
+  "acute_breach_samples": 207,
+  "excursions": [
+    {
+      "start": "2026-03-05T00:05:00",
+      "end": "2026-03-05T03:55:00",
+      "duration_min": 230.0,
+      "peak_dev_ph": 1.719,
+      "direction": "low"
+    }
+  ],
+  "sustained_excursions": [
+    {
+      "start": "2026-03-05T00:05:00",
+      "end": "2026-03-05T03:55:00",
+      "duration_min": 230.0,
+      "peak_dev_ph": 1.719,
+      "direction": "low"
+    }
+  ]
+}

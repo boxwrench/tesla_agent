@@ -1,0 +1,1 @@
+Now I can see a major event. On January 5 around 04:00, the pump enters a rapid-cycling mode — turning on and off every 1-2 minutes for about 4 hours. Let me look at the level behavior during this event and do a full summary.

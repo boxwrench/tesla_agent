@@ -1,0 +1,47 @@
+{
+  "ok": true,
+  "gating_checks": [
+    "dpit_slope_per_day",
+    "fit_mean",
+    "fouling_detected"
+  ],
+  "checks": {
+    "dpit_slope_per_day": {
+      "ok": true,
+      "gating": true,
+      "truth": 1.6335,
+      "answer": 1.6335,
+      "rel_err": 0.0
+    },
+    "normalized_dpit_slope_per_day": {
+      "ok": false,
+      "gating": false,
+      "truth": 0.3782,
+      "answer": 0.091852,
+      "rel_err": 0.7571
+    },
+    "fit_mean": {
+      "ok": true,
+      "gating": true,
+      "truth": 2.0999,
+      "answer": 2.0999,
+      "rel_err": 0.0
+    },
+    "dpit_change_pct": {
+      "ok": false,
+      "gating": false,
+      "truth": 78.16,
+      "answer": 87.5
+    },
+    "fouling_detected": {
+      "ok": true,
+      "gating": true,
+      "truth": true,
+      "answer": true
+    }
+  },
+  "informational_divergence": [
+    "dpit_change_pct",
+    "normalized_dpit_slope_per_day"
+  ]
+}

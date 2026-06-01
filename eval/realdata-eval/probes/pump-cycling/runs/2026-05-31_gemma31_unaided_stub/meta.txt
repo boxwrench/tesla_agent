@@ -1,0 +1,10 @@
+probe:      pump-cycling
+data:       stub  (/data/stubs/pump_cycling_v1.parquet)
+profile:    realdata-eval
+model_tag:  gemma31
+method:     unaided
+timestamp:  2026-05-31T07:30:44-07:00
+git_sha:    55d3281
+hermes:     Hermes Agent v0.14.0 (2026.5.16)
+elapsed_s: 348
+exit_code: 0

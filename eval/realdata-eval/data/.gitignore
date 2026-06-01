@@ -1,0 +1,7 @@
+# raw/ holds the full 128 MB SWaT CSV — NOT redistributed here; get it from the
+# public source (see data/raw/README.md) and the slices regenerate from it.
+raw/
+# real_slices/ ARE published in this public bundle (derived from public SWaT) so
+# the field guide's real-data claims are auditable — intentionally NOT ignored.
+*.tmp
+*.cache

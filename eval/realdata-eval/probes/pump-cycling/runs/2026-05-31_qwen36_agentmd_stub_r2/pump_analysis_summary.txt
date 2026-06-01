@@ -1,0 +1,57 @@
+PUMP P-101 / TANK LEVEL ANALYSIS — 11 DAYS (Jan 1-11, 2026)
+======================================================================
+
+OVERALL HEALTH: GOOD, with ONE significant abnormal event on Jan 5
+
+--- Normal Operation (Days 1-4, 6-11) ---
+  Pump cycling pattern: CLEAN and consistent
+  Turn-on events per day: ~20-21
+  Average run time:    ~30 minutes
+  Average rest time:   ~37 minutes
+  Level swing per cycle: ~44 (low) -> ~80 (high), delta ~36 units
+  Pump ON duty cycle:  ~55%
+  No short cycling (< 2 min) on any normal day
+
+--- ABNORMAL EVENT: Day 5 (Jan 5, 2026) ---
+  From ~04:17 AM onward, pump entered RAPID CYCLING mode
+  174 out of 216 segments (< 2 min each) = 80% short cycling
+  Pump on/off every 40-105 seconds
+  Level trapped in narrow band: 76-79 (vs normal 44-80)
+  Pump ran ~80% of the day during this period
+  Short cycling ended sometime after 04:17 and continued
+  for the remainder of the day (through end of data)
+
+ROOT CAUSE ASSESSMENT:
+  The pump was filling the tank normally at start of day 5.
+  Around 04:00, the level was at ~66 when pump kicked in
+  (instead of the usual ~44). The pump ran and reached ~79.
+  Then it appears the control strategy changed — instead of
+  letting the level drop back down to 44 before restarting,
+  the pump began rapidly cycling between 76-79 to try to
+  maintain a tight level band. This is called short cycling
+  or hunting.
+
+POTENTIAL CAUSES:
+  1. Control system setpoint/band was changed (operator or
+     automated schedule)
+  2. Inflow rate increased, so pump could never bring level
+     down to 44, and the controller tried trimming around 77
+  3. Pump capacity issue (wear, partial blockage)
+  4. Level sensor drift or noise in the 76-79 range
+
+RISKS:
+  - Short cycling causes excessive motor/starter wear
+  - 174 short cycles in one day = high mechanical stress
+  - Level never dropped below ~44 during the event, so the
+    tank was not in danger of running dry
+  - Level did not exceed ~81 during the event, so no overflow
+
+RECOMMENDATIONS:
+  1. Check PLC/control panel for any setpoint changes on
+     Jan 5 around 04:00 AM
+  2. Review if there was a scheduled mode change
+  3. Inspect pump for any performance degradation
+  4. Verify level transmitter calibration
+  5. Check if inflow rates changed (upstream operations)
+  6. Restore wide band (44-80) if a narrow band was
+     intentionally set — short cycling is bad practice
