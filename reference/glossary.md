@@ -22,7 +22,7 @@ graph TD
 ```
 
 ### **APU (Accelerated Processing Unit)**
-* **ELI5 Explanation:** A single computer chip that contains both the main CPU (the "manager") and the GPU (the "math speed-runner").
+* **ELI5 Explanation:** AMD's term for a single chip that contains both the main CPU (the "manager") and the GPU (the "math speed-runner") on one die. Strix Halo's APU shares the system's 128 GB memory pool between CPU and GPU, which is why it can run large local models.
 * **Analogy:** Instead of buying a separate stove and blender, an APU is like a premium kitchen machine that does both tasks on the same counter.
 * **External Reference:** [AMD APU Technology Overview](https://www.amd.com/)
 
@@ -32,17 +32,35 @@ graph TD
 * **External Reference:** For a deep dive on how memory architectures affect ML, see the [Google ML Glossary: Hardware Accelerators](https://developers.google.com/machine-learning/glossary#hardware-accelerators).
 
 ### **GTT Size (Graphics Translation Table)**
-* **ELI5 Explanation:** A setting in your operating system that decides how much shared system RAM the GPU is allowed to allocate.
-* **Analogy:** A boundary line in a shared room. If you have a huge 128 GB house, but the line restricts the GPU to a tiny 16 GB closet, the GPU won't be able to open its huge model boxes. You must slide the boundary line up (e.g., to 96 GB) to let the GPU breathe.
+* **ELI5 Explanation:** A setting in your operating system that decides how much shared system RAM the GPU can use for graphics/compute allocations.
+* **In this repo:** The reference Strix Halo setup uses a 96 GB GTT pool on a 128 GB machine. That leaves enough room for large GGUF models while keeping the system usable.
+* **Analogy:** A boundary line in a shared room. If you have a huge 128 GB house, but the line restricts the GPU to a tiny 16 GB closet, the GPU won't be able to open its huge model boxes. You slide the boundary line up so the GPU can work without taking the whole house.
 
 ### **ROCm (Radeon Open Compute)**
-* **ELI5 Explanation:** AMD's software platform that translates AI mathematical commands into instructions AMD graphics chips can understand.
+* **ELI5 Explanation:** AMD's GPU compute platform, similar in role to NVIDIA CUDA. It provides the HIP backend used by llama.cpp and other local inference stacks.
+* **In this repo:** Strix Halo currently uses `HSA_OVERRIDE_GFX_VERSION=11.5.1` for ROCm/HIP compatibility. The measured generation-speed leader is still Vulkan/RADV, while HIP can be useful for some prompt-processing-heavy rows.
 * **Analogy:** A bilingual translator. ROCm is the AMD equivalent to NVIDIA's CUDA, taking standard AI commands and translating them for the Radeon GPU.
 * **External Reference:** [AMD ROCm Documentation Portal](https://rocm.docs.amd.com/)
 
-### **Vulkan & Mesa RADV**
-* **ELI5 Explanation:** An open-source graphics library (Vulkan) and driver (RADV) developed by the community. It acts as an alternative pipeline to ROCm.
-* **Analogy:** A bypass road. Sometimes, taking the Vulkan road runs +15% faster for reading model files than using the official ROCm highway on Strix Halo hardware.
+### **Vulkan**
+* **ELI5 Explanation:** A graphics and compute API that local inference tools can use to run model math on the GPU.
+* **In this repo:** Vulkan/RADV is the fastest measured default path for llama.cpp generation and low-concurrency local API work on the reference Strix Halo setup.
+* **Analogy:** A road system between the model server and GPU. If the road is well paved, tokens move faster.
+
+### **RADV**
+* **ELI5 Explanation:** Mesa's open-source Vulkan driver for AMD GPUs.
+* **In this repo:** RADV is the Vulkan driver used for the fastest measured rows. It is the path this guide recommends for the default Qwen workhorse and MTP speed lanes.
+* **Analogy:** If Vulkan is the road system, RADV is the road crew that keeps the AMD lanes paved.
+
+### **AMDVLK**
+* **ELI5 Explanation:** AMD's former open-source Vulkan driver.
+* **In this repo:** Prefer Mesa RADV. AMDVLK was discontinued in 2025, and leftover ICD files can cause the wrong Vulkan driver to be selected.
+* **Analogy:** An old road sign that still points traffic down the wrong street. Even if you are not trying to use it, a stale driver entry can quietly send your workload the slow way.
+
+### **tuned**
+* **ELI5 Explanation:** A Linux service that applies performance profiles to the system.
+* **In this repo:** The `accelerator-performance` profile can improve local LLM speed on Strix Halo by reducing power-management drag.
+* **Analogy:** Telling the plant, "we are running a high-load test now; stop using the energy-saving schedule for this shift."
 
 ---
 
@@ -56,9 +74,19 @@ These terms explain how the AI model's "brain" represents data and handles memor
 * **External Reference:** [Google ML Glossary: Large Language Model](https://developers.google.com/machine-learning/glossary#large-language-model)
 
 ### **Tokens**
-* **ELI5 Explanation:** Tiny pieces of words that the AI reads and writes. A token is usually 3 to 4 characters (e.g., the word `antigravity` is split into `anti` + `gravity`).
+* **ELI5 Explanation:** Tiny pieces of words that the AI reads and writes. In English, a token is roughly three-quarters of a word, though exact counts depend on the tokenizer.
 * **Analogy:** Instead of reading full words or single letters, the AI cuts text into syllable blocks, like Lego bricks, to build sentences.
 * **External Reference:** [Google ML Glossary: Token](https://developers.google.com/machine-learning/glossary#token)
+
+### **Prompt Processing (pp)**
+* **ELI5 Explanation:** How fast the model reads your input prompt, measured in tokens per second. Higher is better.
+* **In practice:** A prompt-processing rate of 800 tok/s means the model can ingest roughly hundreds of English words per second before it starts answering.
+* **Analogy:** How fast a reviewer can read the packet before writing comments.
+
+### **Token Generation (tg)**
+* **ELI5 Explanation:** How fast the model writes its response, measured in tokens per second. This is the speed you feel while chatting.
+* **In practice:** Around 50 tok/s feels very responsive. Around 5 tok/s feels slow.
+* **Analogy:** How fast the reviewer can dictate the final answer after reading the packet.
 
 ### **Context Window (Context Size)**
 * **ELI5 Explanation:** The size of the AI's active notebook page. It is the maximum amount of text (prompts plus answers) the AI can hold in its short-term memory at one time.
@@ -67,6 +95,7 @@ These terms explain how the AI model's "brain" represents data and handles memor
 
 ### **Flash Attention**
 * **ELI5 Explanation:** A mathematical speed-reading trick that prevents the AI from slowing down to a crawl when its notebook page gets full of text.
+* **In this repo:** Enable it for Strix Halo (`-fa on` / `-fa 1`, or the equivalent server setting such as `OLLAMA_FLASH_ATTENTION=1` when using Ollama).
 * **Analogy:** Instead of reading a 100-page book line-by-line over and over to find a name, the AI makes index cards of key points so it can recall details in a millisecond.
 
 ### **Speculative Decoding**
@@ -101,17 +130,27 @@ graph LR
 ```
 
 ### **GGUF (GPT-Generated Unified Format)**
-* **ELI5 Explanation:** A single-file package format designed to make loading and running AI models easy on standard consumer laptops and desktops.
-* **Analogy:** A `.zip` or `.mp3` file specifically for AI weights, containing everything needed to run in a single download.
+* **ELI5 Explanation:** The file format used by llama.cpp and related tools to store local AI models. A `.gguf` file contains model weights plus metadata needed for inference.
+* **Analogy:** A `.zip` or `.mp3` file specifically for AI weights, containing the pieces needed to run the model in a single download.
 
 ### **Quantization**
 * **ELI5 Explanation:** A compression technique that reduces the precision of model weights (e.g., from 16-bit decimals to 4-bit integers) to shrink the model file size.
 * **Analogy:** Taking a high-resolution, uncompressed photo and saving it as a neat JPEG. It takes up 70% less hard drive space, but it looks virtually identical to the human eye.
 * **External Reference:** [Google ML Glossary: Quantization](https://developers.google.com/machine-learning/glossary#quantization)
 
+Common quantization labels in this repo:
+* **Q4_K_M:** 4-bit quantization, medium quality. Often a good balance of size, speed, and quality.
+* **Q8_0:** 8-bit quantization. Usually better quality than 4-bit, but roughly twice the weight size.
+* **UD-Q4_K_XL:** Unsloth Dynamic 4-bit. Uses higher precision for important layers.
+* **BF16:** 16-bit precision. Highest fidelity among these examples, but largest and slowest to move through memory.
+
 ### **Mixture-of-Experts (MoE)**
-* **ELI5 Explanation:** A model architecture where only a few parts of the brain ("experts") are active for any given word, while the rest stay asleep.
+* **ELI5 Explanation:** A model architecture where only a few parts of the brain ("experts") are active for any given token, while the rest stay asleep. A `30B-A3B` model has about 30 billion total parameters but activates about 3 billion per token.
 * **Analogy:** A hospital with 8 specialist doctors. Instead of all 8 doctors treating you at once for a simple headache, the router sends only the 2 required specialists. It is much faster and cheaper, but you still get expert care.
+
+### **Dense Model**
+* **ELI5 Explanation:** A model where all parameters are used for every token. A dense 7B model uses all 7 billion parameters every time it writes a token.
+* **Analogy:** Every specialist in the hospital reviews every patient, even routine cases. That can be thorough, but it is slower.
 
 ### **MXFP4 (Microscaling Format 4-bit)**
 * **ELI5 Explanation:** An advanced 4-bit compression standard supported directly by hardware accelerators (like Strix Halo) that packages weights into tiny microscaled blocks.
@@ -120,6 +159,15 @@ graph LR
 ### **Q6_K / UD-Q6_K_XL**
 * **ELI5 Explanation:** GGUF quantization formats that keep more numerical detail than 4-bit formats while still shrinking the model enough to run locally.
 * **Analogy:** If MXFP4 is a very compact field notebook, Q6_K is a larger notebook with clearer handwriting. It takes more room, but can preserve useful detail.
+
+### **llama.cpp**
+* **ELI5 Explanation:** The open-source C++ inference library that powers many local LLM tools. It can run GGUF models through CPU, Vulkan, ROCm/HIP, and other backends.
+* **Analogy:** The engine under the hood. Different apps may have different dashboards, but many are driving with this engine.
+
+### **Ollama**
+* **ELI5 Explanation:** A user-friendly tool for downloading and running local LLMs with commands like `ollama run model-name`.
+* **In this repo:** The reference setup uses `llama-server` directly, but Ollama is a common llama.cpp-based path for users who want simpler model management and an API.
+* **Analogy:** An appliance wrapper around the engine: easier controls, less manual wiring.
 
 ### **gpt-oss-120B**
 * **ELI5 Explanation:** A large open-weight model family used here as the new general quality baseline after local pairwise testing.

@@ -849,7 +849,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <div class="glossary-item">
                   <dt>APU (Accelerated Processing Unit) <a href="https://www.amd.com" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Reference</a></dt>
                   <dd>
-                    <p><strong>ELI5:</strong> A single chip that contains both the computer's CPU manager and GPU math speed-runner.</p>
+                    <p><strong>ELI5:</strong> AMD's term for a single chip that contains both the computer's CPU manager and GPU math speed-runner. Strix Halo shares the system's 128 GB memory pool between CPU and GPU.</p>
                     <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A premium kitchen machine that blends and cooks on the same counter instead of buying two separate appliances.</p>
                   </dd>
                 </div>
@@ -863,15 +863,36 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <div class="glossary-item">
                   <dt>GTT Size (Graphics Translation Table)</dt>
                   <dd>
-                    <p><strong>ELI5:</strong> The operating system setting that controls how much shared RAM the GPU is allowed to access.</p>
-                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A boundary line in a shared room telling the graphics card: "You can use 75% of this space."</p>
+                    <p><strong>ELI5:</strong> The operating system setting that controls how much shared RAM the GPU is allowed to access for graphics and compute allocations. This guide's reference setup uses a 96 GB GTT pool on a 128 GB machine.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A boundary line in a shared room telling the graphics card how much space it can use without taking over the whole house.</p>
                   </dd>
                 </div>
                 <div class="glossary-item">
-                  <dt>ROCm & Vulkan (Mesa RADV) <a href="https://rocm.docs.amd.com/" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> ROCm docs</a></dt>
+                  <dt>ROCm / HIP <a href="https://rocm.docs.amd.com/" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> ROCm docs</a></dt>
                   <dd>
-                    <p><strong>ELI5:</strong> Driver pipelines that translate AI math operations into commands the graphics chip understands.</p>
-                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Bilingual translators bridging the gap between your code and the graphics hardware.</p>
+                    <p><strong>ELI5:</strong> AMD's GPU compute platform, similar in role to NVIDIA CUDA. It provides the HIP backend used by llama.cpp and other local inference stacks.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A bilingual translator bridging the gap between your code and AMD graphics hardware.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Vulkan & Mesa RADV</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> Vulkan is a graphics/compute API. RADV is Mesa's open-source Vulkan driver for AMD GPUs. In this guide, Vulkan/RADV is the fastest measured default path for local generation rows.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Vulkan is the road system; RADV is the road crew keeping the AMD lanes paved.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>AMDVLK</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> AMD's former open-source Vulkan driver. Prefer Mesa RADV; stale AMDVLK ICD files can quietly make the wrong Vulkan driver load.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> An old road sign that still sends traffic down the wrong street.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>tuned</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A Linux service that applies performance profiles. The accelerator-performance profile can reduce power-management drag during local LLM runs.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Telling the plant to use the high-load test profile instead of the energy-saving schedule.</p>
                   </dd>
                 </div>
               </div>
@@ -890,8 +911,22 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <div class="glossary-item">
                   <dt>Tokens <a href="https://developers.google.com/machine-learning/glossary#token" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Google Glossary</a></dt>
                   <dd>
-                    <p><strong>ELI5:</strong> Word-pieces that the AI reads and writes. A token is usually 3 to 4 characters.</p>
+                    <p><strong>ELI5:</strong> Word-pieces that the AI reads and writes. In English, a token is roughly three-quarters of a word, though exact counts depend on the tokenizer.</p>
                     <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Cutting text into syllable Lego bricks to build sentences rather than reading individual letters.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Prompt Processing (pp)</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> How fast the model reads your input prompt, measured in tokens per second. Higher is better.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> How fast a reviewer can read the packet before writing comments.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Token Generation (tg)</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> How fast the model writes its response, measured in tokens per second. This is the speed you feel while chatting.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> How fast the reviewer can dictate the final answer after reading the packet.</p>
                   </dd>
                 </div>
                 <div class="glossary-item">
@@ -904,7 +939,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <div class="glossary-item">
                   <dt>Flash Attention & Speculative Decoding</dt>
                   <dd>
-                    <p><strong>ELI5:</strong> Speed-reading math tricks and word-guessing loops to accelerate model processing.</p>
+                    <p><strong>ELI5:</strong> Speed-reading math tricks and word-guessing loops to accelerate model processing. On Strix Halo, keep Flash Attention enabled with the equivalent of <code>-fa on</code> / <code>-fa 1</code>.</p>
                     <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Indexing a book for fast lookups (Attention) and having an assistant draft text for a senior editor to quickly check (Speculative).</p>
                   </dd>
                 </div>
@@ -938,7 +973,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <div class="glossary-item">
                   <dt>GGUF (GPT-Generated Unified Format)</dt>
                   <dd>
-                    <p><strong>ELI5:</strong> A single-file package format designed to run AI models on standard consumer hardware.</p>
+                    <p><strong>ELI5:</strong> The file format used by llama.cpp and related tools to store local AI models. A .gguf file contains model weights plus metadata needed for inference.</p>
                     <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> An `.mp3` or `.zip` file specifically optimized for loading AI brains.</p>
                   </dd>
                 </div>
@@ -946,14 +981,22 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   <dt>Quantization <a href="https://developers.google.com/machine-learning/glossary#quantization" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> Google Glossary</a></dt>
                   <dd>
                     <p><strong>ELI5:</strong> A compression technique that lowers model decimals to integers to shrink file size.</p>
+                    <p><strong>Common labels:</strong> Q4_K_M is a balanced 4-bit quant; Q8_0 is higher-quality 8-bit at roughly 2x the weight size; UD-Q4_K_XL is Unsloth Dynamic 4-bit with higher precision for important layers; BF16 is 16-bit precision and much larger.</p>
                     <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Saving a huge raw photo as a JPEG. It takes up 70% less space, but looks identical to your eyes.</p>
                   </dd>
                 </div>
                 <div class="glossary-item">
                   <dt>Mixture-of-Experts (MoE)</dt>
                   <dd>
-                    <p><strong>ELI5:</strong> A model design where only a small part of the brain is active for each word.</p>
+                    <p><strong>ELI5:</strong> A model design where only a small part of the brain is active for each token. A 30B-A3B model has about 30 billion total parameters but activates about 3 billion per token.</p>
                     <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A hospital with 8 specialist doctors. For a cold, only the 2 required specialists treat you, keeping it fast and cheap.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Dense Model</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A model where all parameters are used for every token. A dense 7B model uses all 7 billion parameters every time it writes a token.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Every specialist reviews every patient, even routine cases. That can be thorough, but it is slower.</p>
                   </dd>
                 </div>
                 <div class="glossary-item">
@@ -961,6 +1004,20 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   <dd>
                     <p><strong>ELI5:</strong> GGUF compression formats that keep more detail than 4-bit formats while still fitting local hardware.</p>
                     <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A larger field notebook with clearer handwriting: more room than the tiny version, but easier to read back accurately.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>llama.cpp</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> The open-source C++ inference library that powers many local LLM tools. It can run GGUF models through CPU, Vulkan, ROCm/HIP, and other backends.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> The engine under the hood. Different apps may have different dashboards, but many are driving with this engine.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Ollama</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A user-friendly tool for downloading and running local LLMs with commands like <code>ollama run model-name</code>. This repo uses <code>llama-server</code> directly, but Ollama is a common llama.cpp-based path.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> An appliance wrapper around the engine: easier controls, less manual wiring.</p>
                   </dd>
                 </div>
                 <div class="glossary-item">
