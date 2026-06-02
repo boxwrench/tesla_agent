@@ -73,6 +73,15 @@ These terms explain how the AI model's "brain" represents data and handles memor
 * **ELI5 Explanation:** An AI acceleration technique where a tiny, fast model guesses the next words, and a large, smart model checks them in batches.
 * **Analogy:** A junior assistant drafting an email quickly, and a senior editor reviewing it in 5-second passes. If the assistant guessed right, we save time; if wrong, the editor rewrites that sentence.
 
+### **MTP (Multi-Token Prediction / Self-Speculative Decoding)**
+* **ELI5 Explanation:** A speed trick where the model has its own built-in "junior assistant" head for guessing the next few tokens, so it does not need to load a separate draft model.
+* **Analogy:** The senior editor has a sticky-note pad of likely next phrases built into their desk. They can check several likely words at once without calling a separate assistant into the room.
+* **In this repo:** Qwen3.6-35B-A3B-MTP GGUFs use `--spec-type draft-mtp` as an opt-in speed lane. The standard workhorse stays unchanged; MTP is for users who deliberately choose the MTP artifact and build.
+
+### **nextn Head**
+* **ELI5 Explanation:** A model component trained to guess more than one next token at a time.
+* **Analogy:** Instead of predicting the next single word, it pencils in the next short phrase, then the main model checks whether that phrase is acceptable.
+
 ---
 
 ## 🗜️ Group 3: Model Formats & Compression
@@ -117,7 +126,7 @@ graph LR
 * **Analogy:** The slow, careful senior reviewer lane became faster than expected on Strix Halo, so it moved from "special escalation" into the main quality chair.
 
 ### **Gemma 4**
-* **ELI5 Explanation:** A separate model family from Google. In this stack, Gemma 4 31B is a cross-family coding experiment used for quality verification — not a throughput model. As a dense model (all 31B parameters read every token), it runs at ~8 tok/s on Strix Halo, much slower than the MoE models. Its value is a different "working style" for catching mistakes, not speed.
+* **ELI5 Explanation:** A separate model family from Google. In this stack, Gemma 4 31B is a cross-family coding experiment used for quality verification — not a throughput model. As a dense model (all 31B parameters read every token), it runs at ~8 tok/s on Strix Halo, much slower than the faster MoE lanes. Its value is a different "working style" for catching mistakes, not speed.
 * **Analogy:** A second expert reviewer from a different firm. Slower to consult, but worth it for a second opinion on a tricky plan — not someone you route every job to.
 
 ---

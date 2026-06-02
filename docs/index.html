@@ -485,7 +485,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="code-fast" checked>
                     <span class="radio-title">CODE — fast workhorse</span>
-                    <span class="radio-desc">First reach for coding/agent tasks. Qwen 3.6 35B MoE on Vulkan. 50.1 t/s, 82/84 rubric, 3/3 nonce.</span>
+                    <span class="radio-desc">First reach for coding/agent tasks. Qwen 3.6 35B MoE on Vulkan. ~58.5 t/s workhorse; optional MTP speed lane +24–39%.</span>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="code-peer">
@@ -539,7 +539,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   </div>
                   <div>
                     <span class="res-lbl">Speed:</span>
-                    <strong id="rec-speed">~50.1 tokens/sec (Vulkan; ~44.2 ROCm)</strong>
+                    <strong id="rec-speed">~58.5 tokens/sec (Vulkan; ~44.2 ROCm)</strong>
                   </div>
                   <div>
                     <span class="res-lbl">Reasoning:</span>
@@ -575,7 +575,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
                   <strong style="color: var(--text-primary);"><i class="fa-solid fa-layer-group"></i> Benchmark Stack:</strong><br>
                   • <strong>Hardware:</strong> AMD Ryzen Strix Halo APU (gfx1151), 128 GB LPDDR5X RAM (96 GB GTT allocated)<br>
-                  • <strong>Backend:</strong> llama.cpp/llama-server (<code style="color: var(--accent-cyan); font-weight: 600;">b9247</code>) served via ROCm 7.2.x / Vulkan (Mesa RADV 25.2.8)<br>
+                  • <strong>Backend:</strong> llama.cpp/llama-server (<code style="color: var(--accent-cyan); font-weight: 600;">b9247</code>; opt-in MTP reproduced on <code style="color: var(--accent-cyan); font-weight: 600;">b9360</code>) served via ROCm 7.2.x / Vulkan (Mesa RADV 25.2.8)<br>
                   • <strong>Parameters:</strong> Temp = 0 (greedy decoding), context budget = 8k-32k, Flash Attention enabled
                 </p>
               </div>
@@ -607,10 +607,24 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                       <td class="pass">3 / 3</td>
                     </tr>
                     <tr class="highlighted-row">
-                      <td>Qwen 3.6 35B (Vulkan RADV, Think-On) — CODE/general baseline</td>
+                      <td>Qwen 3.6 35B (Vulkan RADV, Think-On) — CODE/general baseline; workhorse default unchanged</td>
                       <td>21.7 GB</td>
                       <td>82 / 84</td>
-                      <td>50.1 t/s</td>
+                      <td>~58.5 t/s</td>
+                      <td class="pass">3 / 3</td>
+                    </tr>
+                    <tr class="highlighted-row">
+                      <td>Qwen 3.6 35B MXFP4-MTP (Vulkan RADV) — opt-in speed lane</td>
+                      <td>21.7 GB</td>
+                      <td>same production quant</td>
+                      <td>~72.7 t/s (+24%)<br><small style="opacity:0.7">prefill not separately captured</small></td>
+                      <td class="pass">3 / 3</td>
+                    </tr>
+                    <tr class="highlighted-row">
+                      <td>Qwen 3.6 35B Q4_K_M-MTP (Vulkan RADV) — opt-in speed lane</td>
+                      <td>35B-class</td>
+                      <td>won quality pairwise 4-2</td>
+                      <td>~81.2 t/s (+39%)<br><small style="opacity:0.7">prefill not separately captured</small></td>
                       <td class="pass">3 / 3</td>
                     </tr>
                     <tr>
@@ -679,7 +693,8 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   </tbody>
                 </table>
               </div>
-              <p class="sub-text" style="margin-top:12px;"><strong>Note — the dense 27B is benchmarked but NOT in the production stack.</strong> Community discussion often treats Qwen 27B as a strong reasoner, but the local Strix Halo benches did not support that routing choice: blind pairwise was 0&ndash;6 vs the 122B and normal decode tested around 9.6&ndash;11.5 t/s. It is kept as a break-glass option for tough, blocked projects, not a first- or second-line model. <em>Technical aside:</em> DFlash speculative decoding lifts its floor to <strong>~31 t/s (2.82&times;)</strong> with a footprint-minimized Q4_K_M draft &mdash; speculation works on <em>dense</em> models (no expert router to thrash) where it is counterproductive on MoE. Full audit trail: <a href="https://github.com/boxwrench/tesla_agent/blob/main/reference/reproducibility-matrix.md" target="_blank" rel="noopener">Reproducibility Matrix &amp; Technical Deep-Dive</a>.</p>
+              <p class="sub-text" style="margin-top:12px;"><strong>Note — MTP speed lanes are opt-in.</strong> The Qwen3.6-35B-A3B-MTP GGUFs carry a native nextn head, so llama-server can self-speculate with <code>--spec-type draft-mtp</code> and no separate draft model. The technique surfaced via the community <a href="https://github.com/hogeheer499-commits/strix-halo-guide" target="_blank" rel="noopener">strix-halo-guide</a>; this repo independently reproduced and quality-gated the MXFP4-MTP and Q4_K_M-MTP lanes. Full audit trail: <a href="https://github.com/boxwrench/tesla_agent/blob/main/reference/reproducibility-matrix.md" target="_blank" rel="noopener">Reproducibility Matrix &amp; Technical Deep-Dive</a>.</p>
+              <p class="sub-text" style="margin-top:12px;"><strong>Note — the dense 27B is benchmarked but NOT in the production stack.</strong> Community discussion often treats Qwen 27B as a strong reasoner, but the local Strix Halo benches did not support that routing choice: blind pairwise was 0&ndash;6 vs the 122B and normal decode tested around 9.6&ndash;11.5 t/s. It is kept as a break-glass option for tough, blocked projects, not a first- or second-line model. <em>Technical aside:</em> DFlash speculative decoding lifts its floor to <strong>~31 t/s (2.82&times;)</strong> with a footprint-minimized Q4_K_M draft.</p>
             </div>
 
             <div class="card">
@@ -700,8 +715,8 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <p>The Vulkan/RADV backend (using Mesa drivers) runs <strong>+13% to +19% faster</strong> than the official ROCm HIP backend on MoE decoding. This represents a significant speed boost for long reasoning sessions.</p>
               </div>
               <div class="bullet-card">
-                <h4>MoE Speculation Defect</h4>
-                <p>Speculative decoding (MTP, DFlash) actually <strong>slows down</strong> execution on Mixture-of-Experts models. The expert routing verification penalty exceeds the token generation speed gains. Keep speculation disabled.</p>
+                <h4>Speculation Path Matters</h4>
+                <p>Older separate-draft MoE speculation slowed down because router verification erased the gain. Native Qwen MTP is different: the model carries its own nextn head, so <code>--spec-type draft-mtp</code> gives an opt-in +24–39% speed lane when quality holds.</p>
               </div>
               <div class="bullet-card">
                 <h4>Thinking Budgets</h4>
@@ -894,6 +909,20 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   </dd>
                 </div>
                 <div class="glossary-item">
+                  <dt>MTP (Multi-Token Prediction)</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A self-speculative speed trick where the model has its own built-in head for guessing the next few tokens, so no separate draft model is needed.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> The senior editor has likely next phrases penciled into the margin and can approve several words at once.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>nextn Head</dt>
+                  <dd>
+                    <p><strong>ELI5:</strong> A model component trained to guess more than one next token at a time.</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> Instead of predicting one word, it sketches the next short phrase for the main model to check.</p>
+                  </dd>
+                </div>
+                <div class="glossary-item">
                   <dt>Chat Template (Jinja2) <a href="https://huggingface.co/docs/transformers/main/en/chat_templating" target="_blank" class="glossary-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> HF Guide</a></dt>
                   <dd>
                     <p><strong>ELI5:</strong> A formatting script that wraps conversational history (User, Assistant, System) and tool-calling data in structured XML or markdown tags so the AI model understands where thoughts end and tool requests begin.</p>
@@ -937,7 +966,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <div class="glossary-item">
                   <dt>Gemma 4</dt>
                   <dd>
-                    <p><strong>ELI5:</strong> A separate model family from Google. In this stack, Gemma 4 31B is a cross-family coding <em>experiment</em> — used for quality verification and second-opinion checks, not as a throughput workhorse. It is a <strong>dense</strong> model: every token reads all 31B parameters, so decode runs at ~8 tok/s on Strix Halo, much slower than the MoE models (~46–50 tok/s).</p>
+                    <p><strong>ELI5:</strong> A separate model family from Google. In this stack, Gemma 4 31B is a cross-family coding <em>experiment</em> — used for quality verification and second-opinion checks, not as a throughput workhorse. It is a <strong>dense</strong> model: every token reads all 31B parameters, so decode runs at ~8 tok/s on Strix Halo, much slower than the faster MoE lanes (~46–81 tok/s depending on model and MTP opt-in).</p>
                     <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> A specialist reviewer from a different firm — slower to consult, but valuable for a second opinion on tricky plans. Not someone you route every job to.</p>
                   </dd>
                 </div>

@@ -49,7 +49,7 @@ Start here and read in order — each chapter builds on the last. Written for wa
 | 05 | [Setup](guide/05-setup.md) | Step-by-step build with troubleshooting |
 | 06 | [Verification](guide/06-verification.md) | Running the Nonce Gate and Coding Eval |
 | 07 | [Choosing a Model](guide/07-choosing-a-model.md) | Benchmarks and reasoning toggles |
-| 08 | [Speed and Tuning](guide/08-speed-and-tuning.md) | Vulkan vs ROCm, reasoning budgets |
+| 08 | [Speed and Tuning](guide/08-speed-and-tuning.md) | Vulkan vs ROCm, MTP speed lanes, reasoning budgets |
 | 09 | [Building Your Workflow](guide/09-building-your-workflow.md) | Putting it to work on real utility tasks |
 | 10 | [How Agents Work Together](guide/10-orchestrating-agents.md) | One agent vs pipelines, batch, and orchestrators |
 | 11 | [Agent Safety](guide/11-agent-safety.md) | Sandboxing, least privilege, spend limits, kill switches — read before write access |
@@ -61,7 +61,7 @@ Start here and read in order — each chapter builds on the last. Written for wa
 ## 🛠️ Reference Testing Stack
 All benchmarks were run on local consumer hardware with the following configuration:
 * **Hardware (APU):** AMD Ryzen Strix Halo (gfx1151), 128 GB LPDDR5X system RAM (configured via modprobe with **96 GB GTT graphics memory pool**).
-* **Server Backend:** `llama.cpp/llama-server` (stable build `b9247`) served via ROCm 7.2.x (HIP) and Mesa/RADV Vulkan (Mesa 25.2.8). The fastest current lanes use the **Vulkan/RADV** backend (see matrix).
+* **Server Backend:** `llama.cpp/llama-server` (stable build `b9247`; opt-in MTP lane reproduced on `b9360`) served via ROCm 7.2.x (HIP) and Mesa/RADV Vulkan (Mesa 25.2.8). The fastest current lanes use the **Vulkan/RADV** backend (see matrix).
 * **Parameters:** Greedy decoding (temperature = 0), context buffers scaled from 8,192 to 32,768, Flash Attention active.
 
 ## 📊 Model Performance Matrix
@@ -74,7 +74,9 @@ Below are the actual measured results across the different configurations. *Comm
 |---|---|---|---|---|---|---|---|
 | **gpt-oss-120B (MXFP4, 3 shards)** | **~63 GB** | 32,768 | High reasoning | **Pairwise: 5-1 vs Qwen 35B; 4-2 vs Qwen 122B** | **~46 tok/s** (Vulkan) | **3 / 3 Pass** | **QUALITY baseline (general)** |
 | **Gemma 4 31B IT (Q6_K)** | **25.2 GB** | 32,768 | On for coding | Pairwise: **4-2 vs Gemma 26B-A4B** | **~8.25 tok/s tg128; ~7.7 tok/s sustained** (Vulkan; pp8192 ~133.6 tok/s) | **3 / 3 Pass** | **Second-opinion lane (dense — slow decode); use orchestrated path** |
-| **Qwen 3.6 35B MoE (Vulkan RADV)** | **21.7 GB** | 32,768 | **On** | **82 / 84** | **50.1 tok/s** (Vulkan) | **3 / 3 Pass** | **CODE/general baseline** |
+| **Qwen 3.6 35B MoE (Vulkan RADV)** | **21.7 GB** | 32,768 | **On** | **82 / 84** | **~58.5 tok/s** (Vulkan) | **3 / 3 Pass** | **CODE/general baseline**; workhorse default unchanged |
+| **Qwen 3.6 35B MoE MXFP4-MTP (Vulkan RADV)** | **21.7 GB** | 32,768 | **On** | same production quant | **~72.7 tok/s** (+24% vs workhorse) | **3 / 3 Pass** | **Opt-in speed lane** using `--spec-type draft-mtp`; technique surfaced via [strix-halo-guide](https://github.com/hogeheer499-commits/strix-halo-guide) |
+| **Qwen 3.6 35B MoE Q4_K_M-MTP (Vulkan RADV)** | similar 35B-class footprint | 32,768 | **On** | **Won quality pairwise 4-2** | **~81.2 tok/s** (+39% vs workhorse) | **3 / 3 Pass** | **Opt-in speed lane**; human-check regulatory figures |
 | **Qwen 3.6 35B MoE (ROCm)** | **21.7 GB** | 32,768 | **On** | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | ROCm fallback backend |
 | **Qwen 3.6 35B MoE (ROCm)** | **21.7 GB** | 32,768 | **Off** | **82 / 84** | **43.7 tok/s** | **3 / 3 Pass** | Cuts wall-time in half for prose (falls to 1/3 coding E2E) |
 | **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **On** | **80 / 84** | **19.4 tok/s** (ROCm) | **3 / 3 Pass** | **QUALITY spot-specialist: regulatory currency and sharp plan review** |
@@ -85,12 +87,15 @@ Below are the actual measured results across the different configurations. *Comm
 | **Qwen3-Coder-Next (UD-Q4_K_XL)** | **49.6 GB** | 16,384 | **On** | — | **34.6 tok/s** (ROCm) | **3 / 3 Pass** | 128GB Coder Challenger |
 
 > [!NOTE]
-> **The dense Qwen 3.6 27B is benchmarked but NOT in the production stack** — community discussion often treats it as a strong reasoner, but the local Strix Halo gates did not corroborate that for this workflow. A blind quality pairwise put it 0-6 against the 122B on the standard prompt set, and tested backends remained around 9.6-11.5 tok/s for normal decode. It remains a break-glass *"arrow in the quiver"* for tough, blocked projects where trying a different dense trace might help, **not a first- or second-line choice.**
->
-> *Technical aside (why it's interesting even though unshipped):* DFlash speculative decoding lifts the dense route to **~31 tok/s (2.82×)** with a footprint-minimized Q4_K_M draft — the inverse of the MoE result below, because a dense model has no expert router to thrash during draft verification.
+> **MTP speed options are opt-in.** The Qwen3.6-35B-A3B-MTP GGUFs carry a native next-token prediction head, so recent `llama-server` builds can self-speculate with `--spec-type draft-mtp` and no separate draft model. The workhorse default remains the standard MXFP4 Qwen 3.6 35B lane. The speed technique was surfaced by the community [strix-halo-guide](https://github.com/hogeheer499-commits/strix-halo-guide); see the acknowledgments below and the [MTP case study](research/mtp-speculative-decoding-strix-halo.md).
 
 > [!NOTE]
-> **Why is Gemma 4 31B so much slower than Qwen 35B MoE?** Both are ~25 GB models, but they have very different internal architectures. Qwen 3.6 35B is a Mixture-of-Experts model that activates only ~3B parameters per token — so each decode step reads far less weight data from memory. Gemma 4 31B is a **dense** model: every one of its 31B parameters must be read for every token generated. On a memory-bandwidth-bound APU like Strix Halo, this difference dominates, producing ~8 tok/s for the dense Gemma vs ~50 tok/s for the MoE Qwen on the same hardware.
+> **The dense Qwen 3.6 27B is benchmarked but NOT in the production stack** — community discussion often treats it as a strong reasoner, but the local Strix Halo gates did not corroborate that for this workflow. A blind quality pairwise put it 0-6 against the 122B on the standard prompt set, and tested backends remained around 9.6-11.5 tok/s for normal decode. It remains a break-glass *"arrow in the quiver"* for tough, blocked projects where trying a different dense trace might help, **not a first- or second-line choice.**
+>
+> *Technical aside (why it's interesting even though unshipped):* DFlash speculative decoding lifts the dense route to **~31 tok/s (2.82×)** with a footprint-minimized Q4_K_M draft. That result came from a separate dense-model path; for Qwen 35B MoE, the current opt-in speed path is native MTP.
+
+> [!NOTE]
+> **Why is Gemma 4 31B so much slower than Qwen 35B MoE?** Both are ~25 GB models, but they have very different internal architectures. Qwen 3.6 35B is a Mixture-of-Experts model that activates only ~3B parameters per token — so each decode step reads far less weight data from memory. Gemma 4 31B is a **dense** model: every one of its 31B parameters must be read for every token generated. On a memory-bandwidth-bound APU like Strix Halo, this difference dominates, producing ~8 tok/s for the dense Gemma vs ~58.5 tok/s for the MoE Qwen workhorse on the same hardware.
 
 > [!TIP]
 > For full reproducibility data, model checksums, evaluation methodologies, and detailed post-mortems of failed attempts (such as vLLM compilation timeouts and MoE speculative decoding latency overhead), see the [Reproducibility Matrix & Deep-Dive](reference/reproducibility-matrix.md).
@@ -149,7 +154,7 @@ tesla_agent/
 │   ├── 05-setup.md                # Step-by-step setup with troubleshooting
 │   ├── 06-verification.md        # Running the Nonce Gate and Coding Eval
 │   ├── 07-choosing-a-model.md     # Benchmarks and reasoning toggles
-│   ├── 08-speed-and-tuning.md     # Going faster: Vulkan vs ROCm, budgets
+│   ├── 08-speed-and-tuning.md     # Going faster: Vulkan, MTP, budgets
 │   ├── 09-building-your-workflow.md # Transition to real-world utility work
 │   ├── 10-orchestrating-agents.md # One agent vs pipelines, batch, orchestrators
 │   └── 11-agent-safety.md         # SAFETY: sandboxing, spend limits, kill switches
@@ -224,3 +229,9 @@ Use the dashboard to select recommended models, follow interactive setup steps w
 
 ## 5. Security & Data Sovereignty
 Public utilities handle critical infrastructure. Sending SCADA readings or operating logs to public cloud APIs violates standard security policies. Running this stack locally protects your data sovereignty, ensuring zero network data leaks.
+
+---
+
+## Acknowledgments
+
+The MTP (multi-token-prediction / self-speculative decoding) speed work was led by the community [strix-halo-guide](https://github.com/hogeheer499-commits/strix-halo-guide) by hogeheer499, whose reproducible Strix Halo benchmarks pointed us at `--spec-type draft-mtp` and the Qwen3.6-35B-A3B-MTP GGUFs. We independently reproduced their pipeline; our Q4_K_M requant came out SHA-identical to theirs, and we adapted the quant choice to this repo's quality bar.

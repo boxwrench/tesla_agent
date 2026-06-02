@@ -75,7 +75,7 @@ Running multi-step workflows generates a lot of text, which consumes your **Cont
 Local agentic AI is evolving rapidly. Here are the developments that could enhance your workflow:
 
 ### **A. Lucebox MoE Support**
-If the Lucebox engine adds native support for loading Qwen MoE architectures, we can enable **DFlash speculative decoding** directly on MoEs. This has the potential to double local generation speeds, making long agentic loops execute in seconds.
+For Qwen 3.6 35B, the current opt-in speed path is **MTP self-speculative decoding** with the Qwen3.6-35B-A3B-MTP GGUFs and `--spec-type draft-mtp`. On the reference box this lifts the workhorse from ~58.5 tok/s to ~72.7 tok/s on MXFP4-MTP, or ~81.2 tok/s on Q4_K_M-MTP after separate quality gating.
 
 ### **B. Official Driver Support**
 As AMD continues to update the ROCm driver stack, consumer APUs like Strix Halo may receive native, out-of-the-box support, removing the need for GFX override variables in `set_hsa_env.sh`.

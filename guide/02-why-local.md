@@ -50,6 +50,6 @@ While local execution is highly secure, it is important to be realistic about it
 | **Max Capability** | Excellent for coding, structured math, and file checks. | Superior at high-level creative writing and abstract logic. |
 | **Data Security** | **Absolute (Data never leaves host)** | Shared with third-party cloud providers. |
 | **Internet Dependency** | **None** | Mandatory. |
-| **Speed** | 15–50 tokens/sec (hardware dependent). | Fast, but subject to internet latency and queue limits. |
+| **Speed** | 15–80+ tokens/sec on the measured lanes (hardware and model dependent). | Fast, but subject to internet latency and queue limits. |
 
 For utility tasks—like verifying telemetry logs, checking chemical compliance, or writing incident summaries—local models have reached a level of quality where the trade-off is highly favorable.

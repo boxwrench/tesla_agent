@@ -139,11 +139,11 @@ function initModelFinder() {
       mode: "CODE — fast workhorse",
       file: "Qwen3.6-35B-A3B-MXFP4_MOE.gguf",
       size: "21.7 GB",
-      speed: "~50.1 tokens/sec (Vulkan/RADV; ~44.2 t/s ROCm fallback)",
+      speed: "~58.5 tokens/sec (Vulkan/RADV; ~44.2 t/s ROCm fallback). Optional MTP speed lanes: ~72.7 t/s MXFP4-MTP, ~81.2 t/s Q4_K_M-MTP.",
       reasoning: "Uncapped think-on — do NOT budget the coding route",
       command: "bash scripts/serving/serve_vulkan.sh",
       hermes: "max_tokens: 8192",
-      rationale: "First reach for any coding or multi-step agent task. Best balance of reasoning quality and speed on a 128 GB APU (82/84 rubric, 3/3 nonce gate). Vulkan/RADV is the promoted backend (+51% prefill, +13.5% decode over ROCm); ROCm is the fallback. A budget sweep showed any reasoning cap drops the stateful coding gate to 1-2/3 while uncapped think-on holds 3/3 — reasoning budgets are a planning latency lever, not a coding one."
+      rationale: "First reach for any coding or multi-step agent task. Best balance of reasoning quality and speed on a 128 GB APU (82/84 rubric, 3/3 nonce gate). Vulkan/RADV is the promoted backend; ROCm is the fallback. The optional Qwen3.6-35B-A3B-MTP GGUF lanes use --spec-type draft-mtp for +24-39% decode speed after separate quality gating. Keep the standard MXFP4 workhorse as the default setup path unless you are deliberately opting into MTP."
     },
     'code-peer': {
       name: "Gemma 4 31B IT (Q6_K)",
@@ -154,7 +154,7 @@ function initModelFinder() {
       reasoning: "On for coding; use orchestrated multi-step pattern",
       command: "bash scripts/serving/serve_vulkan.sh --model gemma-4-31B-it-Q6_K.gguf --cache-type-k f16 --cache-type-v f16",
       hermes: "max_tokens: 8192",
-      rationale: "Cross-family second opinion when a single long coding episode degrades, or for tasks where Qwen's style has plateaued. Cleared nonce 3/3 (think-off and think-on) and orchestrated coding 3/3 E2E; the orchestrated/staged path is what graduated, not single-episode. Won 4-2 quality pairwise vs Gemma 4 26B-A4B. SPEED NOTE: Gemma 31B is a dense model — every token reads all 31B parameters. Decode is ~8 tok/s, far slower than Qwen 35B MoE (~50 tok/s) or gpt-oss-120B (~46 tok/s). Prefill is fast (~133.6 tok/s pp8192). Use on the orchestrated path for quality verification, not as a speed-first workhorse."
+      rationale: "Cross-family second opinion when a single long coding episode degrades, or for tasks where Qwen's style has plateaued. Cleared nonce 3/3 (think-off and think-on) and orchestrated coding 3/3 E2E; the orchestrated/staged path is what graduated, not single-episode. Won 4-2 quality pairwise vs Gemma 4 26B-A4B. SPEED NOTE: Gemma 31B is a dense model — every token reads all 31B parameters. Decode is ~8 tok/s, far slower than Qwen 35B MoE (~58.5 tok/s workhorse) or gpt-oss-120B (~46 tok/s). Prefill is fast (~133.6 tok/s pp8192). Use on the orchestrated path for quality verification, not as a speed-first workhorse."
     },
     'extract': {
       name: "Qwen 3.6 35B Mixture-of-Experts (MXFP4 Quant)",
@@ -209,7 +209,7 @@ function initModelFinder() {
       reasoning: "Either mode; coding gate held 3/3 think-on, 1/3 think-off",
       command: "bash scripts/serving/serve_rocm.sh --model Qwen3.6-27B-UD-Q4_K_XL.gguf",
       hermes: "max_tokens: 8192",
-      rationale: "Experimental arrow in the quiver — community discussion often rates this model highly for reasoning, but local Strix Halo testing did not corroborate the routing choice: blind pairwise was 0-6 vs Qwen 122B on the standard 6-prompt set, and decode lagged the 35B workhorse across Vulkan, ROCm, and Lucebox HIP backends. Try when a different dense single-trace might unstick a blocked task. DFlash speculative decoding with a Q4_K_M draft lifts decode to ~31 t/s (2.82×) — the inverse of the MoE speculative result, because a dense model has no expert router to thrash."
+      rationale: "Experimental arrow in the quiver — community discussion often rates this model highly for reasoning, but local Strix Halo testing did not corroborate the routing choice: blind pairwise was 0-6 vs Qwen 122B on the standard 6-prompt set, and decode lagged the 35B workhorse across Vulkan, ROCm, and Lucebox HIP backends. Try when a different dense single-trace might unstick a blocked task. DFlash speculative decoding with a Q4_K_M draft lifts decode to ~31 t/s (2.82×); for Qwen 35B MoE, the current opt-in speed path is native MTP."
     }
   };
 
@@ -252,6 +252,8 @@ function initBenchmarkChart() {
   const chartData = {
     labels: [
       'Qwen 35B',
+      'Qwen 35B MTP',
+      'Qwen 35B Q4 MTP',
       'gpt-oss 120B',
       'Qwen3-Coder',
       'Qwen 122B',
@@ -260,8 +262,8 @@ function initBenchmarkChart() {
     ],
     datasets: [{
       label: 'Decode tok/s',
-      data: [50.1, 46, 34.6, 19.4, 9.6, 8.25],
-      backgroundColor: ['#2b6cb0', '#14532d', '#718096', '#7c2d12', '#7f1d1d', '#553c7b'],
+      data: [58.5, 72.7, 81.2, 46, 34.6, 19.4, 9.6, 8.25],
+      backgroundColor: ['#2b6cb0', '#0f766e', '#115e59', '#14532d', '#718096', '#7c2d12', '#7f1d1d', '#553c7b'],
       borderRadius: 6
     }]
   };
@@ -302,7 +304,7 @@ function initBenchmarkChart() {
         tooltip: {
           callbacks: {
             label: function(context) {
-              const speedLabels = ['50.1', '~46', '34.6', '19.4', '9.6-11.5', '~8.25 tg128 (dense)'];
+              const speedLabels = ['~58.5', '~72.7 MTP', '~81.2 Q4_K_M-MTP', '~46', '34.6', '19.4', '9.6-11.5', '~8.25 tg128 (dense)'];
               return `${context.label}: ${speedLabels[context.dataIndex]} tok/s`;
             }
           }

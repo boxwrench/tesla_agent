@@ -68,13 +68,13 @@ A model being fast does not make it a good agent. Many models suffer from "Prema
 ### C. The ROCm vs. Vulkan Split Reality
 There is no single "best" backend for Strix Halo; it is currently highly model-dependent.
 *   **ROCm Limitations:** ROCm 7.x on `gfx1151` currently lacks the `ggml_cuda_op_mul_mat` kernels required for **MXFP4** quantization at long contexts. Attempting to use MXFP4 past ~4k tokens on ROCm causes a hard driver abort.
-*   **Vulkan/RADV Capabilities:** The Mesa **RADV** Vulkan driver serves as a potent alternative, pushing Qwen 3.6 35B to **50.13 tok/s** decode mean.
+*   **Vulkan/RADV Capabilities:** The Mesa **RADV** Vulkan driver serves as a potent alternative. This May 2026 run measured Qwen 3.6 35B at **50.13 tok/s** decode mean; the current reference matrix now records a newer ~58.5 tok/s workhorse run plus opt-in MTP lanes at ~72.7-81.2 tok/s.
 *   **The Evaluation:** Your stack must be dual-backend capable. Test both ROCm and Vulkan to determine peak stability for a given Qwen variant.
 
 ### D. Speed Enhancements: What Actually Works (Local Qwen Focus)
 1.  **Flash Attention (`-fa on`):** **VERIFIED.** Essential for high-context runs. It significantly boosts prompt processing speeds across all tested Qwen models.
-2.  **DFlash (Speculative Decoding):** **VERIFIED.** Works excellently for MoE models, yielding substantial speedups when paired with a highly optimized drafter.
-3.  **MTP (Multi-Token Prediction):** **MIXED.** Works well for models with native MTP heads (like Qwen 3.6 27B), but `Qwen3-Coder-Next` lacks native MTP heads and will not benefit from llama.cpp's native MTP implementation.
+2.  **DFlash (Speculative Decoding):** **HISTORICAL / PATH-SPECIFIC.** Dense-model DFlash remains a useful technical result, but the current Qwen 35B MoE speed path is native MTP rather than a separate DFlash drafter.
+3.  **MTP (Multi-Token Prediction):** **VERIFIED FOR QWEN 3.6 35B-A3B-MTP.** Native MTP with `--spec-type draft-mtp` is the current opt-in MoE speed lane. `Qwen3-Coder-Next` still lacks native MTP heads and will not benefit from llama.cpp's native MTP implementation.
 4.  **`--no-mmap` flag:** **VERIFIED.** Prevents iGPU driver hangs and locks on RDNA 3.5 when models exceed 64GB.
 
 ---

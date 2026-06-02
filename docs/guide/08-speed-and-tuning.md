@@ -78,7 +78,9 @@ All values below are local Strix Halo results from the verified stack. Not unive
 
 | Model | Decode speed | Quality lane |
 |---|---:|---|
-| Qwen 3.6 35B-A3B MXFP4 (Vulkan/RADV) | **50.1 tok/s** | CODE/general baseline |
+| Qwen 3.6 35B-A3B Q4_K_M-MTP (Vulkan/RADV) | **~81.2 tok/s** | opt-in speed lane; won quality pairwise 4-2; human-check regulatory figures |
+| Qwen 3.6 35B-A3B MXFP4-MTP (Vulkan/RADV) | **~72.7 tok/s** | opt-in speed lane; same production quant |
+| Qwen 3.6 35B-A3B MXFP4 (Vulkan/RADV) | **~58.5 tok/s** | CODE/general baseline; workhorse default unchanged |
 | Qwen 3.5 35B-A3B MXFP4 (ROCm) | 47.3 tok/s | retained for regression tests |
 | gpt-oss-120B MXFP4 (Vulkan/RADV) | **~46 tok/s** | QUALITY baseline |
 | Qwen 3.6 35B-A3B MXFP4 (ROCm fallback) | ~44.2 tok/s | CODE baseline ROCm fallback |
@@ -94,11 +96,41 @@ All values below are local Strix Halo results from the verified stack. Not unive
 | Gemma 4 26B-A4B UD-Q6_K_XL | 40.11 tok/s mean *(not verified in public repo)* | Queued candidate — coding gate cleared, not Stable Stack |
 
 > [!NOTE]
-> **Why is Gemma 4 31B the slowest model in the verified stack?** Both Gemma 31B and Qwen 35B are roughly 25 GB in size, yet Qwen 35B runs ~6× faster on the same hardware. The reason is architecture: Qwen 35B is a Mixture-of-Experts model that activates only ~3B parameters per token, so each decode step reads far less weight data from memory. Gemma 31B is a **dense** model: every token requires reading all 31B parameters from the same bandwidth-constrained unified memory. On a memory-bandwidth-bound APU like Strix Halo, that difference collapses decode speed from ~50 tok/s (MoE) to ~8 tok/s (dense). Gemma 31B earns its place in the stack as a second-opinion lane for quality verification and cross-family comparison — not as a throughput model. Use it on the orchestrated path where quality of each step matters more than wall-clock time.
+> **Why is Gemma 4 31B the slowest model in the verified stack?** Both Gemma 31B and Qwen 35B are roughly 25 GB in size, yet Qwen 35B runs roughly 7× faster on the same hardware before any MTP opt-in. The reason is architecture: Qwen 35B is a Mixture-of-Experts model that activates only ~3B parameters per token, so each decode step reads far less weight data from memory. Gemma 31B is a **dense** model: every token requires reading all 31B parameters from the same bandwidth-constrained unified memory. On a memory-bandwidth-bound APU like Strix Halo, that difference collapses decode speed from ~58.5 tok/s (MoE workhorse) to ~8 tok/s (dense). Gemma 31B earns its place in the stack as a second-opinion lane for quality verification and cross-family comparison — not as a throughput model. Use it on the orchestrated path where quality of each step matters more than wall-clock time.
 
 ---
 
-## 4. Tuning Batch Sizes
+## 4. MTP self-speculative decoding (opt-in speed options)
+
+The Qwen3.6-35B-A3B-MTP GGUFs carry a native `nextn` head. Recent `llama-server` builds can use that head with `--spec-type draft-mtp` to self-speculate, so the model drafts and verifies candidate tokens without loading a separate draft model. The technique surfaced via the community [strix-halo-guide](https://github.com/hogeheer499-commits/strix-halo-guide) by hogeheer499; see the repository acknowledgments for credit and reproduction notes.
+
+This lane needs a recent llama.cpp build (at least the upstream MTP support from PR #22673; we reproduced on tag `b9360`) and a current `glslc`. The distro `glslc` 2023.8 was too old on the reference box; build shaderc from source or use a recent packaged shaderc. Serve with greedy decoding, F16 KV, Flash Attention on, and MTP flags:
+
+```bash
+llama-server \
+  --spec-type draft-mtp \
+  --spec-draft-n-max 2 \
+  -ub 1024 \
+  --poll 100 \
+  -fa on \
+  --cache-type-k f16 \
+  --cache-type-v f16
+```
+
+Measured on the reference Strix Halo box:
+
+| Lane | Decode | vs MXFP4 workhorse (~58.5 t/s) | Quality | Notes |
+|---|---:|---:|---|---|
+| MXFP4-MTP | ~72.7 t/s | +24% | = production (same quant) | safe default speed lane |
+| Q4_K_M-MTP | ~81.2 t/s | +39% | won quality pairwise 4-2 | human-check regulatory figures |
+
+The most aggressive speed-first quant, IQ4_XS-Q8nextn, is the source of the ~101 t/s community headline. It was too aggressive for this repo's quality bar: in our blind pairwise it lost 0-6 against the production model, so we did not ship it as a recommended lane. That is not a defect in the community work; the guide explicitly frames IQ4_XS as a speed-first quant. For water-treatment and regulatory work, the durable win is MTP itself, applied to quants that hold quality.
+
+One build caveat matters: simply updating llama.cpp did not speed up our MXFP4 model. A clean A/B was a wash because integer-dot shader acceleration does not apply to MXFP4's FP4 format. MTP is the lever, not the build bump.
+
+---
+
+## 5. Tuning Batch Sizes
 
 The server's logical batch size (`--batch-size`) and physical micro-batch size (`--ubatch-size`) control how prompt segments are loaded into memory.
 * For Strix Halo APUs, keep both set to **`2048`**.

@@ -6,8 +6,11 @@ Use this flowchart to select the optimal model, quantization, and reasoning sett
 graph TD
     Start["What is the primary task?"]
     
-    Start -->|Coding & Multi-Step Logic| Code["Qwen 3.6 35B MoE (Vulkan RADV)<br/>• CODE/general baseline<br/>• think-on, uncapped"]
+    Start -->|Coding & Multi-Step Logic| Code["Qwen 3.6 35B MoE (Vulkan RADV)<br/>• CODE/general baseline (~58.5 tok/s)<br/>• think-on, uncapped"]
     style Code fill:#ebf8ff,stroke:#2b6cb0,stroke-width:2px,color:#1a1f36
+
+    Code -->|Opt-in speed lane| MTP["Qwen3.6-35B-A3B-MTP<br/>• MXFP4-MTP ~72.7 tok/s<br/>• Q4_K_M-MTP ~81.2 tok/s<br/>• requires --spec-type draft-mtp"]
+    style MTP fill:#ecfeff,stroke:#0f766e,stroke-width:2px,color:#1a1f36
 
     Start -->|Cross-family second-opinion check| GemmaCode["Gemma 4 31B IT Q6_K<br/>• second-opinion lane (dense — slow decode)<br/>• use orchestrated path"]
     
@@ -25,5 +28,6 @@ graph TD
 ### Key Takeaway for Strix Halo (APU)
 * **Measured local gates now set the ladder.** Qwen remains a strong reasoning family and stays available, but the 2026-05-30 Strix Halo results promote gpt-oss-120B as the general QUALITY baseline and Gemma 4 31B as the second-opinion lane for quality verification (dense model — ~8 tok/s decode; use on orchestrated path, not as a throughput pick).
 * **Qwen 122B is no longer the default quality target.** It stays useful as a spot-specialist for regulatory-currency tasks and incisive plan review.
+* **MTP speed lanes are opt-in.** Qwen3.6-35B-A3B-MTP keeps the Qwen workhorse role but requires the MTP GGUFs, a recent llama.cpp build, and current shaderc / `glslc`.
 * **Gemma 26B-A4B is queued, not graduated.** It cleared the coding gate and has a narrow file-analysis niche, but Gemma 31B won the quality pairwise 4-2.
 * **Reasoning budgets are a *planning* lever, not a coding one.** Capping `thinking_budget_tokens` cuts wall-clock on prose/planning, but a budget sweep showed *any* cap drops the stateful coding gate to 1–2/3 (only uncapped think-on holds 3/3). Leave the coding route uncapped.

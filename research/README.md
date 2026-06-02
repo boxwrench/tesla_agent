@@ -7,7 +7,7 @@ These are the source-of-record documents. The Model Finder, decision tree, and r
 ## Strategic deep dives
 
 ### [Strategic Architecture for Frontier MoE Integration on AMD Strix Halo (gfx1151)](./strategic-architecture-frontier-moe-strix-halo.md)
-*Mitigating kernel failures, speculative decoding trade-offs, and agentic tool normalization.* 58 KB. The flagship piece. An architectural blueprint for deploying frontier Mixture-of-Experts models on 128 GB unified memory with a 96 GiB GTT cap — covers ROCm kernel deficits, why MoE speculative decoding fails on bandwidth-bound APUs while dense speculative decoding succeeds, and how to keep tool-calling discipline under the Hermes orchestration framework.
+*Mitigating kernel failures, speculative decoding trade-offs, and agentic tool normalization.* 58 KB. The flagship piece. An architectural blueprint for deploying frontier Mixture-of-Experts models on 128 GB unified memory with a 96 GiB GTT cap — covers ROCm kernel deficits, why the older separate-draft MoE speculative path failed while dense speculative decoding succeeded, and how to keep tool-calling discipline under the Hermes orchestration framework. For the newer Qwen MTP result, see the MTP case study below.
 
 ### [The Cognitive Dual-Stack: Engineering High-Performance Local Workflows](./cognitive-dual-stack-engineering-local-workflows.md)
 *From strategic prompt architectures to hardware-compiled runtimes.* 64 KB. The most general piece. Argues that local frontier-model deployment is a dual-stack problem: cognitive prompt architectures on top, hardware-specific compilation layers underneath, and neither stack can be optimized in isolation. Frames the engineering decisions readers face as a single system rather than a list of independent choices.
@@ -24,6 +24,9 @@ These are the source-of-record documents. The Model Finder, decision tree, and r
 *Targeted verification that resolved the open questions from round 1.* 13 KB. Reads on top of round 1; closes the loop on the claims that survived first-pass scrutiny.
 
 ## Methodology and framework
+
+### [MTP Self-Speculative Decoding on Strix Halo](./mtp-speculative-decoding-strix-halo.md)
+*Case study dated June 2026.* A concise methodology note on vetting a community speedup claim: reproduce the MTP pipeline from the strix-halo-guide, gate the quants on nonce/coding/quality, reject the speed-first IQ4_XS lane for this repo's quality bar, and ship the quality-preserving MXFP4-MTP and Q4_K_M-MTP options.
 
 ### [Comprehensive Agentic LLM Evaluation on AMD Strix Halo (128 GB)](./strix-halo-agentic-evaluation-report.md)
 *Evaluation report dated May 24, 2026.* 7 KB. The methodology piece — what was measured, how, and why each metric matters for local agentic workflows. Companion to the reproducibility matrix.
