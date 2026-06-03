@@ -34,11 +34,14 @@ The following table summarizes the speed and quality benchmarks run on the host 
 | **Qwen 3.6 35B MoE (ROCm)** | 21.7 GB | 32,768 | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | ROCm fallback backend |
 | **Qwen 3.5 122B MoE (MXFP4)** | 70.0 GB | 12,288 | **80 / 84** | **19.4 tok/s** (ROCm) | **3 / 3 Pass** | **QUALITY spot-specialist** for regulatory currency and sharp plan reviews |
 | **Qwen 3.5 122B MoE (MXFP4)** *think-off* | 70.0 GB | 12,288 | **81 / 84** | **19.5 tok/s** | **3 / 3 Pass** | Holds 3/3 coding even think-off |
+| **Qwen 3.5 122B MoE MTP (MXFP4_MOE)** | ~70 GB | 12,288 | **3-3 quality tie vs previous MTP config** | **28.3 tok/s** (Vulkan; pp 324.9 tok/s) | **3 / 3 Pass** | Tuned 122B speed lane: `DRAFT_N=1`, `PMIN` unset; coding PASS 5/5 E2E |
+| **StepFun Step-3.7-Flash MTP** | 88.79 GiB + 3.5 GB draft | 12,288 | Plain StepFun pairwise: **6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B** | **26.0 tok/s** (Vulkan; pp 211.2 tok/s) | **3 / 3 Pass** | Large-model QUALITY contender; independent calibration still needed before default promotion |
+| **StepFun Step-3.7-Flash plain** | 88.79 GiB | 16,384 gate / 32,768 coding | **6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B** | **20.4-22.3 tok/s** (Vulkan; pp 212.0 tok/s) | **3 / 3 Pass** | Large QUALITY contender baseline; coding 4/5 E2E |
 | **Gemma 4 26B-A4B IT UD-Q6_K_XL** | 21.2 GB | 32,768 | **2-4 vs Gemma 31B** | **44.8 tok/s tg128; pp512 1002.8 tok/s** | **3 / 3 Pass** | **Verified plain-control baseline**; simpler lane for general reasoning/JSON/prose |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** *think-on* | 16.4 GB | 32,768 | 0-6 vs 122B | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in stack;* break-glass option. DFlash → ~31 tok/s (2.82×) |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** *think-off* | 16.4 GB | 32,768 | — | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in stack* |
 | **Qwen 3.5 35B MoE (MXFP4)** | 21.0 GB | 8,192 | **79 / 84** | **47.3 tok/s** (ROCm) | **3 / 3 Pass** | Retained for regression tests |
-| **Qwen3-Coder-Next (UD-Q4_K_XL)** | 49.6 GB | 16,384 | — | 34.6 tok/s (ROCm) | 3 / 3 Pass | CODE challenger (128GB-class) |
+| **Qwen3-Coder-Next (UD-Q4_K_XL)** | 49.6 GB | 32,768 | orchestrated coding artifact: saved grader checks PASS | **44.4 tok/s** (Vulkan; pp 723.2 tok/s) | 3 / 3 Pass recorded | CODE challenger (128GB-class); Vulkan b9360 promoted |
 
 **Recommendation note:** Qwen remains a strong and widely favored reasoning family, but this guide's default ladder follows the local Strix Halo agent gates. As of the 2026-05-30 update, gpt-oss-120B is the measured general QUALITY baseline, Gemma 4 31B is the second-opinion lane (dense model — slow decode, ~8 tok/s; use on orchestrated path for quality verification), Gemma 26B-A4B is now a verified plain-control baseline (think-off, F16 KV) at ~44.8 tok/s tg128 / pp512 ~1003 tok/s, Qwen 3.6 35B remains the CODE/general baseline, and Qwen 122B moves to a spot-specialist role. The new MTP rows are opt-in speed lanes for the same Qwen 3.6 35B workhorse; they do not replace the default setup path.
 
@@ -56,6 +59,8 @@ The public setup guide starts with the 35B-class CODE baseline because it is the
 * **Opt-in MTP speed lane:** Qwen 3.6 35B-A3B Q4_K_M-MTP, SHA256 `be11d472527e5013290b09c1afc12694a326a4184eb97cf58fff579a671dddc3`
 * **Second-opinion lane (dense):** Gemma 4 31B IT Q6_K, SHA256 `abd0be03a2bc3f3c9d8e018cbb4ff5b553c340c65d49b6b346c48be5a1efde28`
 * **QUALITY baseline:** gpt-oss-120B MXFP4, three shards with per-shard SHA256 pins in [reproducibility-matrix.md](reproducibility-matrix.md)
+* **Large QUALITY contender:** StepFun Step-3.7-Flash UD-IQ4_XS plus optional `Step-3.7-Flash-MTP-Q8_0.gguf`; public source/checksum pins are still incomplete, so treat it as measured but not yet turnkey-reproducible from this public mirror alone.
+* **Tuned 122B MTP speed lane:** Qwen 3.5 122B-A10B MTP MXFP4_MOE, `DRAFT_N=1`, `PMIN` unset; public source/checksum pin still pending.
 * **Verified plain-control baseline:** Gemma 4 26B-A4B IT UD-Q6_K_XL, SHA256 `5cfb7ab424c01388538005f26573f3bd374d3140cc021a1c44249e69928882a4`
 
 ### **Inference Server Backend**

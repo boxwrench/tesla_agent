@@ -94,15 +94,20 @@ Below are the actual measured results across the different configurations. *Comm
 | **Qwen 3.6 35B MoE (ROCm)** | **21.7 GB** | 32,768 | **Off** | **82 / 84** | **43.7 tok/s** | **3 / 3 Pass** | Cuts wall-time in half for prose (falls to 1/3 coding E2E) |
 | **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **On** | **80 / 84** | **19.4 tok/s** (ROCm) | **3 / 3 Pass** | **QUALITY spot-specialist: regulatory currency and sharp plan review** |
 | **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **Off** | **81 / 84** | **19.5 tok/s** | **3 / 3 Pass** | Holds 3/3 coding even think-off |
+| **Qwen 3.5 122B MoE MTP (MXFP4_MOE, Vulkan RADV)** | **~70 GB** | 12,288 | **On** | quality parity: 3-3 tie vs prior MTP config | **28.3 tok/s**; pp **324.9 tok/s** | **3 / 3 Pass** | **Tuned 122B speed lane**: `DRAFT_N=1`, `PMIN` unset; coding PASS 5/5 E2E |
+| **StepFun Step-3.7-Flash MTP (UD-IQ4_XS + Q8_0 draft, Vulkan RADV)** | **88.79 GiB + 3.5 GB draft** | 12,288 | model-native | plain StepFun pairwise: 6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B | **26.0 tok/s**; pp **211.2 tok/s** | **3 / 3 Pass** | **Large-model QUALITY contender**; MTP acceptance 84.7%; independent calibration still needed before public default promotion |
+| **StepFun Step-3.7-Flash plain (UD-IQ4_XS, Vulkan RADV)** | **88.79 GiB** | 16,384 gate / 32,768 coding | model-native | 6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B | **20.4-22.3 tok/s**; pp **212.0 tok/s** | **3 / 3 Pass** | Large QUALITY contender baseline; coding 4/5 E2E |
 | **Gemma 4 26B-A4B IT (UD-Q6_K_XL)** | **21.2 GB** | 32,768 | Off | Pairwise: 2-4 vs Gemma 31B | **44.8 tok/s tg128; pp512 1002.8 tok/s** | **3 / 3 Pass** | **Verified plain-control baseline**; simpler lane for general reasoning/JSON/prose |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **On** | 0-6 vs Qwen 122B | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in the stack (see note)* |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **Off** | — | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in the stack* |
-| **Qwen3-Coder-Next (UD-Q4_K_XL)** | **49.6 GB** | 16,384 | **On** | — | **34.6 tok/s** (ROCm) | **3 / 3 Pass** | 128GB Coder Challenger |
+| **Qwen3-Coder-Next (UD-Q4_K_XL, Vulkan RADV)** | **49.6 GB** | 32,768 | Off | one orchestrated 4-step coding run: saved grader checks PASS | **44.4 tok/s**; pp **723.2 tok/s** | **3 / 3 Pass recorded** | 128GB Coder Challenger; Vulkan b9360 promoted over ROCm |
 
 > [!NOTE]
 > **MTP speed options are opt-in.** The Qwen3.6-35B-A3B-MTP GGUFs carry a native next-token prediction head, so recent `llama-server` builds can self-speculate with `--spec-type draft-mtp` and no separate draft model. The workhorse default remains the standard MXFP4 Qwen 3.6 35B lane. The speed technique was surfaced by the community [strix-halo-guide](https://github.com/hogeheer499-commits/strix-halo-guide); see the acknowledgments below and the [MTP case study](research/mtp-speculative-decoding-strix-halo.md).
 
 > **Gemma 4 26B-A4B plain control baseline:** The no-spec Vulkan lane with `--reasoning off` and F16 KV now measures `pp512 ~1003 tok/s` and `tg128 ~44.8 tok/s` with Hermes nonce 3/3. It is the simpler lane for general reasoning, JSON extraction, and prose; the MTP comparison only pays off on heavy code generation.
+
+> **Latest large-model MTP lanes:** Qwen 122B MTP now has a tuned Vulkan profile (`DRAFT_N=1`, `PMIN` unset) at **28.3 tok/s** decode with **81.8%** MTP-probe acceptance. StepFun Step-3.7-Flash MTP reaches **26.0 tok/s** decode with **84.7%** raw timing acceptance, but `bench.json` leaves `mtp.acceptance_pct` null, so the acceptance source is the raw `tg_probe.json` counters.
 
 > [!NOTE]
 > **The dense Qwen 3.6 27B is benchmarked but NOT in the production stack** — community discussion often treats it as a strong reasoner, but the local Strix Halo gates did not corroborate that for this workflow. A blind quality pairwise put it 0-6 against the 122B on the standard prompt set, and tested backends remained around 9.6-11.5 tok/s for normal decode. It remains a break-glass *"arrow in the quiver"* for tough, blocked projects where trying a different dense trace might help, **not a first- or second-line choice.**

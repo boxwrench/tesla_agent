@@ -145,6 +145,17 @@ function initModelFinder() {
       hermes: "max_tokens: 8192",
       rationale: "First reach for any coding or multi-step agent task. Best balance of reasoning quality and speed on a 128 GB APU (82/84 rubric, 3/3 nonce gate). Vulkan/RADV is the promoted backend; ROCm is the fallback. The optional Qwen3.6-35B-A3B-MTP GGUF lanes use --spec-type draft-mtp for +24-39% decode speed after separate quality gating. Keep the standard MXFP4 workhorse as the default setup path unless you are deliberately opting into MTP."
     },
+    'code-coder-next': {
+      name: "Qwen3-Coder-Next (UD-Q4_K_XL)",
+      mode: "CODE — hard-coding challenger",
+      file: "Qwen3-Coder-Next-UD-Q4_K_XL.gguf",
+      size: "49.6 GB",
+      speed: "44.4 tokens/sec decode; 723.2 tokens/sec prefill (Vulkan/RADV b9360)",
+      reasoning: "Reasoning off in promoted run; orchestrated 4-step coding artifact passed saved grader checks",
+      command: "BACKEND=vulkan PORT=8097 scripts/serve/qwen3_coder_next_serve.sh",
+      hermes: "max_tokens: 8192\nctx_size: 32768",
+      rationale: "Use when the task is explicitly code-heavy and you want a coding-specialized MoE route. Vulkan b9360 promoted over the older ROCm row: 44.4 t/s decode and 723.2 t/s prefill versus ROCm 38.5/663.4. The saved result is one orchestrated 4-step coding task with all grader checks passing, not five independent E2E runs."
+    },
     'code-peer': {
       name: "Gemma 4 31B IT (Q6_K)",
       mode: "EXPERIMENT — Gemma dense (orchestrated; ~8 tok/s decode)",
@@ -179,15 +190,26 @@ function initModelFinder() {
       rationale: "The current general quality baseline after blinded pairwise wins of 5-1 vs Qwen 35B and 4-2 vs Qwen 122B (single judge, seed-fixed A/B order). Requires the 'draft with illustrative assumptions' system prompt; pre-prompt behavior was deflection-with-checklist (the 3-3 pre-fix pairwise vs 35B measured the prompt bug, not the model). Use for master-plan reports, research synthesis, multi-document summarization."
     },
     'synthesis-specialist': {
-      name: "Qwen 3.5 122B-A10B (MXFP4)",
+      name: "Qwen 3.5 122B-A10B MTP (MXFP4_MOE)",
       mode: "SYNTHESIS — regulatory specialist",
-      file: "Qwen3.5-122B-A10B-MXFP4_MOE.gguf",
-      size: "70.0 GB (fits GTT memory limits at ctx 12,288)",
-      speed: "~19.4 tokens/sec (ROCm)",
-      reasoning: "Deep reasoning active; think-off variant holds the coding gate 3/3",
-      command: "bash scripts/serving/serve_rocm.sh --model ~/models/Qwen3.5-122B-A10B-MXFP4_MOE.gguf --ctx-size 12288",
-      hermes: "thinking_budget_tokens: 1024\nmax_tokens: 8192",
-      rationale: "Reserved as a QUALITY spot-specialist after gpt-oss-120B took the general baseline. Reach for it on regulatory-currency tasks (EPA April-2024 PFAS NPDWR framing, state DEQ rule synthesis) and incisive plan reviews where the 122B's wider knowledge base earns its decode cost. 80-81/84 rubric, 3/3 nonce."
+      file: "Qwen3.5-122B-A10B-MTP-MXFP4_MOE.gguf",
+      size: "~70 GB (ctx 12,288 safe cap)",
+      speed: "28.3 tokens/sec decode; 324.9 tokens/sec prefill (Vulkan/RADV b9360)",
+      reasoning: "Deep reasoning active; tuned MTP uses DRAFT_N=1 and PMIN unset",
+      command: "DRAFT_N=1 PORT=8098 bash scripts/qwen122b_mtp_vulkan_serve.sh",
+      hermes: "max_tokens: 8192\nctx_size: 12288",
+      rationale: "Reserved as a QUALITY spot-specialist for regulatory-currency tasks and incisive plan review. The tuned native-MTP Vulkan lane lifts the old 19.4 t/s ROCm route to 28.3 t/s with 81.8% MTP-probe acceptance and coding PASS 5/5 E2E. DRAFT_N=2 remains slightly better for two-slot aggregate, but DRAFT_N=1 wins single-stream responsiveness."
+    },
+    'synthesis-stepfun': {
+      name: "StepFun Step-3.7-Flash MTP",
+      mode: "SYNTHESIS — large contender",
+      file: "Step-3.7-Flash-UD-IQ4_XS + Step-3.7-Flash-MTP-Q8_0.gguf",
+      size: "88.79 GiB main + 3.5 GB draft",
+      speed: "26.0 tokens/sec decode; 211.2 tokens/sec prefill (patched Vulkan b9360)",
+      reasoning: "Model-native template; no Qwen-style think toggle",
+      command: "bash scripts/serve/stepfun_mtp_vulkan_serve.sh",
+      hermes: "max_tokens: 8192\nctx_size: 12288",
+      rationale: "Use as a large-model quality contender when the task merits spending the 26 t/s tier. Private pairwise favored plain StepFun 6-0 vs gpt-oss-soulfix and 4-0-2 vs 122B, and the MTP lane passed nonce 3/3 plus coding PASS 5/5 E2E. It should not become the public default until an independent judge/calibration pass confirms the pairwise result. Artificial Analysis lists Step 3.7 Flash at Intelligence Index 43."
     },
     'companion': {
       name: "Gemma 4 26B-A4B IT (UD-Q6_K_XL)",
@@ -248,30 +270,31 @@ function initBenchmarkChart() {
   const ctx = document.getElementById('benchmarkChart');
   if (!ctx) return;
 
-  // Decode speed leaderboard. Quality evidence is shown in the benchmark table.
-  const chartData = {
-    labels: [
-      'Qwen 35B',
-      'Qwen 35B MTP',
-      'Qwen 35B Q4 MTP',
-      'gpt-oss 120B',
-      'Gemma 26B control',
-      'Qwen3-Coder',
-      'Qwen 122B',
-      'Qwen 27B Dense',
-      'Gemma 31B (dense)'
-    ],
-    datasets: [{
-      label: 'Decode tok/s',
-      data: [58.5, 72.7, 81.2, 46, 44.8, 34.6, 19.4, 9.6, 8.25],
-      backgroundColor: ['#2b6cb0', '#0f766e', '#115e59', '#14532d', '#2563eb', '#718096', '#7c2d12', '#7f1d1d', '#553c7b'],
-      borderRadius: 6
-    }]
-  };
+  const benchModels = [
+    { label: 'Qwen 35B Q4 MTP', decode: 81.2, prefill: null, intelligence: 43.5, coding: 35.2, source: 'AA Intelligence + AA Coding; local Tesla bench speed', tier: 'code-speed', color: '#115e59' },
+    { label: 'Qwen 35B MTP', decode: 72.7, prefill: null, intelligence: 43.5, coding: 35.2, source: 'AA Intelligence + AA Coding; local Tesla bench speed', tier: 'code-speed', color: '#0f766e' },
+    { label: 'Qwen 35B', decode: 58.5, prefill: 932.1, intelligence: 43.5, coding: 35.2, source: 'AA Intelligence + AA Coding; local Tesla bench speed', tier: 'workhorse', color: '#2b6cb0' },
+    { label: 'gpt-oss 120B', decode: 46.0, prefill: null, intelligence: 33.3, coding: 28.6, source: 'AA Intelligence + AA Coding; local Tesla bench speed', tier: 'quality', color: '#14532d' },
+    { label: 'Gemma 26B', decode: 44.8, prefill: 1002.8, intelligence: 27.1, coding: 29.1, source: 'AA non-reasoning Intelligence + Coding; local Tesla bench speed', tier: 'companion', color: '#2563eb' },
+    { label: 'Qwen 122B MTP', decode: 28.3, prefill: 324.9, intelligence: 42.0, coding: 34.7, source: 'AA Intelligence + provider-surfaced AA Coding; local Tesla bench speed', tier: 'specialist', color: '#c2410c' },
+    { label: 'StepFun 3.7 MTP', decode: 26.0, prefill: 211.2, intelligence: 43.0, coding: 56.3, source: 'AA Intelligence; StepFun SWE-Bench Pro proxy for coding; local Tesla bench speed', tier: 'large-contender', color: '#b45309' },
+    { label: 'StepFun 3.7 plain', decode: 20.4, prefill: 212.0, intelligence: 43.0, coding: 56.3, source: 'AA Intelligence; StepFun SWE-Bench Pro proxy for coding; local Tesla bench speed', tier: 'large-contender', color: '#92400e' },
+    { label: 'Qwen 122B', decode: 19.4, prefill: 136.0, intelligence: 42.0, coding: 34.7, source: 'AA Intelligence + provider-surfaced AA Coding; local Tesla bench speed', tier: 'specialist', color: '#7c2d12' },
+    { label: 'Qwen 27B Dense', decode: 9.6, prefill: null, intelligence: 45.8, coding: 36.5, source: 'AA Intelligence + AA Coding; local Tesla bench speed', tier: 'experimental', color: '#7f1d1d' },
+    { label: 'Gemma 31B', decode: 8.25, prefill: 133.6, intelligence: 39.2, coding: 38.7, source: 'AA reasoning Intelligence + Coding; local Tesla bench speed', tier: 'dense', color: '#553c7b' }
+  ];
 
   new Chart(ctx, {
     type: 'bar',
-    data: chartData,
+    data: {
+      labels: benchModels.map(model => model.label),
+      datasets: [{
+        label: 'Local decode tok/s',
+        data: benchModels.map(model => model.decode),
+        backgroundColor: benchModels.map(model => model.color),
+        borderRadius: 6
+      }]
+    },
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -305,14 +328,157 @@ function initBenchmarkChart() {
         tooltip: {
           callbacks: {
             label: function(context) {
-              const speedLabels = ['~58.5', '~72.7 MTP', '~81.2 Q4_K_M-MTP', '~46', '~44.8 tg128', '34.6', '19.4', '9.6-11.5', '~8.25 tg128 (dense)'];
-              return `${context.label}: ${speedLabels[context.dataIndex]} tok/s`;
+              const model = benchModels[context.dataIndex];
+              const prefill = model.prefill ? `; prefill ${model.prefill} tok/s` : '';
+              return `${context.label}: ${model.decode} tok/s decode${prefill}`;
             }
           }
         }
       }
     }
   });
+
+  const intelligenceCtx = document.getElementById('intelligenceChart');
+  if (intelligenceCtx) {
+    new Chart(intelligenceCtx, {
+      type: 'scatter',
+      data: {
+        datasets: benchModels.map(model => ({
+          label: model.label,
+          data: [{ x: model.intelligence, y: model.decode }],
+          pointRadius: model.tier === 'large-contender' ? 8 : 6,
+          pointHoverRadius: 10,
+          backgroundColor: model.color
+        }))
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: { display: true, text: 'Artificial Analysis Intelligence Index', color: '#4a5568', font: { family: 'Outfit', weight: 'bold' } },
+            min: 25,
+            max: 47,
+            grid: { color: 'rgba(26, 31, 54, 0.08)' },
+            ticks: { color: '#4a5568' }
+          },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Local Decode Speed (tok/s)', color: '#4a5568', font: { family: 'Outfit', weight: 'bold' } },
+            grid: { color: 'rgba(26, 31, 54, 0.08)' },
+            ticks: { color: '#4a5568' }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const model = benchModels.find(entry => entry.label === context.dataset.label);
+                return `${model.label}: intelligence ${model.intelligence}, coding ${model.coding}, local ${model.decode} tok/s`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  const efficiencyCtx = document.getElementById('efficiencyChart');
+  const codingCtx = document.getElementById('codingChart');
+  if (codingCtx) {
+    const codingModels = benchModels.filter(model => model.coding !== null);
+
+    new Chart(codingCtx, {
+      type: 'scatter',
+      data: {
+        datasets: codingModels.map(model => ({
+          label: model.label,
+          data: [{ x: model.coding, y: model.decode }],
+          pointRadius: model.tier === 'large-contender' ? 8 : 6,
+          pointHoverRadius: 10,
+          backgroundColor: model.color
+        }))
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            title: { display: true, text: 'External Coding Score', color: '#4a5568', font: { family: 'Outfit', weight: 'bold' } },
+            min: 20,
+            max: 60,
+            grid: { color: 'rgba(26, 31, 54, 0.08)' },
+            ticks: { color: '#4a5568' }
+          },
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Local Decode Speed (tok/s)', color: '#4a5568', font: { family: 'Outfit', weight: 'bold' } },
+            grid: { color: 'rgba(26, 31, 54, 0.08)' },
+            ticks: { color: '#4a5568' }
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const model = codingModels.find(entry => entry.label === context.dataset.label);
+                return `${model.label}: coding ${model.coding}, local ${model.decode} tok/s; ${model.source}`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+  if (efficiencyCtx) {
+    const efficiencyModels = benchModels
+      .map(model => ({ ...model, efficiency: Number((model.decode / model.coding).toFixed(2)) }))
+      .sort((a, b) => b.efficiency - a.efficiency);
+
+    new Chart(efficiencyCtx, {
+      type: 'bar',
+      data: {
+        labels: efficiencyModels.map(model => model.label),
+        datasets: [{
+          label: 'Local decode tok/s per coding point',
+          data: efficiencyModels.map(model => model.efficiency),
+          backgroundColor: efficiencyModels.map(model => model.color),
+          borderRadius: 6
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            beginAtZero: true,
+            title: { display: true, text: 'tok/s per coding point', color: '#4a5568', font: { family: 'Outfit', weight: 'bold' } },
+            grid: { color: 'rgba(26, 31, 54, 0.08)' },
+            ticks: { color: '#4a5568' }
+          },
+          y: {
+            grid: { color: 'rgba(26, 31, 54, 0.04)' },
+            ticks: { color: '#4a5568' }
+          }
+        },
+        plugins: {
+          legend: { labels: { color: '#1a1f36', font: { family: 'Outfit' } } },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const model = efficiencyModels[context.dataIndex];
+                return `${model.efficiency} tok/s per coding point (${model.decode} tok/s / coding ${model.coding}; ${model.source})`;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
 }
 
 /* ================= 11-Chapter Guide Logic ================= */

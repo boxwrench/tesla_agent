@@ -489,6 +489,11 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                     <span class="radio-desc">First reach for coding/agent tasks. Qwen 3.6 35B MoE on Vulkan. ~58.5 t/s workhorse; optional MTP speed lane +24–39%.</span>
                   </label>
                   <label class="radio-card">
+                    <input type="radio" name="finder-priority" value="code-coder-next">
+                    <span class="radio-title">CODE — hard-coding challenger</span>
+                    <span class="radio-desc">Qwen3-Coder-Next on Vulkan b9360. 44.4 t/s decode, 723.2 t/s prefill, orchestrated coding artifact passes saved grader checks.</span>
+                  </label>
+                  <label class="radio-card">
                     <input type="radio" name="finder-priority" value="code-peer">
                     <span class="radio-title">EXPERIMENT — Gemma dense (orchestrated, slow decode)</span>
                     <span class="radio-desc">Cross-family second opinion; orchestrated multi-step pattern required. Gemma 4 31B IT. ~8.25 tok/s decode (dense model — slow; prefill ~133.6 tok/s).</span>
@@ -506,7 +511,12 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="synthesis-specialist">
                     <span class="radio-title">SYNTHESIS — regulatory specialist</span>
-                    <span class="radio-desc">Regulatory currency (EPA NPDWRs, state DEQ rules), incisive plan reviews. Qwen 3.5 122B-A10B. 19.4 t/s, 80–81/84.</span>
+                    <span class="radio-desc">Regulatory currency and incisive plan reviews. Qwen 3.5 122B-A10B MTP. 28.3 t/s tuned Vulkan, 81.8% MTP-probe acceptance.</span>
+                  </label>
+                  <label class="radio-card">
+                    <input type="radio" name="finder-priority" value="synthesis-stepfun">
+                    <span class="radio-title">SYNTHESIS — large contender</span>
+                    <span class="radio-desc">StepFun Step-3.7-Flash MTP. 26.0 t/s local decode, AA Intelligence 43, strong private pairwise; independent calibration still needed.</span>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="companion">
@@ -571,12 +581,12 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
           <div class="grid-2col">
             <div class="card">
               <h2>Strix Halo Benchmark Matrix</h2>
-              <p>Performance comparison on AMD APU system (128GB total RAM, 96GB GTT allocated):</p>
+              <p>Performance comparison on AMD APU system (128GB total RAM, 96-112GB GTT allocated depending run):</p>
               <div class="stack-note-box" style="background: rgba(26, 31, 54, 0.03); border: 1px solid rgba(26, 31, 54, 0.08); padding: 12px; border-radius: 8px; margin-bottom: 16px;">
                 <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
                   <strong style="color: var(--text-primary);"><i class="fa-solid fa-layer-group"></i> Benchmark Stack:</strong><br>
-                  • <strong>Hardware:</strong> AMD Ryzen Strix Halo APU (gfx1151), 128 GB LPDDR5X RAM (96 GB GTT allocated)<br>
-                  • <strong>Backend:</strong> llama.cpp/llama-server (<code style="color: var(--accent-cyan); font-weight: 600;">b9247</code>; opt-in MTP reproduced on <code style="color: var(--accent-cyan); font-weight: 600;">b9360</code>) served via ROCm 7.2.x / Vulkan (Mesa RADV 25.2.8)<br>
+                  • <strong>Hardware:</strong> AMD Ryzen Strix Halo APU (gfx1151), 128 GB LPDDR5X RAM (96-112 GB GTT ceiling depending model)<br>
+                  • <strong>Backend:</strong> llama.cpp/llama-server (<code style="color: var(--accent-cyan); font-weight: 600;">b9247</code>; Vulkan/MTP lanes reproduced on <code style="color: var(--accent-cyan); font-weight: 600;">b9360</code>) served via ROCm 7.2.x / Vulkan (Mesa RADV 25.2.8)<br>
                   • <strong>Parameters:</strong> Temp = 0 (greedy decoding), context budget = 8k-32k, Flash Attention enabled
                 </p>
               </div>
@@ -670,6 +680,27 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                        <td>19.5 t/s</td>
                        <td class="pass">3 / 3</td>
                      </tr>
+                     <tr class="highlighted-row">
+                       <td>Qwen 3.5 122B MTP (MXFP4_MOE, Vulkan RADV) — tuned speed lane</td>
+                       <td>~70 GB</td>
+                       <td>3-3 quality tie vs previous MTP config</td>
+                       <td>28.3 t/s<br><small style="opacity:0.7">pp 324.9 t/s; DRAFT_N=1, PMIN unset</small></td>
+                       <td class="pass">3 / 3</td>
+                     </tr>
+                     <tr class="highlighted-row">
+                       <td>StepFun Step-3.7-Flash MTP — large QUALITY contender</td>
+                       <td>88.79 GiB + 3.5 GB draft</td>
+                       <td>plain StepFun: 6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B</td>
+                       <td>26.0 t/s<br><small style="opacity:0.7">pp 211.2 t/s; 84.7% raw MTP acceptance</small></td>
+                       <td class="pass">3 / 3</td>
+                     </tr>
+                     <tr>
+                       <td>StepFun Step-3.7-Flash plain — large contender baseline</td>
+                       <td>88.79 GiB</td>
+                       <td>6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B</td>
+                       <td>20.4-22.3 t/s<br><small style="opacity:0.7">pp 212.0 t/s; coding 4/5 E2E</small></td>
+                       <td class="pass">3 / 3</td>
+                     </tr>
                     <tr style="opacity:0.7;">
                        <td>Qwen 3.6 27B Dense (UD-Q4_K_XL, Think-On) <em>— experimental, not in stack</em></td>
                        <td>16.4 GB</td>
@@ -685,26 +716,41 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                        <td class="fail">1 / 3</td>
                      </tr>
                     <tr>
-                      <td>Qwen3-Coder-Next (UD-Q4_K_XL)</td>
+                      <td>Qwen3-Coder-Next (UD-Q4_K_XL, Vulkan RADV)</td>
                       <td>49.6 GB</td>
-                      <td>—</td>
-                      <td>34.6 t/s</td>
+                      <td>saved orchestrated coding artifact passes grader checks</td>
+                      <td>44.4 t/s<br><small style="opacity:0.7">pp 723.2 t/s; b9360 promoted</small></td>
                       <td class="pass">3 / 3</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
               <p class="sub-text" style="margin-top:12px;"><strong>Note — MTP speed lanes are opt-in.</strong> The Qwen3.6-35B-A3B-MTP GGUFs carry a native nextn head, so llama-server can self-speculate with <code>--spec-type draft-mtp</code> and no separate draft model. The technique surfaced via the community <a href="https://github.com/hogeheer499-commits/strix-halo-guide" target="_blank" rel="noopener">strix-halo-guide</a>; this repo independently reproduced and quality-gated the MXFP4-MTP and Q4_K_M-MTP lanes. Full audit trail: <a href="https://github.com/boxwrench/tesla_agent/blob/main/reference/reproducibility-matrix.md" target="_blank" rel="noopener">Reproducibility Matrix &amp; Technical Deep-Dive</a>.</p>
+              <p class="sub-text" style="margin-top:12px;"><strong>Latest large-model MTP lanes.</strong> Qwen 122B MTP now has a tuned Vulkan profile at <strong>28.3 t/s</strong> decode with <strong>81.8%</strong> MTP-probe acceptance. StepFun Step-3.7-Flash MTP reaches <strong>26.0 t/s</strong> decode with <strong>84.7%</strong> raw timing acceptance; its aggregate <code>bench.json</code> acceptance field is null, so the source is raw timing counters.</p>
               <p class="sub-text" style="margin-top:12px;"><strong>Gemma 4 26B-A4B plain control baseline.</strong> The no-spec Vulkan lane with <code>--reasoning off</code> and F16 KV measures <strong>pp512 1002.76 &plusmn; 10.29 t/s</strong> and <strong>tg128 44.76 &plusmn; 0.90 t/s</strong> with Hermes nonce 3/3. It is the simpler lane for general reasoning, JSON extraction, and prose; the MTP comparison only pays off on heavy code generation.</p>
               <p class="sub-text" style="margin-top:12px;"><strong>Note — the dense 27B is benchmarked but NOT in the production stack.</strong> Community discussion often treats Qwen 27B as a strong reasoner, but the local Strix Halo benches did not support that routing choice: blind pairwise was 0&ndash;6 vs the 122B and normal decode tested around 9.6&ndash;11.5 t/s. It is kept as a break-glass option for tough, blocked projects, not a first- or second-line model. <em>Technical aside:</em> DFlash speculative decoding lifts its floor to <strong>~31 t/s (2.82&times;)</strong> with a footprint-minimized Q4_K_M draft.</p>
             </div>
 
             <div class="card">
               <h2>Visual Performance Analysis</h2>
-              <p class="sub-text">Decode speed leaderboard; quality evidence is in the benchmark table and reproducibility matrix:</p>
+              <p class="sub-text">Local Strix Halo speed plus external intelligence and coding scores. Artificial Analysis scores measure cloud/API model capability; local speed is this repo's llama.cpp/Vulkan/ROCm benchmark, so treat the combined view as a routing map, not a universal leaderboard.</p>
+              <h3>Local Decode Leaderboard</h3>
               <div class="chart-container">
                 <canvas id="benchmarkChart"></canvas>
               </div>
+              <h3 style="margin-top: 24px;">External Intelligence vs. Local Decode</h3>
+              <div class="chart-container" style="margin-top: 24px;">
+                <canvas id="intelligenceChart"></canvas>
+              </div>
+              <h3 style="margin-top: 24px;">External Coding Score vs. Local Decode</h3>
+              <div class="chart-container" style="margin-top: 24px;">
+                <canvas id="codingChart"></canvas>
+              </div>
+              <h3 style="margin-top: 24px;">Local Speed Per Coding Point</h3>
+              <div class="chart-container" style="margin-top: 24px;">
+                <canvas id="efficiencyChart"></canvas>
+              </div>
+              <p class="sub-text" style="margin-top:12px;"><strong>Credit and source notes.</strong> Intelligence scores are credited to <a href="https://artificialanalysis.ai/leaderboards/models" target="_blank" rel="noopener">Artificial Analysis</a>. Coding scores use Artificial Analysis Coding Index where available; for StepFun Step 3.7 Flash, the crawl exposed AA Intelligence but not AA Coding Index, so the coding marker is StepFun's published SWE-Bench Pro score and is labeled separately. Local speed, prefill, nonce, and coding-gate rows are this repo's Strix Halo measurements. MTP technique credit remains with <a href="https://github.com/hogeheer499-commits/strix-halo-guide" target="_blank" rel="noopener">strix-halo-guide</a> where noted.</p>
             </div>
           </div>
 

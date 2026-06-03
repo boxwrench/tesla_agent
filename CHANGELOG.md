@@ -29,6 +29,13 @@ guidance, or web-dashboard behavior should be listed.
   `archive/public-sync-pre-2026-06-03`.
 - Added `REPO_MAP.md` to make canonical sources explicit for humans and
   machine agents without changing public dashboard paths.
+- Updated the public performance matrix with private-repo verified rows for
+  Qwen 122B MTP tuning, StepFun Step-3.7-Flash MTP/plain, and Qwen3-Coder-Next
+  Vulkan b9360.
+- Updated the dashboard recommender and visual analysis with local speed rows
+  plus credited external intelligence/coding scores from Artificial Analysis
+  where available; StepFun coding proxy is labeled as StepFun-published rather
+  than AA Coding Index.
 
 ### Benchmark Framing
 

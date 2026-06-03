@@ -57,6 +57,9 @@ The following models are used in the reference tests. Download paths are pinned 
 | **Gemma 4 31B IT** | GGUF (Q6_K) | `gemma-4-31B-it-Q6_K.gguf` | 25.2 GB | Unsloth GGUF release | `abd0be03a2bc3f3c9d8e018cbb4ff5b553c340c65d49b6b346c48be5a1efde28` |
 | **gpt-oss-120B** | GGUF (MXFP4, 3 shards) | `gpt-oss-120b-mxfp4-0000{1..3}-of-00003.gguf` | ~63 GB | Unsloth GGUF release | shard pins below |
 | **Qwen 3.5 122B MoE** | GGUF (MXFP4) | `Qwen3.5-122B-A10B-MXFP4_MOE.gguf` | 70.0 GB | [unsloth/Qwen3.5-122B-A10B-GGUF](https://huggingface.co/unsloth/Qwen3.5-122B-A10B-GGUF) | *(unpinned — not on local disk; verify against source)* |
+| **Qwen 3.5 122B MoE MTP** | GGUF (MXFP4_MOE, native MTP) | `Qwen3.5-122B-A10B-MTP-MXFP4_MOE.gguf` | ~70 GB | source pin pending in public mirror | *(unpinned — private benchmark artifact; publish checksum before external reproduction claim)* |
+| **StepFun Step-3.7-Flash** | GGUF (UD-IQ4_XS, 3 shards) | `Step-3.7-Flash-UD-IQ4_XS-00001-of-00003.gguf` | 88.79 GiB | source pin pending in public mirror | *(download verified locally; public checksum pending)* |
+| **StepFun Step-3.7-Flash MTP draft** | GGUF (Q8_0 draft) | `Step-3.7-Flash-MTP-Q8_0.gguf` | 3.5 GB | [notSnix/Step-3.7-Flash-Q4_K_M-MTP-GGUF](https://huggingface.co/notSnix/Step-3.7-Flash-Q4_K_M-MTP-GGUF) | *(download verified locally; public checksum pending)* |
 | **Gemma 4 26B-A4B IT** | GGUF (UD-Q6_K_XL) | `gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf` | 21.2 GB | Unsloth GGUF release | `5cfb7ab424c01388538005f26573f3bd374d3140cc021a1c44249e69928882a4` |
 | **Qwen3-Coder-Next** | GGUF (UD-Q4_K_XL) | `Qwen3-Coder-Next-UD-Q4_K_XL.gguf` | 49.6 GB | [unsloth/Qwen3-Coder-Next-GGUF](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) | `4bb93f0a0221ef4ff963ca9094df629c8dfdfabc3b4fdd85c1a2e4c0624fce36` |
 | **Qwen 3.5 35B MoE** | GGUF (MXFP4) | `Qwen3.5-35B-A3B-MXFP4_MOE.gguf` | 21.0 GB | [unsloth/Qwen3.5-35B-A3B-GGUF](https://huggingface.co/unsloth/Qwen3.5-35B-A3B-GGUF) | `0f135a59159030f4710477abc6f9922d2f13552c85bff736deaaef71023cd770` |
@@ -112,14 +115,20 @@ Benchmarks are measured in tokens/second (generation/decode speed) and quality s
 | **Qwen 3.6 35B MoE (Think-Off)** | ROCm 7.2.x | **82 / 84** | **43.7 tok/s** | ~628.1 tok/s | 21.7 GB | **3 / 3 Pass** |
 | **Qwen 3.5 122B MoE (Think-On)** — QUALITY spot-specialist | ROCm 7.2.x | **80 / 84** | **19.4 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
 | **Qwen 3.5 122B MoE (Think-Off)** | ROCm 7.2.x | **81 / 84** | **19.5 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
+| **Qwen 3.5 122B MoE MTP (DRAFT_N=1, PMIN unset)** — tuned Vulkan lane | **Vulkan RADV, llama.cpp b9360** | **80-81 / 84 role preserved; 3-3 quality tie vs previous MTP config** | **28.3 tok/s** | **324.9 tok/s** | ~70 GB | **3 / 3 Pass; coding PASS 5/5 E2E** |
+| **StepFun Step-3.7-Flash + Q8_0 MTP draft** — large QUALITY contender | **Vulkan RADV, patched llama.cpp b9360** | **Plain StepFun pairwise: 6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B; independent calibration still needed** | **26.0 tok/s** | **211.2 tok/s** | 88.79 GiB + 3.5 GB draft | **3 / 3 Pass; coding PASS 5/5 E2E** |
+| **StepFun Step-3.7-Flash plain** — large QUALITY contender baseline | Vulkan RADV, llama.cpp b9360 | **6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B; do not auto-graduate without independent judge** | **20.4-22.3 tok/s** | **212.0 tok/s** | 88.79 GiB | **3 / 3 Pass; coding 4/5 E2E** |
 | **Gemma 4 26B-A4B IT UD-Q6_K_XL** *(verified plain-control baseline; think-off)* | Vulkan RADV | **Pairwise 2-4 vs Gemma 31B** | **44.76 ± 0.90 tok/s** | **pp512 1002.76 ± 10.29 tok/s** | 21.2 GB | **3 / 3 Pass** |
 | **Qwen 3.6 27B Dense (Think-On)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | **0-6 vs Qwen 122B** | **9.6-11.5 tok/s** tested normal decode | not captured in stable run | 16.4 GB | **3 / 3 Pass** (coding 3/3) |
 | **Qwen 3.6 27B Dense (Think-Off)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | — | **9.6-11.5 tok/s** tested normal decode | not captured in stable run | 16.4 GB | **3 / 3 Pass** (coding 1/3) |
 | **Qwen 3.6 27B Dense + DFlash spec.** *(experimental)* | Lucebox HIP (Q4_K_M draft) | — | **~31.3 tok/s (2.82×)** | see acceptance table below | ~16 GB | discipline-limited |
 | **Qwen 3.5 35B MoE (Think-On)** | ROCm 7.2.x | **79 / 84** | **47.3 tok/s** | ~562.9 tok/s | 21.0 GB | **3 / 3 Pass** |
-| **Qwen3-Coder-Next (Think-On)** | ROCm 7.2.x | — | **34.6 tok/s** | ~127.0 tok/s | 49.6 GB | **3 / 3 Pass** |
+| **Qwen3-Coder-Next (reasoning off)** — Vulkan promoted | **Vulkan RADV, llama.cpp b9360** | **One orchestrated 4-step coding run: all saved grader checks PASS** | **44.4 tok/s** | **723.2 tok/s** | 49.6 GB | **3 / 3 Pass recorded** |
+| **Qwen3-Coder-Next (reasoning off)** — ROCm fallback | ROCm 7.2.x | baseline only | **38.5 tok/s** | **663.4 tok/s** | 49.6 GB | **3 / 3 Pass recorded** |
 
-> **Stable Stack update (2026-05-30):** gpt-oss-120B is now the general QUALITY baseline after blinded pairwise wins of 5-1 vs Qwen 35B and 4-2 vs Qwen 122B. Qwen 122B is retained as a QUALITY spot-specialist for regulatory-currency work and sharp plan reviews. Gemma 4 31B is the cross-family second-opinion lane (coding experiment — quality verification, not throughput); Gemma 26B-A4B is now a verified plain-control baseline (think-off, F16 KV) at 44.76 ± 0.90 tok/s tg128 / pp512 1002.76 ± 10.29 tok/s, which is the simpler lane for general reasoning, JSON/prose, and memory-pressure cases. **Speed correction:** a previous draft listed Gemma 31B at 43-48 tok/s, which was a misattribution of the gpt-oss-120B Vulkan speed. Verified Gemma 31B decode is ~8.25 tok/s tg128 / ~7.7 tok/s sustained (dense model; full weights read every token). For tasks where decode speed matters, prefer Qwen 3.6 35B MoE (~58.5 tok/s Vulkan) or gpt-oss-120B (~46 tok/s Vulkan). The MTP rows are opt-in speed lanes for the Qwen 35B workhorse, not a replacement for the default setup.
+> **Stable Stack update (2026-06-03):** gpt-oss-120B remains the public general QUALITY baseline after blinded pairwise wins of 5-1 vs Qwen 35B and 4-2 vs Qwen 122B. StepFun Step-3.7-Flash is now a measured large-model QUALITY contender, including an MTP lane at 26.0 tok/s, but it is not silently promoted as the public default until an independent judge/calibration pass confirms the pairwise result. Qwen 122B is retained as a QUALITY spot-specialist for regulatory-currency work and sharp plan reviews; the tuned native-MTP Vulkan lane lifts it from ~19.4 tok/s to 28.3 tok/s with `DRAFT_N=1` and `PMIN` unset. Gemma 4 31B is the cross-family second-opinion lane (coding experiment — quality verification, not throughput); Gemma 26B-A4B is a verified plain-control baseline (think-off, F16 KV) at 44.76 ± 0.90 tok/s tg128 / pp512 1002.76 ± 10.29 tok/s. Qwen3-Coder-Next moved from the old ROCm row to the promoted Vulkan b9360 row at 44.4 tok/s decode / 723.2 tok/s prefill.
+>
+> **Speed correction:** a previous draft listed Gemma 31B at 43-48 tok/s, which was a misattribution of the gpt-oss-120B Vulkan speed. Verified Gemma 31B decode is ~8.25 tok/s tg128 / ~7.7 tok/s sustained (dense model; full weights read every token). For tasks where decode speed matters, prefer Qwen 3.6 35B MoE (~58.5 tok/s Vulkan; up to ~81.2 tok/s with opt-in MTP), gpt-oss-120B (~46 tok/s Vulkan), Qwen3-Coder-Next Vulkan (~44.4 tok/s), or the tuned 122B/StepFun MTP large-model lanes when their quality profile is worth the slower tier.
 >
 > **Status: the dense Qwen 3.6 27B is benchmarked but NOT in the production stack.** Community consensus often treats it as a strong reasoner, but local Strix Halo testing did not support that routing choice: blind pairwise was 0-6 vs the 122B on the standard 6-prompt set, and normal decode tested around 9.6-11.5 tok/s across backends. It is retained as a break-glass *"arrow in the quiver"* for tough, blocked projects — not a first- or second-line model. The speculative-decoding result below is kept as a technical finding.
 >
@@ -136,14 +145,19 @@ The table above keeps missing instrumentation explicit. Decode rates are the mai
 | Prefill speed | Qwen 3.6 35B-A3B Q4_K_M-MTP, Vulkan/RADV | not separately captured | rerun under the same protocol before publishing a value |
 | Prefill speed | Qwen 3.6 35B-A3B MXFP4, ROCm | ~628.1 tok/s | `pp8192` benchmark |
 | Prefill speed | Qwen 3.5 122B-A10B MXFP4, ROCm | ~136.0 tok/s | quality route benchmark |
+| Prefill speed | Qwen 3.5 122B-A10B MTP MXFP4_MOE, Vulkan/RADV | **324.9 tok/s** | tuned `DRAFT_N=1`, `PMIN` unset |
+| Prefill speed | StepFun Step-3.7-Flash MTP, Vulkan/RADV | **211.2 tok/s** | MTP lane; paired baseline measured 212.0 tok/s |
 | Prefill speed | Qwen 3.5 35B-A3B MXFP4, ROCm | ~562.9 tok/s | planning route benchmark |
-| Prefill speed | Qwen3-Coder-Next UD-Q4_K_XL, ROCm | ~127.0 tok/s | coding challenger benchmark |
+| Prefill speed | Qwen3-Coder-Next UD-Q4_K_XL, Vulkan/RADV | **723.2 tok/s** | promoted b9360 coding challenger |
+| Prefill speed | Qwen3-Coder-Next UD-Q4_K_XL, ROCm | **663.4 tok/s** | fallback baseline |
 | Prefill speed | gpt-oss-120B MXFP4 | not captured | rerun under the same protocol before publishing a value |
 | Prefill speed | Gemma 4 26B-A4B IT Q6_K_XL | **pp512 1002.76 ± 10.29 tok/s** | verified plain-control baseline; reasoning off, F16 KV |
 | Prefill speed | Gemma 4 31B IT Q6_K | **pp8192 ~133.6 tok/s** (controlled local GPU benchmark, b9247 57ebaf4e) | verified; decode ~8.25 tok/s tg128, ~7.7 tok/s sustained |
 | Speculative acceptance length | Qwen 3.6 27B Dense + Q4_K_M DFlash draft | AL = 6.67 | HumanEval mean at DDTree budget 22 |
 | Speculative acceptance percentage | Qwen 3.6 27B Dense + Q4_K_M DFlash draft | not captured | do not derive a percent from AL; rerun if acceptance-rate counters are needed |
 | Speculative acceptance length | Qwen 3.6 27B Dense + Q8_0 DFlash draft | not captured | speedup was captured, but AL / acceptance percent were not |
+| MTP draft acceptance | Qwen 3.5 122B-A10B MTP, `DRAFT_N=1`, `PMIN` unset | **81.8%** | from dedicated `mtp_probe.json` sample: 224 accepted / 274 drafted; standard decode run was 80.8% |
+| MTP draft acceptance | StepFun Step-3.7-Flash + Q8_0 MTP draft | **84.7%** | from raw `tg_probe.json` timing counters: 416 accepted / 491 drafted; aggregate `bench.json` field is null |
 
 DDTree budget sweep for the dense 27B Q4_K_M draft:
 
