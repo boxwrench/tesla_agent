@@ -48,14 +48,17 @@ def main() -> None:
     p.add_argument("--out", default="score.json")
     args = p.parse_args()
 
-    truth = json.load(open(args.truth))
+    with open(args.truth) as f:
+        truth = json.load(f)
     if not os.path.exists(args.answers):
         result = {"ok": False, "reason": f"answers file missing: {args.answers}"}
-        json.dump(result, open(args.out, "w"), indent=2)
+        with open(args.out, "w") as f:
+            json.dump(result, f, indent=2)
         print(json.dumps(result, indent=2))
         sys.exit(2)
 
-    ans = json.load(open(args.answers))
+    with open(args.answers) as f:
+        ans = json.load(f)
     metrics = truth["metrics"]
     tol = truth["tolerances"]
     checks = {}
@@ -94,7 +97,7 @@ def main() -> None:
     }
 
     checks["fouling_detected"] = {
-        "ok": ans.get("fouling_detected") is metrics["fouling_detected"],
+        "ok": ans.get("fouling_detected") == metrics["fouling_detected"],
         "gating": "fouling_detected" in gating,
         "truth": metrics["fouling_detected"],
         "answer": ans.get("fouling_detected"),
@@ -112,7 +115,8 @@ def main() -> None:
     }
     if informational:
         result["informational_divergence"] = sorted(informational)
-    json.dump(result, open(args.out, "w"), indent=2)
+    with open(args.out, "w") as f:
+        json.dump(result, f, indent=2)
     print(json.dumps(result, indent=2))
     sys.exit(0 if gating_ok else 1)
 

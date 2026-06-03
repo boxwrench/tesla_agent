@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -uo pipefail
+set -euo pipefail
 # run_probe.sh — fire one realdata-eval probe at a local model via Hermes and
 # capture the raw attempt for by-hand grading.
 #

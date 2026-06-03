@@ -384,7 +384,6 @@ function initBenchmarkChart() {
     });
   }
 
-  const efficiencyCtx = document.getElementById('efficiencyChart');
   const codingCtx = document.getElementById('codingChart');
   if (codingCtx) {
     const codingModels = benchModels.filter(model => model.coding !== null);
@@ -433,19 +432,34 @@ function initBenchmarkChart() {
     });
   }
 
-  if (efficiencyCtx) {
-    const efficiencyModels = benchModels
-      .map(model => ({ ...model, efficiency: Number((model.decode / model.coding).toFixed(2)) }))
-      .sort((a, b) => b.efficiency - a.efficiency);
+  const wallTimeCtx = document.getElementById('wallTimeChart');
+  if (wallTimeCtx) {
+    // measured: directly from full_bench.sh wall_std runs
+    // estimated: 1150/pp + 2000/tg from speed data (same formula as full_bench.sh)
+    const wallTimeModels = [
+      { label: 'Qwen 35B Q4 MTP',    wallTime: 25.9,  measured: false, color: '#115e59' },
+      { label: 'Qwen 35B MTP',        wallTime: 28.7,  measured: false, color: '#0f766e' },
+      { label: 'Qwen 35B',            wallTime: 35.4,  measured: false, color: '#2b6cb0' },
+      { label: 'Gemma 26B MTP',       wallTime: 42.0,  measured: true,  color: '#2563eb' },
+      { label: 'Gemma 26B',           wallTime: 45.8,  measured: false, color: '#3b82f6' },
+      { label: 'Qwen3-Coder-Next',    wallTime: 46.6,  measured: true,  color: '#0369a1' },
+      { label: 'Qwen 122B MTP',       wallTime: 74.2,  measured: true,  color: '#c2410c' },
+      { label: 'StepFun 3.7 MTP',     wallTime: 82.4,  measured: true,  color: '#b45309' },
+      { label: 'StepFun 3.7 plain',   wallTime: 103.4, measured: true,  color: '#92400e' },
+      { label: 'Qwen 122B',           wallTime: 111.5, measured: false, color: '#7c2d12' },
+      { label: 'Gemma 31B MTP',       wallTime: 129.3, measured: true,  color: '#553c7b' },
+    ].sort((a, b) => a.wallTime - b.wallTime);
 
-    new Chart(efficiencyCtx, {
+    new Chart(wallTimeCtx, {
       type: 'bar',
       data: {
-        labels: efficiencyModels.map(model => model.label),
+        labels: wallTimeModels.map(m => m.label),
         datasets: [{
-          label: 'Local decode tok/s per coding point',
-          data: efficiencyModels.map(model => model.efficiency),
-          backgroundColor: efficiencyModels.map(model => model.color),
+          label: 'Wall time (seconds)',
+          data: wallTimeModels.map(m => m.wallTime),
+          backgroundColor: wallTimeModels.map(m => m.measured ? m.color : m.color + '88'),
+          borderColor: wallTimeModels.map(m => m.measured ? 'transparent' : m.color),
+          borderWidth: wallTimeModels.map(m => m.measured ? 0 : 1),
           borderRadius: 6
         }]
       },
@@ -456,7 +470,7 @@ function initBenchmarkChart() {
         scales: {
           x: {
             beginAtZero: true,
-            title: { display: true, text: 'tok/s per coding point', color: '#4a5568', font: { family: 'Outfit', weight: 'bold' } },
+            title: { display: true, text: 'Seconds (lower = faster)', color: '#4a5568', font: { family: 'Outfit', weight: 'bold' } },
             grid: { color: 'rgba(26, 31, 54, 0.08)' },
             ticks: { color: '#4a5568' }
           },
@@ -466,12 +480,13 @@ function initBenchmarkChart() {
           }
         },
         plugins: {
-          legend: { labels: { color: '#1a1f36', font: { family: 'Outfit' } } },
+          legend: { display: false },
           tooltip: {
             callbacks: {
               label: function(context) {
-                const model = efficiencyModels[context.dataIndex];
-                return `${model.efficiency} tok/s per coding point (${model.decode} tok/s / coding ${model.coding}; ${model.source})`;
+                const m = wallTimeModels[context.dataIndex];
+                const src = m.measured ? 'measured' : 'est. (1150/pp + 2000/tg)';
+                return `${m.wallTime}s — ${src}`;
               }
             }
           }
@@ -538,10 +553,14 @@ function initGuideTab() {
         viewer.innerHTML = `<pre>${markdownText}</pre>`;
       }
     } catch (error) {
-      viewer.innerHTML = `<div class="card" style="border-left:4px solid var(--color-danger); background-color:var(--color-danger-bg);">
-        <h3>Error Loading Chapter</h3>
-        <p>${error.message}</p>
-      </div>`;
+      const errDiv = document.createElement('div');
+      errDiv.className = 'card';
+      errDiv.style.cssText = 'border-left:4px solid var(--color-danger); background-color:var(--color-danger-bg);';
+      errDiv.innerHTML = '<h3>Error Loading Chapter</h3>';
+      const p = document.createElement('p');
+      p.textContent = error.message;
+      errDiv.appendChild(p);
+      viewer.replaceChildren(errDiv);
     } finally {
       if (spinner) spinner.style.display = 'none';
       viewer.style.opacity = '1';

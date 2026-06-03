@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -uo pipefail
+set -euo pipefail
 # selftest.sh — fast (<1s, no GPU) regression guard for the harness + scorers.
 # Guards two real bugs fixed 2026-05-31:
 #   1. run_probe.sh request extraction was case-sensitive ("## The request" vs

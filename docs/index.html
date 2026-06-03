@@ -746,11 +746,11 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
               <div class="chart-container" style="margin-top: 24px;">
                 <canvas id="codingChart"></canvas>
               </div>
-              <h3 style="margin-top: 24px;">Local Speed Per Coding Point</h3>
+              <h3 style="margin-top: 24px;">Sequential Task Wall Time <span style="font-size:0.8em;font-weight:400;color:#718096;">(1150-token prompt / 2000-token response — lower is faster)</span></h3>
               <div class="chart-container" style="margin-top: 24px;">
-                <canvas id="efficiencyChart"></canvas>
+                <canvas id="wallTimeChart"></canvas>
               </div>
-              <p class="sub-text" style="margin-top:12px;"><strong>Credit and source notes.</strong> Intelligence scores are credited to <a href="https://artificialanalysis.ai/leaderboards/models" target="_blank" rel="noopener">Artificial Analysis</a>. Coding scores use Artificial Analysis Coding Index where available; for StepFun Step 3.7 Flash, the crawl exposed AA Intelligence but not AA Coding Index, so the coding marker is StepFun's published SWE-Bench Pro score and is labeled separately. Local speed, prefill, nonce, and coding-gate rows are this repo's Strix Halo measurements. MTP technique credit remains with <a href="https://github.com/hogeheer499-commits/strix-halo-guide" target="_blank" rel="noopener">strix-halo-guide</a> where noted.</p>
+              <p class="sub-text" style="margin-top:12px;"><strong>Credit and source notes.</strong> Intelligence scores are credited to <a href="https://artificialanalysis.ai/leaderboards/models" target="_blank" rel="noopener">Artificial Analysis</a>. Coding scores use Artificial Analysis Coding Index where available; for StepFun Step 3.7 Flash, the crawl exposed AA Intelligence but not AA Coding Index, so the coding marker is StepFun's published SWE-Bench Pro score and is labeled separately. Local speed, prefill, nonce, and coding-gate rows are this repo's Strix Halo measurements. Wall time chart: solid bars are directly measured via <code>full_bench.sh</code> (1150-token prompt / 2000-token response, normalized); faded bars are estimates using the same formula from speed data. MTP technique credit remains with <a href="https://github.com/hogeheer499-commits/strix-halo-guide" target="_blank" rel="noopener">strix-halo-guide</a> where noted.</p>
             </div>
           </div>
 

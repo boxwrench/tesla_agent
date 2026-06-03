@@ -41,9 +41,11 @@ fi
 
 echo
 echo "== checksums =="
-( cd "$RAW" && find . -maxdepth 2 -type f -print0 | xargs -0 sha256sum > "$MANIFEST" 2>/dev/null || true )
+( cd "$RAW" && find . -maxdepth 2 -type f -print0 | xargs -0 sha256sum > "$MANIFEST" || true )
 if [ -s "$MANIFEST" ]; then
   cat "$MANIFEST"
+else
+  echo "  warning: checksum computation failed or no files found — manifest is empty" >&2
 fi
 
 echo

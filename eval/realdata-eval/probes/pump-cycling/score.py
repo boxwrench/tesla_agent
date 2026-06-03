@@ -31,13 +31,16 @@ def main():
     p.add_argument("--out", default="score.json")
     args = p.parse_args()
 
-    truth = json.load(open(args.truth))
+    with open(args.truth) as f:
+        truth = json.load(f)
     if not os.path.exists(args.answers):
         result = {"ok": False, "reason": f"answers file missing: {args.answers}"}
-        json.dump(result, open(args.out, "w"), indent=2)
+        with open(args.out, "w") as f:
+            json.dump(result, f, indent=2)
         print(json.dumps(result, indent=2)); sys.exit(2)
 
-    ans = json.load(open(args.answers))
+    with open(args.answers) as f:
+        ans = json.load(f)
     tol = truth["tolerances"]
     checks: dict = {}
 
@@ -86,7 +89,8 @@ def main():
 
     overall_ok = all(c["ok"] for c in checks.values())
     result = {"ok": overall_ok, "checks": checks}
-    json.dump(result, open(args.out, "w"), indent=2)
+    with open(args.out, "w") as f:
+        json.dump(result, f, indent=2)
     print(json.dumps(result, indent=2))
     sys.exit(0 if overall_ok else 1)
 
