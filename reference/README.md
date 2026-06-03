@@ -9,6 +9,9 @@ Use this reference as the public source of truth for measured rows. The README,
 guide chapters, and web dashboard summarize these values; if numbers conflict,
 fix this reference first and then mirror the summary copies.
 
+For the full folder map and canonical-source rules, see
+[Repository Map and Canonical Sources](../REPO_MAP.md).
+
 ---
 
 ## 1. Strix Halo Performance Benchmarks

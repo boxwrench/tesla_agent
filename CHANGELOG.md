@@ -27,6 +27,8 @@ guidance, or web-dashboard behavior should be listed.
 - Added/linked the Gemma 4 26B-A4B control-vs-MTP benchmark note.
 - Added archive note for the pre-sync dirty state:
   `archive/public-sync-pre-2026-06-03`.
+- Added `REPO_MAP.md` to make canonical sources explicit for humans and
+  machine agents without changing public dashboard paths.
 
 ### Benchmark Framing
 

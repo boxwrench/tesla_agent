@@ -18,6 +18,8 @@ The public repo has four jobs:
 | **Build safely** | The workflow and safety chapters show how to run a supervised, local water-agent workflow without connecting an agent to production systems. |
 
 Track recommendation and benchmark pivots in the [Changelog](CHANGELOG.md).
+For a machine- and human-readable map of canonical sources, see
+[Repository Map and Canonical Sources](REPO_MAP.md).
 
 For related writing on utility work, technology, and practical operations, see **[Title 22](https://www.title22.org/)** — *water, systems, strategy*.
 
@@ -157,6 +159,8 @@ It is not an unsupervised operator. The honest caveats — a single yes/no verdi
 tesla_agent/
 │
 ├── README.md                      # Front door: what, who, and reading order
+├── REPO_MAP.md                    # Canonical-source policy and folder roles
+├── CHANGELOG.md                   # Public-facing recommendation/history log
 ├── LICENSE                        # CC BY-NC 4.0 (Attribution Required, Non-Commercial)
 │
 ├── guide/                         # THE TEACHING GUIDE (Read in order)
@@ -176,7 +180,8 @@ tesla_agent/
 │   ├── README.md                  # Pinned versions, checksums, benchmarks
 │   ├── glossary.md                # Plain-language glossary of ML terms
 │   ├── architecture-diagram.md    # Mermaid stack diagram
-│   └── decision-tree.md           # Mermaid model chooser flowchart
+│   ├── decision-tree.md           # Mermaid model chooser flowchart
+│   └── reproducibility-matrix.md  # Canonical benchmark/checksum source
 │
 ├── research/                      # DEEP RESEARCH ARTIFACTS (Long-form)
 │   ├── README.md                  # Index, reading order, who-this-is-for
@@ -186,12 +191,23 @@ tesla_agent/
 │   ├── american-stack-research-synthesis.md
 │   ├── american-stack-research-synthesis-round2.md
 │   ├── strix-halo-agentic-evaluation-report.md
-│   └── infrastructure-profiling-framework.md
+│   ├── infrastructure-profiling-framework.md
+│   ├── mtp-speculative-decoding-strix-halo.md
+│   └── gemma-4-26b-control-vs-mtp-strix-halo.md
 │
 ├── eval/                          # THE EVALUATION FRAMEWORK
 │   ├── README.md                  # Explanation of the testing approach
 │   ├── coding/                    # 4-step sequential coding evaluation
-│   └── quality/                   # 7-dimension planning quality rubric
+│   ├── quality/                   # 7-dimension planning quality rubric
+│   └── realdata-eval/             # Water-treatment data evaluation bundle
+│
+├── docs/                          # GitHub Pages dashboard and guide mirror
+│   ├── index.html                 # Interactive guide/dashboard
+│   ├── app.js                     # Dashboard model finder and verifier logic
+│   └── guide/                     # Mirror of guide/ for the rendered site
+│
+├── assets/                        # Static images used by markdown docs
+├── archive/                       # Preservation notes for old working states
 │
 └── scripts/                       # PORTABLE SYSTEM UTILITIES
     ├── config.env.example         # Template configuration file
