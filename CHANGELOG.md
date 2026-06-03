@@ -8,6 +8,27 @@ guidance, or web-dashboard behavior should be listed.
 
 ## Unreleased
 
+### Dashboard
+
+- Replaced "Local Speed Per Coding Point" chart with a **Sequential Task Wall
+  Time** chart (1150-token prompt / 2000-token response, lower = faster).
+  Solid bars are directly measured via `full_bench.sh`; faded bars are
+  estimates using the same `1150/pp + 2000/tg` formula from speed data.
+- Added fresh `full_bench.sh` wall-time measurements for Gemma 4 26B-A4B MTP
+  block 3 (42.0 s) and Gemma 4 31B IT MTP block 3 (129.3 s).
+
+### Eval Harness Fixes
+
+- `score.py` (all three probes): changed `is` to `==` for boolean gating
+  checks so integer answers (e.g. `1`/`0` instead of `true`/`false`) grade
+  correctly; replaced bare `open()` calls with `with open()` to ensure output
+  files are fully flushed before `sys.exit()`.
+- `run_probe.sh`, `selftest.sh`: added `-e` to `set` flags so command failures
+  abort the script rather than silently continuing.
+- `fetch_mirror.sh`: removed `2>/dev/null` from the checksum step and added a
+  warning when the manifest is empty, so a missing `sha256sum` is visible
+  rather than silently producing an empty file.
+
 ### Public Mirror Sync
 
 - Clarified the public repo's four jobs: learning guide, benchmark-data
