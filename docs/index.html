@@ -112,6 +112,7 @@
           <div class="welcome-card">
             <h2>Welcome to Your Agentic AI Guide</h2>
             <p>This interactive workspace teaches you how to run a private, local agentic AI workflow on consumer AMD hardware. No API keys, no external cloud dependencies, and 100% data privacy.</p>
+            <p>Use it four ways: <strong>learn</strong> the agent stack, <strong>reproduce</strong> the benchmark rows, <strong>choose</strong> a model/backend lane, and <strong>build safely</strong> toward supervised water-utility workflows.</p>
             <p class="blog-note">Related writing: <a href="https://www.title22.org/" target="_blank" rel="noopener"><strong>Title 22</strong></a> — <em>water, systems, strategy</em>.</p>
             <p class="blog-note">Technical details: <a href="https://github.com/boxwrench/tesla_agent/blob/main/reference/reproducibility-matrix.md" target="_blank" rel="noopener">Reproducibility Matrix &amp; Technical Deep-Dive</a>.</p>
           </div>
@@ -510,7 +511,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="companion">
                     <span class="radio-title">COMPANION — small-footprint MoE</span>
-                    <span class="radio-desc">For concurrent loads (e.g. 26B + 120B fits where 31B + 120B doesn't). Gemma 4 26B-A4B IT. ~40 t/s mean <em>(not verified in public repo)</em>. Queued, not Stable Stack.</span>
+                    <span class="radio-desc">For concurrent loads (e.g. 26B + 120B fits where 31B + 120B doesn't). Gemma 4 26B-A4B IT. ~44.8 t/s tg128; pp512 ~1003 t/s. Verified plain-control baseline for general reasoning, JSON, and prose.</span>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="arrow">
@@ -600,6 +601,13 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                       <td class="pass">3 / 3</td>
                     </tr>
                     <tr class="highlighted-row">
+                      <td>Gemma 4 26B-A4B IT (UD-Q6_K_XL) <em>— verified plain-control baseline</em></td>
+                      <td>21.2 GB</td>
+                      <td>2-4 vs Gemma 31B</td>
+                      <td>44.76 t/s tg128<br><small style="opacity:0.7">pp512 1002.76 t/s; reasoning off, F16 KV</small></td>
+                      <td class="pass">3 / 3</td>
+                    </tr>
+                    <tr class="highlighted-row">
                       <td>Gemma 4 31B IT Q6_K — second-opinion lane <small style="opacity:0.7">(dense — slow decode)</small></td>
                       <td>25.2 GB</td>
                       <td>4-2 vs Gemma 26B-A4B</td>
@@ -615,14 +623,14 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                     </tr>
                     <tr class="highlighted-row">
                       <td>Qwen 3.6 35B MXFP4-MTP (Vulkan RADV) — opt-in speed lane</td>
-                      <td>21.7 GB</td>
+                      <td>19.3 GB</td>
                       <td>same production quant</td>
                       <td>~72.7 t/s (+24%)<br><small style="opacity:0.7">prefill not separately captured</small></td>
                       <td class="pass">3 / 3</td>
                     </tr>
                     <tr class="highlighted-row">
                       <td>Qwen 3.6 35B Q4_K_M-MTP (Vulkan RADV) — opt-in speed lane</td>
-                      <td>35B-class</td>
+                      <td>20.7 GB</td>
                       <td>won quality pairwise 4-2</td>
                       <td>~81.2 t/s (+39%)<br><small style="opacity:0.7">prefill not separately captured</small></td>
                       <td class="pass">3 / 3</td>
@@ -662,14 +670,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                        <td>19.5 t/s</td>
                        <td class="pass">3 / 3</td>
                      </tr>
-                     <tr style="opacity:0.85;">
-                       <td>Gemma 4 26B-A4B IT (UD-Q6_K_XL) <em>— queued, not Stable Stack</em></td>
-                       <td>21.2 GB</td>
-                       <td>2-4 vs Gemma 31B</td>
-                       <td>40.11 t/s mean <em style="opacity:0.7">(not verified in public repo)</em></td>
-                       <td class="pass">3 / 3</td>
-                     </tr>
-                     <tr style="opacity:0.7;">
+                    <tr style="opacity:0.7;">
                        <td>Qwen 3.6 27B Dense (UD-Q4_K_XL, Think-On) <em>— experimental, not in stack</em></td>
                        <td>16.4 GB</td>
                        <td>0-6 vs Qwen 122B</td>
@@ -694,6 +695,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 </table>
               </div>
               <p class="sub-text" style="margin-top:12px;"><strong>Note — MTP speed lanes are opt-in.</strong> The Qwen3.6-35B-A3B-MTP GGUFs carry a native nextn head, so llama-server can self-speculate with <code>--spec-type draft-mtp</code> and no separate draft model. The technique surfaced via the community <a href="https://github.com/hogeheer499-commits/strix-halo-guide" target="_blank" rel="noopener">strix-halo-guide</a>; this repo independently reproduced and quality-gated the MXFP4-MTP and Q4_K_M-MTP lanes. Full audit trail: <a href="https://github.com/boxwrench/tesla_agent/blob/main/reference/reproducibility-matrix.md" target="_blank" rel="noopener">Reproducibility Matrix &amp; Technical Deep-Dive</a>.</p>
+              <p class="sub-text" style="margin-top:12px;"><strong>Gemma 4 26B-A4B plain control baseline.</strong> The no-spec Vulkan lane with <code>--reasoning off</code> and F16 KV measures <strong>pp512 1002.76 &plusmn; 10.29 t/s</strong> and <strong>tg128 44.76 &plusmn; 0.90 t/s</strong> with Hermes nonce 3/3. It is the simpler lane for general reasoning, JSON extraction, and prose; the MTP comparison only pays off on heavy code generation.</p>
               <p class="sub-text" style="margin-top:12px;"><strong>Note — the dense 27B is benchmarked but NOT in the production stack.</strong> Community discussion often treats Qwen 27B as a strong reasoner, but the local Strix Halo benches did not support that routing choice: blind pairwise was 0&ndash;6 vs the 122B and normal decode tested around 9.6&ndash;11.5 t/s. It is kept as a break-glass option for tough, blocked projects, not a first- or second-line model. <em>Technical aside:</em> DFlash speculative decoding lifts its floor to <strong>~31 t/s (2.82&times;)</strong> with a footprint-minimized Q4_K_M draft.</p>
             </div>
 

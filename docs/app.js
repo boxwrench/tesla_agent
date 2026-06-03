@@ -139,7 +139,7 @@ function initModelFinder() {
       mode: "CODE — fast workhorse",
       file: "Qwen3.6-35B-A3B-MXFP4_MOE.gguf",
       size: "21.7 GB",
-      speed: "~58.5 tokens/sec (Vulkan/RADV; ~44.2 t/s ROCm fallback). Optional MTP speed lanes: ~72.7 t/s MXFP4-MTP, ~81.2 t/s Q4_K_M-MTP.",
+      speed: "~58.5 tokens/sec (Vulkan/RADV; ~44.2 t/s ROCm fallback). Optional MTP speed lanes: ~72.7 t/s MXFP4-MTP (19.3 GB), ~81.2 t/s Q4_K_M-MTP (20.7 GB).",
       reasoning: "Uncapped think-on — do NOT budget the coding route",
       command: "bash scripts/serving/serve_vulkan.sh",
       hermes: "max_tokens: 8192",
@@ -194,11 +194,11 @@ function initModelFinder() {
       mode: "COMPANION — small-footprint MoE",
       file: "gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf",
       size: "21.2 GB",
-      speed: "~40.11 tokens/sec mean (Vulkan/RADV) [Not verified in public repo]",
-      reasoning: "Off in tested gate (think-on variant also cleared nonce 3/3)",
-      command: "bash scripts/serving/serve_vulkan.sh --model gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf --cache-type-k f16 --cache-type-v f16",
+      speed: "~44.8 tokens/sec tg128; pp512 ~1003 tokens/sec (Vulkan/RADV)",
+      reasoning: "Off in tested gate; 3/3 nonce with F16 KV",
+      command: "bash scripts/serving/serve_vulkan.sh --model gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf --reasoning off --cache-type-k f16 --cache-type-v f16",
       hermes: "max_tokens: 8192",
-      rationale: "Cleared the coding gate (nonce 3/3, orchestrated pass^3) but did NOT graduate to the Stable Stack based on quality pairwise (2-4 loss to Gemma 31B). Use case: when GPU memory pressure matters and you want concurrent loads — 26B-A4B + gpt-oss-120B fits where 31B + 120B does not. Also a step-1 file-analysis fallback for prompts where 31B's empty-exceedances bug recurs (orchestrated coding step 1 PASSed across all four runs). Speed note: 40.11 tok/s was reported in source benchmarks but has not been independently verified in the public repo."
+      rationale: "Verified plain-control baseline on Vulkan/RADV. Use it when GPU memory pressure matters, when you want concurrent loads — 26B-A4B + gpt-oss-120B fits where 31B + 120B does not — or when you want the simpler no-spec lane for general reasoning, JSON, and prose. The MTP comparison is opt-in code-speed work, not the default path."
     },
     'arrow': {
       name: "Qwen 3.6 27B Dense (UD-Q4_K_XL)",
@@ -255,6 +255,7 @@ function initBenchmarkChart() {
       'Qwen 35B MTP',
       'Qwen 35B Q4 MTP',
       'gpt-oss 120B',
+      'Gemma 26B control',
       'Qwen3-Coder',
       'Qwen 122B',
       'Qwen 27B Dense',
@@ -262,8 +263,8 @@ function initBenchmarkChart() {
     ],
     datasets: [{
       label: 'Decode tok/s',
-      data: [58.5, 72.7, 81.2, 46, 34.6, 19.4, 9.6, 8.25],
-      backgroundColor: ['#2b6cb0', '#0f766e', '#115e59', '#14532d', '#718096', '#7c2d12', '#7f1d1d', '#553c7b'],
+      data: [58.5, 72.7, 81.2, 46, 44.8, 34.6, 19.4, 9.6, 8.25],
+      backgroundColor: ['#2b6cb0', '#0f766e', '#115e59', '#14532d', '#2563eb', '#718096', '#7c2d12', '#7f1d1d', '#553c7b'],
       borderRadius: 6
     }]
   };
@@ -304,7 +305,7 @@ function initBenchmarkChart() {
         tooltip: {
           callbacks: {
             label: function(context) {
-              const speedLabels = ['~58.5', '~72.7 MTP', '~81.2 Q4_K_M-MTP', '~46', '34.6', '19.4', '9.6-11.5', '~8.25 tg128 (dense)'];
+              const speedLabels = ['~58.5', '~72.7 MTP', '~81.2 Q4_K_M-MTP', '~46', '~44.8 tg128', '34.6', '19.4', '9.6-11.5', '~8.25 tg128 (dense)'];
               return `${context.label}: ${speedLabels[context.dataIndex]} tok/s`;
             }
           }

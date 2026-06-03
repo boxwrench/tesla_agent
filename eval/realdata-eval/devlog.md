@@ -1,5 +1,11 @@
 # realdata-eval — devlog
 
+## 2026-06-02 — Gemma 4 26B-A4B plain Vulkan control baseline
+
+Verified the plain Vulkan control lane for Gemma 4 26B-A4B on the reference box. Setup was the no-spec path with F16 KV and reasoning off; Hermes nonce gate cleared 3/3. Measured `pp512 1002.76 ± 10.29 tok/s` and `tg128 44.76 ± 0.90 tok/s` on the control lane.
+
+Then compared against the block-size-3 MTP lane. The useful gain showed up on heavy code generation (`63.23 tok/s`, +41%), but JSON/prose stayed effectively flat (`45.2-46.5 tok/s`) while setup complexity went up. Takeaway: keep the plain Vulkan control lane as the simpler default for general reasoning, JSON extraction, and prose; reserve MTP for code-heavy workloads that justify the extra moving parts.
+
 ## 2026-06-01 — ph-control first rolls: expert adjudicated agent vs truth (agent won)
 
 Fired stub + real smoke (sole-GPU, MoE). **Stub PASS** (199s) — found the seeded

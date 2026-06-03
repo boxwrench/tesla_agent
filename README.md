@@ -8,6 +8,17 @@ Welcome to **tesla_agent**! This repository is a clean-room, plug-and-play templ
 
 This is the guide we wish we had when we started: verbose, explanatory, data-driven, and honest about what didn't work.
 
+The public repo has four jobs:
+
+| Job | What to use |
+|---|---|
+| **Learn** | The chapter guide explains local agents, Strix Halo hardware, safety, and utility workflows in plain language. |
+| **Reproduce** | The reference matrix records model files, checksums, backend versions, gates, and measured benchmark rows. |
+| **Choose** | The model ladder and decision tree help pick a default, quality lane, speed lane, or experimental lane without trying every release from scratch. |
+| **Build safely** | The workflow and safety chapters show how to run a supervised, local water-agent workflow without connecting an agent to production systems. |
+
+Track recommendation and benchmark pivots in the [Changelog](CHANGELOG.md).
+
 For related writing on utility work, technology, and practical operations, see **[Title 22](https://www.title22.org/)** — *water, systems, strategy*.
 
 Tracking the wider field? **[Of Agents and Aquifers](https://boxwrench.github.io/of-agents-and-aquifers/)** is a running, curated collection of research papers, repositories, and notable finds at the intersection of **AI / agentic systems and utilities** — the reading list behind this work ([source repo](https://github.com/boxwrench/of-agents-and-aquifers)).
@@ -75,19 +86,21 @@ Below are the actual measured results across the different configurations. *Comm
 | **gpt-oss-120B (MXFP4, 3 shards)** | **~63 GB** | 32,768 | High reasoning | **Pairwise: 5-1 vs Qwen 35B; 4-2 vs Qwen 122B** | **~46 tok/s** (Vulkan) | **3 / 3 Pass** | **QUALITY baseline (general)** |
 | **Gemma 4 31B IT (Q6_K)** | **25.2 GB** | 32,768 | On for coding | Pairwise: **4-2 vs Gemma 26B-A4B** | **~8.25 tok/s tg128; ~7.7 tok/s sustained** (Vulkan; pp8192 ~133.6 tok/s) | **3 / 3 Pass** | **Second-opinion lane (dense — slow decode); use orchestrated path** |
 | **Qwen 3.6 35B MoE (Vulkan RADV)** | **21.7 GB** | 32,768 | **On** | **82 / 84** | **~58.5 tok/s** (Vulkan) | **3 / 3 Pass** | **CODE/general baseline**; workhorse default unchanged |
-| **Qwen 3.6 35B MoE MXFP4-MTP (Vulkan RADV)** | **21.7 GB** | 32,768 | **On** | same production quant | **~72.7 tok/s** (+24% vs workhorse) | **3 / 3 Pass** | **Opt-in speed lane** using `--spec-type draft-mtp`; technique surfaced via [strix-halo-guide](https://github.com/hogeheer499-commits/strix-halo-guide) |
-| **Qwen 3.6 35B MoE Q4_K_M-MTP (Vulkan RADV)** | similar 35B-class footprint | 32,768 | **On** | **Won quality pairwise 4-2** | **~81.2 tok/s** (+39% vs workhorse) | **3 / 3 Pass** | **Opt-in speed lane**; human-check regulatory figures |
+| **Qwen 3.6 35B MoE MXFP4-MTP (Vulkan RADV)** | **19.3 GB** | 32,768 | **On** | same production quant | **~72.7 tok/s** (+24% vs workhorse) | **3 / 3 Pass** | **Opt-in speed lane** using `--spec-type draft-mtp`; technique surfaced via [strix-halo-guide](https://github.com/hogeheer499-commits/strix-halo-guide) |
+| **Qwen 3.6 35B MoE Q4_K_M-MTP (Vulkan RADV)** | **20.7 GB** | 32,768 | **On** | **Won quality pairwise 4-2** | **~81.2 tok/s** (+39% vs workhorse) | **3 / 3 Pass** | **Opt-in speed lane**; human-check regulatory figures |
 | **Qwen 3.6 35B MoE (ROCm)** | **21.7 GB** | 32,768 | **On** | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | ROCm fallback backend |
 | **Qwen 3.6 35B MoE (ROCm)** | **21.7 GB** | 32,768 | **Off** | **82 / 84** | **43.7 tok/s** | **3 / 3 Pass** | Cuts wall-time in half for prose (falls to 1/3 coding E2E) |
 | **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **On** | **80 / 84** | **19.4 tok/s** (ROCm) | **3 / 3 Pass** | **QUALITY spot-specialist: regulatory currency and sharp plan review** |
 | **Qwen 3.5 122B MoE (MXFP4)** | **70.0 GB** | 12,288 | **Off** | **81 / 84** | **19.5 tok/s** | **3 / 3 Pass** | Holds 3/3 coding even think-off |
-| **Gemma 4 26B-A4B IT (UD-Q6_K_XL)** | **21.2 GB** | 32,768 | Off in tested gate | Pairwise: 2-4 vs Gemma 31B | **40.11 tok/s** mean *(not independently verified in public repo; do not treat as confirmed)* | **3 / 3 Pass** | **Queued candidate only; coding gate cleared, not Stable Stack** |
+| **Gemma 4 26B-A4B IT (UD-Q6_K_XL)** | **21.2 GB** | 32,768 | Off | Pairwise: 2-4 vs Gemma 31B | **44.8 tok/s tg128; pp512 1002.8 tok/s** | **3 / 3 Pass** | **Verified plain-control baseline**; simpler lane for general reasoning/JSON/prose |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **On** | 0-6 vs Qwen 122B | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in the stack (see note)* |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **Off** | — | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in the stack* |
 | **Qwen3-Coder-Next (UD-Q4_K_XL)** | **49.6 GB** | 16,384 | **On** | — | **34.6 tok/s** (ROCm) | **3 / 3 Pass** | 128GB Coder Challenger |
 
 > [!NOTE]
 > **MTP speed options are opt-in.** The Qwen3.6-35B-A3B-MTP GGUFs carry a native next-token prediction head, so recent `llama-server` builds can self-speculate with `--spec-type draft-mtp` and no separate draft model. The workhorse default remains the standard MXFP4 Qwen 3.6 35B lane. The speed technique was surfaced by the community [strix-halo-guide](https://github.com/hogeheer499-commits/strix-halo-guide); see the acknowledgments below and the [MTP case study](research/mtp-speculative-decoding-strix-halo.md).
+
+> **Gemma 4 26B-A4B plain control baseline:** The no-spec Vulkan lane with `--reasoning off` and F16 KV now measures `pp512 ~1003 tok/s` and `tg128 ~44.8 tok/s` with Hermes nonce 3/3. It is the simpler lane for general reasoning, JSON extraction, and prose; the MTP comparison only pays off on heavy code generation.
 
 > [!NOTE]
 > **The dense Qwen 3.6 27B is benchmarked but NOT in the production stack** — community discussion often treats it as a strong reasoner, but the local Strix Halo gates did not corroborate that for this workflow. A blind quality pairwise put it 0-6 against the 122B on the standard prompt set, and tested backends remained around 9.6-11.5 tok/s for normal decode. It remains a break-glass *"arrow in the quiver"* for tough, blocked projects where trying a different dense trace might help, **not a first- or second-line choice.**

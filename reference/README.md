@@ -5,6 +5,10 @@ This document contains raw performance tables, version pins with fetchable links
 > [!TIP]
 > For seasoned developers seeking complete reproducibility metrics, exact methodology descriptions, and post-mortems of failed attempts (such as vLLM compilation timeouts and MoE speculative decoding overhead), see the [Reproducibility Matrix & Deep-Dive](reproducibility-matrix.md).
 
+Use this reference as the public source of truth for measured rows. The README,
+guide chapters, and web dashboard summarize these values; if numbers conflict,
+fix this reference first and then mirror the summary copies.
+
 ---
 
 ## 1. Strix Halo Performance Benchmarks
@@ -22,18 +26,18 @@ The following table summarizes the speed and quality benchmarks run on the host 
 | **gpt-oss-120B MXFP4 (3 shards)** | ~63 GB | 32,768 | **5-1 vs Qwen 35B; 4-2 vs Qwen 122B** | **~46 tok/s** (RADV) | **3 / 3 Pass** | **QUALITY baseline (general)**; requires the draft-with-assumptions system prompt to avoid checklist deflection |
 | **Gemma 4 31B IT Q6_K** | 25.2 GB | 32,768 | **4-2 vs Gemma 26B-A4B** | **~8.25 tok/s tg128; ~7.7 tok/s sustained** (Vulkan; pp8192 ~133.6 tok/s) | **3 / 3 Pass** | **Second-opinion lane (dense — slow decode)**; orchestrated coding path required |
 | **Qwen 3.6 35B MoE (Vulkan RADV)** | 21.7 GB | 32,768 | **82 / 84** | **~58.5 tok/s** (RADV) | **3 / 3 Pass** | **CODE/general baseline**; workhorse default unchanged |
-| **Qwen 3.6 35B MoE MXFP4-MTP (Vulkan RADV)** | 21.7 GB | 32,768 | same production quant | **~72.7 tok/s** (+24%) | **3 / 3 Pass** | *Opt-in speed lane* via `--spec-type draft-mtp`; prefill not separately captured |
-| **Qwen 3.6 35B MoE Q4_K_M-MTP (Vulkan RADV)** | 35B-class | 32,768 | **4-2 pairwise win** | **~81.2 tok/s** (+39%) | **3 / 3 Pass** | *Opt-in speed lane*; human-check regulatory figures; prefill not separately captured |
+| **Qwen 3.6 35B MoE MXFP4-MTP (Vulkan RADV)** | 19.3 GB | 32,768 | same production quant | **~72.7 tok/s** (+24%) | **3 / 3 Pass** | *Opt-in speed lane* via `--spec-type draft-mtp`; prefill not separately captured |
+| **Qwen 3.6 35B MoE Q4_K_M-MTP (Vulkan RADV)** | 20.7 GB | 32,768 | **4-2 pairwise win** | **~81.2 tok/s** (+39%) | **3 / 3 Pass** | *Opt-in speed lane*; human-check regulatory figures; prefill not separately captured |
 | **Qwen 3.6 35B MoE (ROCm)** | 21.7 GB | 32,768 | **82 / 84** | **44.2 tok/s** (ROCm) | **3 / 3 Pass** | ROCm fallback backend |
 | **Qwen 3.5 122B MoE (MXFP4)** | 70.0 GB | 12,288 | **80 / 84** | **19.4 tok/s** (ROCm) | **3 / 3 Pass** | **QUALITY spot-specialist** for regulatory currency and sharp plan reviews |
 | **Qwen 3.5 122B MoE (MXFP4)** *think-off* | 70.0 GB | 12,288 | **81 / 84** | **19.5 tok/s** | **3 / 3 Pass** | Holds 3/3 coding even think-off |
-| **Gemma 4 26B-A4B IT UD-Q6_K_XL** | 21.2 GB | 32,768 | **2-4 vs Gemma 31B** | **40.11 tok/s** mean *(not independently verified in public repo)* | **3 / 3 Pass** | *Queued candidate only.* Coding gate cleared; not Stable Stack |
+| **Gemma 4 26B-A4B IT UD-Q6_K_XL** | 21.2 GB | 32,768 | **2-4 vs Gemma 31B** | **44.8 tok/s tg128; pp512 1002.8 tok/s** | **3 / 3 Pass** | **Verified plain-control baseline**; simpler lane for general reasoning/JSON/prose |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** *think-on* | 16.4 GB | 32,768 | 0-6 vs 122B | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in stack;* break-glass option. DFlash → ~31 tok/s (2.82×) |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** *think-off* | 16.4 GB | 32,768 | — | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in stack* |
 | **Qwen 3.5 35B MoE (MXFP4)** | 21.0 GB | 8,192 | **79 / 84** | **47.3 tok/s** (ROCm) | **3 / 3 Pass** | Retained for regression tests |
 | **Qwen3-Coder-Next (UD-Q4_K_XL)** | 49.6 GB | 16,384 | — | 34.6 tok/s (ROCm) | 3 / 3 Pass | CODE challenger (128GB-class) |
 
-**Recommendation note:** Qwen remains a strong and widely favored reasoning family, but this guide's default ladder follows the local Strix Halo agent gates. As of the 2026-05-30 update, gpt-oss-120B is the measured general QUALITY baseline, Gemma 4 31B is the second-opinion lane (dense model — slow decode, ~8 tok/s; use on orchestrated path for quality verification), Qwen 3.6 35B remains the CODE/general baseline, and Qwen 122B moves to a spot-specialist role. The new MTP rows are opt-in speed lanes for the same Qwen 3.6 35B workhorse; they do not replace the default setup path.
+**Recommendation note:** Qwen remains a strong and widely favored reasoning family, but this guide's default ladder follows the local Strix Halo agent gates. As of the 2026-05-30 update, gpt-oss-120B is the measured general QUALITY baseline, Gemma 4 31B is the second-opinion lane (dense model — slow decode, ~8 tok/s; use on orchestrated path for quality verification), Gemma 26B-A4B is now a verified plain-control baseline (think-off, F16 KV) at ~44.8 tok/s tg128 / pp512 ~1003 tok/s, Qwen 3.6 35B remains the CODE/general baseline, and Qwen 122B moves to a spot-specialist role. The new MTP rows are opt-in speed lanes for the same Qwen 3.6 35B workhorse; they do not replace the default setup path.
 
 ---
 
@@ -49,7 +53,7 @@ The public setup guide starts with the 35B-class CODE baseline because it is the
 * **Opt-in MTP speed lane:** Qwen 3.6 35B-A3B Q4_K_M-MTP, SHA256 `be11d472527e5013290b09c1afc12694a326a4184eb97cf58fff579a671dddc3`
 * **Second-opinion lane (dense):** Gemma 4 31B IT Q6_K, SHA256 `abd0be03a2bc3f3c9d8e018cbb4ff5b553c340c65d49b6b346c48be5a1efde28`
 * **QUALITY baseline:** gpt-oss-120B MXFP4, three shards with per-shard SHA256 pins in [reproducibility-matrix.md](reproducibility-matrix.md)
-* **Queued candidate:** Gemma 4 26B-A4B IT UD-Q6_K_XL, SHA256 `5cfb7ab424c01388538005f26573f3bd374d3140cc021a1c44249e69928882a4`
+* **Verified plain-control baseline:** Gemma 4 26B-A4B IT UD-Q6_K_XL, SHA256 `5cfb7ab424c01388538005f26573f3bd374d3140cc021a1c44249e69928882a4`
 
 ### **Inference Server Backend**
 * **Inference Engine:** `llama.cpp` stable build `b9247`

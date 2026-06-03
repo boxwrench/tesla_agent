@@ -4,6 +4,25 @@ This chapter details the performance benchmarks run on Strix Halo hardware and e
 
 ---
 
+## 0. How This Repo Labels Model Lanes
+
+The public guide is a learning tool, a benchmark-data repository, a
+reproducibility reference, and a working water-agent starting point. That means
+the model table tracks more than "fastest model wins."
+
+| Lane | Meaning |
+|---|---|
+| **Default / baseline** | The first setup path most readers should reproduce. |
+| **Quality lane** | Slower/deeper model used for synthesis, reports, or second opinions. |
+| **Opt-in speed lane** | Verified speed improvement with extra setup or a different artifact. |
+| **Experimental** | Interesting benchmark result that is not recommended as a normal route. |
+| **Rejected for this workflow** | Fast or popular, but failed this repo's water-agent quality bar. |
+
+If a row is marked opt-in, it is not replacing the default setup. It is a
+deliberate choice after the baseline works.
+
+---
+
 ## 1. The Quality vs. Speed Trade-Off
 
 When choosing a model, you must balance its logical capability (Quality Score) against how fast it generates text (Generation Speed). 
@@ -15,7 +34,7 @@ Below is the benchmark matrix plotted from our testing runs:
 ### **Key Takeaways from the Benchmarks:**
 1. **The QUALITY Baseline (gpt-oss-120B):** The latest local pairwise tests moved gpt-oss-120B into the general quality tier. It beat Qwen 35B by 5-1 and Qwen 122B by 4-2 on blinded six-prompt comparisons, while decoding at ~46 tokens/second on Vulkan/RADV.
 2. **The CODE Baseline (Qwen 3.6 35B):** Qwen 3.6 35B remains the CODE/general baseline because it is fast, compact, and has repeatedly cleared the tool and coding gates. The standard Vulkan/RADV workhorse now measures ~58.5 tokens/second on the reference box. Opt-in MTP lanes raise that to ~72.7 tok/s on MXFP4-MTP and ~81.2 tok/s on Q4_K_M-MTP, while leaving the default setup path unchanged. Community consensus still favors Qwen reasoning in many settings; this guide keeps it in the ladder for exactly that reason.
-3. **The Gemma Experiment (Gemma 4 31B):** Gemma 4 31B IT Q6_K is the cross-family coding experiment and second-opinion lane. It cleared nonce and orchestrated coding gates and beat the smaller Gemma 26B-A4B candidate 4-2 in quality pairwise. **Important speed caveat:** Gemma 31B is a dense model — it reads all 31B parameters every token. Measured decode is ~8.25 tok/s tg128 and ~7.7 tok/s sustained on the Vulkan/RADV stack (pp8192 prefill is fast at ~133.6 tok/s). This is much slower than Qwen 35B MoE (~58.5 tok/s workhorse) or gpt-oss-120B (~46 tok/s) because those are Mixture-of-Experts models that activate far fewer parameters per token. Use Gemma 31B for a cross-family second opinion on the orchestrated path, not as a speed-competitive workhorse.
+3. **The Gemma Experiment (Gemma 4 31B):** Gemma 4 31B IT Q6_K is the cross-family coding experiment and second-opinion lane. It cleared nonce and orchestrated coding gates and beat the smaller Gemma 26B-A4B plain-control baseline 4-2 in quality pairwise. The 26B lane itself is now verified on the plain Vulkan/no-spec path at ~44.8 tok/s tg128 with pp512 ~1003 tok/s, so it is the simpler choice for general reasoning, JSON extraction, prose, and memory-pressure cases. **Important speed caveat:** Gemma 31B is a dense model — it reads all 31B parameters every token. Measured decode is ~8.25 tok/s tg128 and ~7.7 tok/s sustained on the Vulkan/RADV stack (pp8192 prefill is fast at ~133.6 tok/s). This is much slower than Qwen 35B MoE (~58.5 tok/s workhorse) or gpt-oss-120B (~46 tok/s) because those are Mixture-of-Experts models that activate far fewer parameters per token. Use Gemma 31B for a cross-family second opinion on the orchestrated path, not as a speed-competitive workhorse.
 4. **The Qwen 122B Role Change:** Qwen 122B is no longer the default quality target. It remains a spot-specialist for regulatory-currency work and sharp plan review, where it retained its pairwise wins.
 5. **The 27B Caveat:** Qwen 3.6 27B has a strong reputation as a reasoner, but local Strix Halo tests did not support making it a default route. It lost 0-6 to Qwen 122B in blind pairwise and normal decode stayed around 9.6-11.5 tokens/second across tested backends.
 

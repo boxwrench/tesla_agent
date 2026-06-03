@@ -1,6 +1,16 @@
 # Reproducibility Matrix & Technical Deep-Dive
 
-This document compiles the exact methodology, hardware baseline, driver configurations, model checksums, performance metrics, and technical post-mortems of attempts and failures. It is designed to serve as a complete reference for researchers and software engineers seeking to replicate, verify, or extend these benchmarks on AMD APU hardware.
+This document compiles the exact methodology, hardware baseline, driver configurations, model checksums, performance metrics, and technical post-mortems of attempts and failures. It is designed to serve as the canonical public benchmark record for researchers and software engineers seeking to replicate, verify, or extend these benchmarks on AMD APU hardware.
+
+The rest of the repository summarizes this file for different readers:
+
+| Surface | Role |
+|---|---|
+| `README.md` | Orientation and short model ladder. |
+| `guide/*.md` | Teaching path for utility professionals. |
+| `reference/*.md` | Reproducibility, checksums, and decision support. |
+| `research/*.md` | Long-form case studies and post-mortems. |
+| `docs/` | GitHub Pages mirror of the public guide and interactive model finder. |
 
 ---
 
@@ -42,8 +52,8 @@ The following models are used in the reference tests. Download paths are pinned 
 | Model Identity | Format & Quant | File Name | Size (GB) | HF Source Repository | SHA256 (local copy) |
 |---|---|---|---|---|---|
 | **Qwen 3.6 35B MoE** | GGUF (MXFP4) | `Qwen3.6-35B-A3B-MXFP4_MOE.gguf` | 21.7 GB | [unsloth/Qwen3.6-35B-A3B-GGUF](https://huggingface.co/unsloth/Qwen3.6-35B-A3B-GGUF) | `2fdd20997c4d88ee25f70f500c61f8b999378d92ab055f9d450fc70d617158d3` |
-| **Qwen 3.6 35B MoE MTP** | GGUF (MXFP4_MOE requant from Q8_0 MTP) | `Qwen3.6-35B-A3B-MTP-MXFP4_MOE.gguf` | 35B-class | [ggml-org/Qwen3.6-35B-A3B-MTP-GGUF](https://huggingface.co/ggml-org/Qwen3.6-35B-A3B-MTP-GGUF) | `1960416bb2cb9ec60cb297016b204ea73a70faaadf5401a62584e47ed2832c28` |
-| **Qwen 3.6 35B MoE MTP** | GGUF (Q4_K_M requant from Q8_0 MTP) | `Qwen3.6-35B-A3B-MTP-Q4_K_M.gguf` | 35B-class | [ggml-org/Qwen3.6-35B-A3B-MTP-GGUF](https://huggingface.co/ggml-org/Qwen3.6-35B-A3B-MTP-GGUF) | `be11d472527e5013290b09c1afc12694a326a4184eb97cf58fff579a671dddc3` |
+| **Qwen 3.6 35B MoE MTP** | GGUF (MXFP4_MOE requant from Q8_0 MTP) | `Qwen3.6-35B-A3B-MTP-MXFP4_MOE.gguf` | 19.3 GB | [ggml-org/Qwen3.6-35B-A3B-MTP-GGUF](https://huggingface.co/ggml-org/Qwen3.6-35B-A3B-MTP-GGUF) | `1960416bb2cb9ec60cb297016b204ea73a70faaadf5401a62584e47ed2832c28` |
+| **Qwen 3.6 35B MoE MTP** | GGUF (Q4_K_M requant from Q8_0 MTP) | `Qwen3.6-35B-A3B-MTP-Q4_K_M.gguf` | 20.7 GB | [ggml-org/Qwen3.6-35B-A3B-MTP-GGUF](https://huggingface.co/ggml-org/Qwen3.6-35B-A3B-MTP-GGUF) | `be11d472527e5013290b09c1afc12694a326a4184eb97cf58fff579a671dddc3` |
 | **Gemma 4 31B IT** | GGUF (Q6_K) | `gemma-4-31B-it-Q6_K.gguf` | 25.2 GB | Unsloth GGUF release | `abd0be03a2bc3f3c9d8e018cbb4ff5b553c340c65d49b6b346c48be5a1efde28` |
 | **gpt-oss-120B** | GGUF (MXFP4, 3 shards) | `gpt-oss-120b-mxfp4-0000{1..3}-of-00003.gguf` | ~63 GB | Unsloth GGUF release | shard pins below |
 | **Qwen 3.5 122B MoE** | GGUF (MXFP4) | `Qwen3.5-122B-A10B-MXFP4_MOE.gguf` | 70.0 GB | [unsloth/Qwen3.5-122B-A10B-GGUF](https://huggingface.co/unsloth/Qwen3.5-122B-A10B-GGUF) | *(unpinned — not on local disk; verify against source)* |
@@ -96,20 +106,20 @@ Benchmarks are measured in tokens/second (generation/decode speed) and quality s
 | **gpt-oss-120B MXFP4** — QUALITY baseline | **Vulkan RADV** | **Pairwise 5-1 vs Qwen 35B; 4-2 vs Qwen 122B** | **~46 tok/s** | not captured in stable run | ~63 GB | **3 / 3 Pass** |
 | **Gemma 4 31B IT Q6_K** — second-opinion lane (dense — slow decode) | **Vulkan RADV** | **Pairwise 4-2 vs Gemma 26B-A4B** | **~8.25 tok/s tg128; ~7.7 tok/s sustained long completions** | pp8192 ~133.6 tok/s (verified) | 25.2 GB | **3 / 3 Pass** |
 | **Qwen 3.6 35B MoE (Think-On)** — **default** | **Vulkan RADV** | **82 / 84** | **~58.5 tok/s** | **932.1 tok/s** | 21.7 GB | **3 / 3 Pass** |
-| **Qwen 3.6 35B MoE MXFP4-MTP (Think-On)** — opt-in speed lane | **Vulkan RADV, llama.cpp b9360** | same production quant | **~72.7 tok/s** | not separately captured | 21.7 GB | **3 / 3 Pass** |
-| **Qwen 3.6 35B MoE Q4_K_M-MTP (Think-On)** — opt-in speed lane | **Vulkan RADV, llama.cpp b9360** | **4-2 pairwise win vs production model** | **~81.2 tok/s** | not separately captured | 35B-class | **3 / 3 Pass** |
+| **Qwen 3.6 35B MoE MXFP4-MTP (Think-On)** — opt-in speed lane | **Vulkan RADV, llama.cpp b9360** | same production quant | **~72.7 tok/s** | not separately captured | 19.3 GB | **3 / 3 Pass** |
+| **Qwen 3.6 35B MoE Q4_K_M-MTP (Think-On)** — opt-in speed lane | **Vulkan RADV, llama.cpp b9360** | **4-2 pairwise win vs production model** | **~81.2 tok/s** | not separately captured | 20.7 GB | **3 / 3 Pass** |
 | **Qwen 3.6 35B MoE (Think-On)** — fallback | ROCm 7.2.x | **82 / 84** | **44.2 tok/s** | ~628.1 tok/s | 21.7 GB | **3 / 3 Pass** |
 | **Qwen 3.6 35B MoE (Think-Off)** | ROCm 7.2.x | **82 / 84** | **43.7 tok/s** | ~628.1 tok/s | 21.7 GB | **3 / 3 Pass** |
 | **Qwen 3.5 122B MoE (Think-On)** — QUALITY spot-specialist | ROCm 7.2.x | **80 / 84** | **19.4 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
 | **Qwen 3.5 122B MoE (Think-Off)** | ROCm 7.2.x | **81 / 84** | **19.5 tok/s** | ~136.0 tok/s | 70.0 GB | **3 / 3 Pass** |
-| **Gemma 4 26B-A4B IT UD-Q6_K_XL** *(queued, not Stable Stack)* | Vulkan RADV | **Pairwise 2-4 vs Gemma 31B** | **40.11 tok/s mean** *(not independently verified in public repo — sourced from private benchmarks; treat as directional)* | not captured in stable run | 21.2 GB | **3 / 3 Pass** |
+| **Gemma 4 26B-A4B IT UD-Q6_K_XL** *(verified plain-control baseline; think-off)* | Vulkan RADV | **Pairwise 2-4 vs Gemma 31B** | **44.76 ± 0.90 tok/s** | **pp512 1002.76 ± 10.29 tok/s** | 21.2 GB | **3 / 3 Pass** |
 | **Qwen 3.6 27B Dense (Think-On)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | **0-6 vs Qwen 122B** | **9.6-11.5 tok/s** tested normal decode | not captured in stable run | 16.4 GB | **3 / 3 Pass** (coding 3/3) |
 | **Qwen 3.6 27B Dense (Think-Off)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | — | **9.6-11.5 tok/s** tested normal decode | not captured in stable run | 16.4 GB | **3 / 3 Pass** (coding 1/3) |
 | **Qwen 3.6 27B Dense + DFlash spec.** *(experimental)* | Lucebox HIP (Q4_K_M draft) | — | **~31.3 tok/s (2.82×)** | see acceptance table below | ~16 GB | discipline-limited |
 | **Qwen 3.5 35B MoE (Think-On)** | ROCm 7.2.x | **79 / 84** | **47.3 tok/s** | ~562.9 tok/s | 21.0 GB | **3 / 3 Pass** |
 | **Qwen3-Coder-Next (Think-On)** | ROCm 7.2.x | — | **34.6 tok/s** | ~127.0 tok/s | 49.6 GB | **3 / 3 Pass** |
 
-> **Stable Stack update (2026-05-30):** gpt-oss-120B is now the general QUALITY baseline after blinded pairwise wins of 5-1 vs Qwen 35B and 4-2 vs Qwen 122B. Qwen 122B is retained as a QUALITY spot-specialist for regulatory-currency work and sharp plan reviews. Gemma 4 31B is the cross-family second-opinion lane (coding experiment — quality verification, not throughput); Gemma 26B-A4B cleared the coding gate but did not graduate based on the quality pairwise result (2-4 loss to Gemma 31B). **Speed correction:** a previous draft listed Gemma 31B at 43-48 tok/s, which was a misattribution of the gpt-oss-120B Vulkan speed. Verified Gemma 31B decode is ~8.25 tok/s tg128 / ~7.7 tok/s sustained (dense model; full weights read every token). For tasks where decode speed matters, prefer Qwen 3.6 35B MoE (~58.5 tok/s Vulkan) or gpt-oss-120B (~46 tok/s Vulkan). The MTP rows are opt-in speed lanes for the Qwen 35B workhorse, not a replacement for the default setup.
+> **Stable Stack update (2026-05-30):** gpt-oss-120B is now the general QUALITY baseline after blinded pairwise wins of 5-1 vs Qwen 35B and 4-2 vs Qwen 122B. Qwen 122B is retained as a QUALITY spot-specialist for regulatory-currency work and sharp plan reviews. Gemma 4 31B is the cross-family second-opinion lane (coding experiment — quality verification, not throughput); Gemma 26B-A4B is now a verified plain-control baseline (think-off, F16 KV) at 44.76 ± 0.90 tok/s tg128 / pp512 1002.76 ± 10.29 tok/s, which is the simpler lane for general reasoning, JSON/prose, and memory-pressure cases. **Speed correction:** a previous draft listed Gemma 31B at 43-48 tok/s, which was a misattribution of the gpt-oss-120B Vulkan speed. Verified Gemma 31B decode is ~8.25 tok/s tg128 / ~7.7 tok/s sustained (dense model; full weights read every token). For tasks where decode speed matters, prefer Qwen 3.6 35B MoE (~58.5 tok/s Vulkan) or gpt-oss-120B (~46 tok/s Vulkan). The MTP rows are opt-in speed lanes for the Qwen 35B workhorse, not a replacement for the default setup.
 >
 > **Status: the dense Qwen 3.6 27B is benchmarked but NOT in the production stack.** Community consensus often treats it as a strong reasoner, but local Strix Halo testing did not support that routing choice: blind pairwise was 0-6 vs the 122B on the standard 6-prompt set, and normal decode tested around 9.6-11.5 tok/s across backends. It is retained as a break-glass *"arrow in the quiver"* for tough, blocked projects — not a first- or second-line model. The speculative-decoding result below is kept as a technical finding.
 >
@@ -117,7 +127,7 @@ Benchmarks are measured in tokens/second (generation/decode speed) and quality s
 
 ### D. Prefill and Speculative-Acceptance Coverage
 
-The table above keeps missing instrumentation explicit. Decode rates are the main stable-run metric for the newly added Gemma and gpt-oss rows; prefill was not captured in those stable gate records. A separate research note mentions a gpt-oss prompt-processing figure, but because it is not tied to the stable graduation protocol used above, it is not promoted into this matrix.
+The table above keeps missing instrumentation explicit. Decode rates are the main stable-run metric for gpt-oss and the Gemma 31B row; the Gemma 26B control baseline now has a captured `pp512` figure from the verified no-spec lane. A separate research note mentions a gpt-oss prompt-processing figure, but because it is not tied to the stable graduation protocol used above, it is not promoted into this matrix.
 
 | Metric | Model / configuration | Captured value | Notes |
 |---|---|---:|---|
@@ -128,7 +138,8 @@ The table above keeps missing instrumentation explicit. Decode rates are the mai
 | Prefill speed | Qwen 3.5 122B-A10B MXFP4, ROCm | ~136.0 tok/s | quality route benchmark |
 | Prefill speed | Qwen 3.5 35B-A3B MXFP4, ROCm | ~562.9 tok/s | planning route benchmark |
 | Prefill speed | Qwen3-Coder-Next UD-Q4_K_XL, ROCm | ~127.0 tok/s | coding challenger benchmark |
-| Prefill speed | gpt-oss-120B MXFP4, Gemma 4 26B-A4B | not captured | rerun under the same protocol before publishing a value |
+| Prefill speed | gpt-oss-120B MXFP4 | not captured | rerun under the same protocol before publishing a value |
+| Prefill speed | Gemma 4 26B-A4B IT Q6_K_XL | **pp512 1002.76 ± 10.29 tok/s** | verified plain-control baseline; reasoning off, F16 KV |
 | Prefill speed | Gemma 4 31B IT Q6_K | **pp8192 ~133.6 tok/s** (controlled local GPU benchmark, b9247 57ebaf4e) | verified; decode ~8.25 tok/s tg128, ~7.7 tok/s sustained |
 | Speculative acceptance length | Qwen 3.6 27B Dense + Q4_K_M DFlash draft | AL = 6.67 | HumanEval mean at DDTree budget 22 |
 | Speculative acceptance percentage | Qwen 3.6 27B Dense + Q4_K_M DFlash draft | not captured | do not derive a percent from AL; rerun if acceptance-rate counters are needed |

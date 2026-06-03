@@ -2,6 +2,10 @@
 
 Use this flowchart to select the optimal model, quantization, and reasoning settings on the 128 GB (96 GB GTT) baseline system based on your task priority:
 
+The tree is a routing aid, not a universal leaderboard. It reflects this repo's
+measured local gates for a water/utility agent workflow: tool discipline,
+coding reliability, report quality, speed, and reproducibility.
+
 ```mermaid
 graph TD
     Start["What is the primary task?"]
@@ -20,7 +24,7 @@ graph TD
     
     Start -->|Fast QA & Extraction| Ext["Qwen 3.6 35B MoE (MXFP4)<br/>• think-off via chat-template parameter<br/>• Save 50% wall-time"]
 
-    Start -->|GPU pressure or Step-1 file-analysis fallback| Queued["Gemma 4 26B-A4B UD-Q6_K_XL<br/>• coding gate cleared<br/>• queued candidate, not Stable Stack"]
+    Start -->|GPU pressure or Step-1 file-analysis fallback| GemmaControl["Gemma 4 26B-A4B UD-Q6_K_XL<br/>• verified plain-control baseline<br/>• think-off, F16 KV, 3/3 nonce"]
 ```
 
 ---
@@ -29,5 +33,5 @@ graph TD
 * **Measured local gates now set the ladder.** Qwen remains a strong reasoning family and stays available, but the 2026-05-30 Strix Halo results promote gpt-oss-120B as the general QUALITY baseline and Gemma 4 31B as the second-opinion lane for quality verification (dense model — ~8 tok/s decode; use on orchestrated path, not as a throughput pick).
 * **Qwen 122B is no longer the default quality target.** It stays useful as a spot-specialist for regulatory-currency tasks and incisive plan review.
 * **MTP speed lanes are opt-in.** Qwen3.6-35B-A3B-MTP keeps the Qwen workhorse role but requires the MTP GGUFs, a recent llama.cpp build, and current shaderc / `glslc`.
-* **Gemma 26B-A4B is queued, not graduated.** It cleared the coding gate and has a narrow file-analysis niche, but Gemma 31B won the quality pairwise 4-2.
+* **Gemma 26B-A4B is a verified plain-control baseline, not a queued candidate.** It keeps a narrow file-analysis / memory-pressure niche, but the plain Vulkan lane is now measured and reproducible at ~44.8 tok/s tg128 with F16 KV and reasoning off.
 * **Reasoning budgets are a *planning* lever, not a coding one.** Capping `thinking_budget_tokens` cuts wall-clock on prose/planning, but a budget sweep showed *any* cap drops the stateful coding gate to 1–2/3 (only uncapped think-on holds 3/3). Leave the coding route uncapped.

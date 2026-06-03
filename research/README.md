@@ -28,6 +28,9 @@ These are the source-of-record documents. The Model Finder, decision tree, and r
 ### [MTP Self-Speculative Decoding on Strix Halo](./mtp-speculative-decoding-strix-halo.md)
 *Case study dated June 2026.* A concise methodology note on vetting a community speedup claim: reproduce the MTP pipeline from the strix-halo-guide, gate the quants on nonce/coding/quality, reject the speed-first IQ4_XS lane for this repo's quality bar, and ship the quality-preserving MXFP4-MTP and Q4_K_M-MTP options.
 
+### [Gemma 4 26B-A4B Control Baseline vs MTP on Strix Halo](./gemma-4-26b-control-vs-mtp-strix-halo.md)
+*Benchmark note dated June 2026.* The plain Vulkan no-spec baseline for Gemma 26B-A4B, the measured pp512/tg128 numbers, and the control-vs-MTP trade-off on the same reference box. The takeaway is that the plain lane is the cleaner default for general reasoning, JSON extraction, and prose.
+
 ### [Comprehensive Agentic LLM Evaluation on AMD Strix Halo (128 GB)](./strix-halo-agentic-evaluation-report.md)
 *Evaluation report dated May 24, 2026.* 7 KB. The methodology piece — what was measured, how, and why each metric matters for local agentic workflows. Companion to the reproducibility matrix.
 

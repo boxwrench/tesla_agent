@@ -74,6 +74,10 @@ This script automatically exports `HIP_VISIBLE_DEVICES=-1` (hiding the GPU from 
 
 All values below are local Strix Halo results from the verified stack. Not universal model rankings. Sorted by decode speed (fastest first); quality lane labels are for routing, not ranking.
 
+For exact artifact sizes, checksums, and missing-instrumentation notes, treat
+the [Reproducibility Matrix](../reference/reproducibility-matrix.md) as the
+source of truth. This chapter explains the speed levers.
+
 **Verified stack entries:**
 
 | Model | Decode speed | Quality lane |
@@ -83,20 +87,21 @@ All values below are local Strix Halo results from the verified stack. Not unive
 | Qwen 3.6 35B-A3B MXFP4 (Vulkan/RADV) | **~58.5 tok/s** | CODE/general baseline; workhorse default unchanged |
 | Qwen 3.5 35B-A3B MXFP4 (ROCm) | 47.3 tok/s | retained for regression tests |
 | gpt-oss-120B MXFP4 (Vulkan/RADV) | **~46 tok/s** | QUALITY baseline |
+| Gemma 4 26B-A4B plain control (Vulkan/RADV) | **~44.8 tok/s tg128** | verified plain-control baseline; `pp512 1002.76 ± 10.29 tok/s`, reasoning off, F16 KV |
 | Qwen 3.6 35B-A3B MXFP4 (ROCm fallback) | ~44.2 tok/s | CODE baseline ROCm fallback |
 | Qwen3-Coder-Next UD-Q4_K_XL (ROCm) | 34.6 tok/s | hard-coding challenger |
 | Qwen 3.5 122B-A10B MXFP4 (ROCm) | ~19.4 tok/s | QUALITY spot-specialist |
 | Qwen 3.6 27B Dense UD-Q4_K_XL | 9.6–11.5 tok/s normal decode | break-glass only |
 | **Gemma 4 31B IT Q6_K (Vulkan/RADV)** | **~8.25 tok/s tg128; ~7.7 tok/s sustained** | second-opinion lane (dense — see note) |
 
-**Unverified / queued candidates** *(speed numbers sourced from private benchmarks not reproduced in this public repo — treat as directional only):*
-
-| Model | Reported speed | Status |
-|---|---:|---|
-| Gemma 4 26B-A4B UD-Q6_K_XL | 40.11 tok/s mean *(not verified in public repo)* | Queued candidate — coding gate cleared, not Stable Stack |
-
 > [!NOTE]
 > **Why is Gemma 4 31B the slowest model in the verified stack?** Both Gemma 31B and Qwen 35B are roughly 25 GB in size, yet Qwen 35B runs roughly 7× faster on the same hardware before any MTP opt-in. The reason is architecture: Qwen 35B is a Mixture-of-Experts model that activates only ~3B parameters per token, so each decode step reads far less weight data from memory. Gemma 31B is a **dense** model: every token requires reading all 31B parameters from the same bandwidth-constrained unified memory. On a memory-bandwidth-bound APU like Strix Halo, that difference collapses decode speed from ~58.5 tok/s (MoE workhorse) to ~8 tok/s (dense). Gemma 31B earns its place in the stack as a second-opinion lane for quality verification and cross-family comparison — not as a throughput model. Use it on the orchestrated path where quality of each step matters more than wall-clock time.
+
+### **Gemma 4 26B-A4B plain Vulkan control baseline**
+
+The smaller Gemma 26B-A4B lane is now verified on the plain Vulkan/no-spec path with F16 KV and `--reasoning off`. On the reference box it measured `pp512 1002.76 ± 10.29 tok/s` and `tg128 44.76 ± 0.90 tok/s`, with Hermes nonce 3/3. For general reasoning, JSON extraction, and prose, this is the simpler lane: fewer moving parts than MTP, no draft model to manage, and no speculative-drafting flags to keep in sync.
+
+The MTP comparison only pays off on heavy code generation, where the block-size-3 lane reached `63.23 tok/s` on the same box. For JSON/prose it stayed effectively flat versus the plain control lane, so keep the no-spec path as the default.
 
 ---
 
