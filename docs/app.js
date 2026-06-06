@@ -287,14 +287,16 @@ function initBenchmarkChart() {
     { label: 'Gemma 31B Q6', decode: 8.25, prefill: 133.6, intelligence: 39.2, coding: 38.7, source: 'AA reasoning Intelligence + Coding; local Tesla bench speed', tier: 'dense-control', color: '#6d28d9' }
   ];
 
+  const decodeLeaderboard = [...benchModels].sort((a, b) => b.decode - a.decode);
+
   new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: benchModels.map(model => model.label),
+      labels: decodeLeaderboard.map(model => model.label),
       datasets: [{
         label: 'Local decode tok/s',
-        data: benchModels.map(model => model.decode),
-        backgroundColor: benchModels.map(model => model.color),
+        data: decodeLeaderboard.map(model => model.decode),
+        backgroundColor: decodeLeaderboard.map(model => model.color),
         borderRadius: 6
       }]
     },
@@ -331,7 +333,7 @@ function initBenchmarkChart() {
         tooltip: {
           callbacks: {
             label: function(context) {
-              const model = benchModels[context.dataIndex];
+              const model = decodeLeaderboard[context.dataIndex];
               const prefill = model.prefill ? `; prefill ${model.prefill} tok/s` : '';
               return `${context.label}: ${model.decode} tok/s decode${prefill}`;
             }
