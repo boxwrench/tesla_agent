@@ -123,10 +123,11 @@ Benchmarks are measured in tokens/second (generation/decode speed) and quality s
 | **StepFun Step-3.7-Flash plain** — large QUALITY contender baseline | Vulkan RADV, llama.cpp b9360 | **6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B; do not auto-graduate without independent judge** | **20.4-22.3 tok/s** | **212.0 tok/s** | 88.79 GiB | **3 / 3 Pass; coding 4/5 E2E** |
 | **Gemma 4 26B-A4B IT UD-Q6_K_XL** *(verified plain-control baseline; think-off)* | Vulkan RADV | **Pairwise 2-4 vs Gemma 31B** | **44.76 ± 0.90 tok/s** | **pp512 1002.76 ± 10.29 tok/s** | 21.2 GB | **3 / 3 Pass** |
 | **Gemma 4 26B-A4B QAT Q4_0** *(official Google QAT; think-off)* | Vulkan RADV, llama.cpp b9360 | quality control vs non-QAT Q4 pending | **59.4 tok/s** | **1194.4 tok/s** | 13.45 GiB | **3 / 3 Pass** |
-| **Gemma 4 26B-A4B QAT Q4_0 + MTP/Q8 KV** *(experimental speed probe)* | Atomic Vulkan b9019 | assistant head is not QAT-matched; quality control pending | **71.0 tok/s** | **714.4 tok/s** | 13.45 GiB + ~310 MiB assistant | **3 / 3 Pass** |
+| **Gemma 4 26B-A4B QAT Q4_0 + MTP/Q8 KV (QAT head)** | Atomic Vulkan b9019 | QAT-matched head; quality control pending | **71.4 tok/s** | **729.3 tok/s** | 13.45 GiB + ~310 MiB assistant | **3 / 3 Pass** |
 | **Gemma 4 12B QAT Q4_0** | Vulkan RADV, llama.cpp b9360 | quality control pending | **25.7 tok/s** | **666.5 tok/s** | 6.50 GiB | not run |
+| **Gemma 4 12B QAT Q4_0 + MTP/Q8 KV (QAT head)** | Atomic Vulkan b9019 | QAT-matched head; quality control pending | **45.6 tok/s** | **539.9 tok/s** | 6.50 GiB + ~313 MiB assistant | not run |
 | **Gemma 4 31B QAT Q4_0** | Vulkan RADV, llama.cpp b9360 | quality control pending | **11.0 tok/s** | **204.2 tok/s** | 16.44 GiB | not run |
-| **Gemma 4 31B QAT Q4_0 + MTP** *(experimental speed probe)* | Atomic Vulkan b9019 | assistant head is not QAT-matched; quality control pending | **15.4 tok/s** | **118.0 tok/s** | 16.44 GiB + ~337 MiB assistant | not run |
+| **Gemma 4 31B QAT Q4_0 + MTP (QAT head)** | Atomic Vulkan b9019 | QAT-matched head; quality control pending | **19.1 tok/s** | **203.6 tok/s** | 16.44 GiB + ~337 MiB assistant | not run |
 | **Qwen 3.6 27B Dense (Think-On)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | **0-6 vs Qwen 122B** | **9.6-11.5 tok/s** tested normal decode | not captured in stable run | 16.4 GB | **3 / 3 Pass** (coding 3/3) |
 | **Qwen 3.6 27B Dense (Think-Off)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | — | **9.6-11.5 tok/s** tested normal decode | not captured in stable run | 16.4 GB | **3 / 3 Pass** (coding 1/3) |
 | **Qwen 3.6 27B Dense + DFlash spec.** *(experimental)* | Lucebox HIP (Q4_K_M draft) | — | **~31.3 tok/s (2.82×)** | see acceptance table below | ~16 GB | discipline-limited |
@@ -161,30 +162,39 @@ The table above keeps missing instrumentation explicit. Decode rates are the mai
 | Prefill speed | gpt-oss-120B MXFP4 | not captured | rerun under the same protocol before publishing a value |
 | Prefill speed | Gemma 4 26B-A4B IT Q6_K_XL | **pp512 1002.76 ± 10.29 tok/s** | verified plain-control baseline; reasoning off, F16 KV |
 | Prefill speed | Gemma 4 26B-A4B QAT Q4_0, plain F16 KV | **1194.4 tok/s** | official Google QAT GGUF; llama.cpp b9360 Vulkan/RADV |
-| Prefill speed | Gemma 4 26B-A4B QAT Q4_0, MTP + Q8 KV | **714.4 tok/s** | experimental single-stream speed probe; Atomic b9019 |
+| Prefill speed | Gemma 4 26B-A4B QAT Q4_0, MTP + Q8 KV (QAT head) | **729.3 tok/s** | QAT-matched head; Atomic b9019 |
 | Prefill speed | Gemma 4 12B QAT Q4_0, plain F16 KV | **666.5 tok/s** | official Google QAT GGUF; llama.cpp b9360 Vulkan/RADV |
+| Prefill speed | Gemma 4 12B QAT Q4_0, MTP + Q8 KV (QAT head) | **539.9 tok/s** | QAT-matched head; Atomic b9019 |
 | Prefill speed | Gemma 4 31B QAT Q4_0, plain Q8 KV | **204.2 tok/s** | official Google QAT GGUF; llama.cpp b9360 Vulkan/RADV |
-| Prefill speed | Gemma 4 31B QAT Q4_0, MTP F16 KV | **118.0 tok/s** | experimental speed probe; Atomic b9019 |
+| Prefill speed | Gemma 4 31B QAT Q4_0, MTP F16 KV (QAT head) | **203.6 tok/s** | QAT-matched head; Atomic b9019 |
 | Prefill speed | Gemma 4 31B IT Q6_K | **pp8192 ~133.6 tok/s** (controlled local GPU benchmark, b9247 57ebaf4e) | verified; decode ~8.25 tok/s tg128, ~7.7 tok/s sustained |
 | Speculative acceptance length | Qwen 3.6 27B Dense + Q4_K_M DFlash draft | AL = 6.67 | HumanEval mean at DDTree budget 22 |
 | Speculative acceptance percentage | Qwen 3.6 27B Dense + Q4_K_M DFlash draft | not captured | do not derive a percent from AL; rerun if acceptance-rate counters are needed |
 | Speculative acceptance length | Qwen 3.6 27B Dense + Q8_0 DFlash draft | not captured | speedup was captured, but AL / acceptance percent were not |
 | MTP draft acceptance | Qwen 3.5 122B-A10B MTP, `DRAFT_N=1`, `PMIN` unset | **81.8%** | from dedicated `mtp_probe.json` sample: 224 accepted / 274 drafted; standard decode run was 80.8% |
 | MTP draft acceptance | StepFun Step-3.7-Flash + Q8_0 MTP draft | **84.7%** | from raw `tg_probe.json` timing counters: 416 accepted / 491 drafted; aggregate `bench.json` field is null |
-| MTP draft acceptance | Gemma 4 26B-A4B QAT Q4_0 + existing 26B assistant head | **56.9%** | experimental; assistant head is not QAT-matched, so treat as a speed probe |
-| MTP draft acceptance | Gemma 4 31B QAT Q4_0 + existing 31B assistant head | **42.5%** | experimental; assistant head is not QAT-matched and acceptance is low |
+| MTP draft acceptance | Gemma 4 26B-A4B QAT Q4_0 + non-QAT 26B assistant head | **56.9%** | mismatched head baseline; superseded by QAT-matched row |
+| MTP draft acceptance | Gemma 4 26B-A4B QAT Q4_0 + QAT-matched 26B assistant head (Q8_0) | **91.8%** | canonical QAT MTP row; 71.4 tok/s decode, 29.6 s wall std |
+| MTP draft acceptance | Gemma 4 12B QAT Q4_0 + QAT-matched 12B assistant head (Q8_0) | **78.4%** | 45.6 tok/s decode, 46.0 s wall std |
+| MTP draft acceptance | Gemma 4 31B QAT Q4_0 + non-QAT 31B assistant head | **42.5%** | mismatched head baseline; superseded by QAT-matched row |
+| MTP draft acceptance | Gemma 4 31B QAT Q4_0 + QAT-matched 31B assistant head (Q8_0) | **60.4%** | 19.1 tok/s decode, 110.4 s wall std |
 
 ### Gemma 4 QAT Q4_0 sweep
 
 QAT means quantization-aware training: the model is trained or adapted while accounting for the low-precision target format, with the goal of retaining more behavior at Q4 than a simple post-training quantization. The speed comparison against older Q6 rows mostly shows the benefit of smaller Q4 artifacts; QAT earns its keep only if quality holds against ordinary non-QAT Q4/K-quant controls. Those controls are still pending.
 
+All MTP rows below use QAT-matched assistant heads converted from Google's official unquantized QAT assistant repos (`google/gemma-4-{12B,26B-A4B,31B}-it-qat-q4_0-unquantized-assistant`), quantized to Q8_0 and loaded via the Atomic llama.cpp TurboQuant fork. The earlier non-QAT head rows (now marked "non-QAT head") are retained for comparison.
+
 | Lane | Load to listening | Prefill | Decode | Normalized wall, 1150-in/2000-out | Two-slot aggregate | Notes |
 |---|---:|---:|---:|---:|---:|---|
-| Gemma 4 26B-A4B QAT Q4_0, plain F16 KV | ~4 s | 1194.4 tok/s | 59.4 tok/s | 34.6 s | 90.9 tok/s | best general QAT row |
-| Gemma 4 26B-A4B QAT Q4_0, MTP + Q8 KV | ~18 s | 714.4 tok/s | 71.0 tok/s | 29.8 s | 55.6 tok/s | fastest single-stream row; 56.9% MTP acceptance |
+| Gemma 4 26B-A4B QAT Q4_0, plain F16 KV | ~4 s | 1194.4 tok/s | 59.4 tok/s | 34.6 s | 90.9 tok/s | best general QAT row; best two-slot |
+| Gemma 4 26B-A4B QAT Q4_0, MTP + Q8 KV (QAT head) | ~18 s | 729.3 tok/s | **71.4 tok/s** | **29.6 s** | 62.5 tok/s | **91.8% acceptance**; fastest single-stream row |
+| Gemma 4 26B-A4B QAT Q4_0, MTP + Q8 KV (non-QAT head) | ~18 s | 714.4 tok/s | 71.0 tok/s | 29.8 s | 55.6 tok/s | 56.9% acceptance; head-mismatch baseline |
 | Gemma 4 12B QAT Q4_0, plain F16 KV | ~4 s | 666.5 tok/s | 25.7 tok/s | 79.5 s | 47.6 tok/s | slower than 26B-A4B on this stack |
+| Gemma 4 12B QAT Q4_0, MTP + Q8 KV (QAT head) | ~10 s | 539.9 tok/s | **45.6 tok/s** | **46.0 s** | 43.5 tok/s | **78.4% acceptance**; +77% vs plain |
 | Gemma 4 31B QAT Q4_0, plain Q8 KV | ~8 s | 204.2 tok/s | 11.0 tok/s | 187.4 s | 20.0 tok/s | best plain 31B QAT row |
-| Gemma 4 31B QAT Q4_0, MTP F16 KV | ~10 s | 118.0 tok/s | 15.4 tok/s | 139.6 s | 15.9 tok/s | speed-only probe; 42.5% MTP acceptance |
+| Gemma 4 31B QAT Q4_0, MTP F16 KV (QAT head) | ~20 s | 203.6 tok/s | **19.1 tok/s** | **110.4 s** | 18.9 tok/s | **60.4% acceptance**; +73% vs plain |
+| Gemma 4 31B QAT Q4_0, MTP F16 KV (non-QAT head) | ~10 s | 118.0 tok/s | 15.4 tok/s | 139.6 s | 15.9 tok/s | 42.5% acceptance; head-mismatch baseline |
 
 DDTree budget sweep for the dense 27B Q4_K_M draft:
 

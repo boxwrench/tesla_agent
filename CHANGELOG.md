@@ -8,6 +8,23 @@ guidance, or web-dashboard behavior should be listed.
 
 ## Unreleased
 
+### Gemma 4 QAT MTP — Matched Head Update (2026-06-06)
+
+- Updated all three Gemma 4 QAT MTP rows to use **QAT-matched assistant heads**
+  (converted from `google/gemma-4-{12B,26B-A4B,31B}-it-qat-q4_0-unquantized-assistant`
+  to Atomic `gemma4_assistant` GGUF Q8_0).
+- **26B-A4B QAT MTP**: acceptance `56.9% → 91.8%`; decode `71.0 → 71.4 tok/s`;
+  wall std `29.8 → 29.6 s`. The earlier low acceptance was entirely the
+  non-QAT head mismatch.
+- **12B QAT MTP (new)**: `45.6 tok/s` decode, `78.4%` acceptance, `46.0 s` wall std
+  (+77% vs 12B plain at `25.7 tok/s`).
+- **31B QAT MTP**: acceptance `42.5% → 60.4%`; decode `15.4 → 19.1 tok/s`;
+  wall std `139.6 → 110.4 s` (+73% vs 31B plain at `11.0 tok/s`).
+- Non-QAT head baseline rows retained in the reproducibility matrix for
+  comparison; marked as superseded.
+- Dashboard `wallTimeModels` updated: 31B QAT MTP `139.6 → 110.4 s`; 26B QAT
+  MTP `29.8 → 29.6 s`; 12B QAT MTP added at `46.0 s`.
+
 ### Dashboard
 
 - Replaced "Local Speed Per Coding Point" chart with a **Sequential Task Wall
