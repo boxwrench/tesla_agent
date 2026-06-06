@@ -175,7 +175,8 @@ The table above keeps missing instrumentation explicit. Decode rates are the mai
 | MTP draft acceptance | StepFun Step-3.7-Flash + Q8_0 MTP draft | **84.7%** | from raw `tg_probe.json` timing counters: 416 accepted / 491 drafted; aggregate `bench.json` field is null |
 | MTP draft acceptance | Gemma 4 26B-A4B QAT Q4_0 + non-QAT 26B assistant head | **56.9%** | mismatched head baseline; superseded by QAT-matched row |
 | MTP draft acceptance | Gemma 4 26B-A4B QAT Q4_0 + QAT-matched 26B assistant head (Q8_0) | **91.8%** | canonical QAT MTP row; 71.4 tok/s decode, 29.6 s wall std |
-| MTP draft acceptance | Gemma 4 12B QAT Q4_0 + QAT-matched 12B assistant head (Q8_0) | **78.4%** | 45.6 tok/s decode, 46.0 s wall std |
+| MTP draft acceptance | Gemma 4 12B QAT Q4_0 + QAT-matched 12B assistant head (Q8_0) | **78.4%** | 45.6 tok/s decode, 46.0 s wall std; single-slot |
+| MTP draft acceptance | Gemma 4 12B QAT Q4_0 + QAT-matched 12B assistant head (Q8_0), PARALLEL=2 | **88.6%** | 38.6 tok/s raw / 48.6 eff., 62.5 tok/s 2-slot agg; post-fix |
 | MTP draft acceptance | Gemma 4 31B QAT Q4_0 + non-QAT 31B assistant head | **42.5%** | mismatched head baseline; superseded by QAT-matched row |
 | MTP draft acceptance | Gemma 4 31B QAT Q4_0 + QAT-matched 31B assistant head (Q8_0) | **60.4%** | 19.1 tok/s decode, 110.4 s wall std |
 
@@ -191,7 +192,8 @@ All MTP rows below use QAT-matched assistant heads converted from Google's offic
 | Gemma 4 26B-A4B QAT Q4_0, MTP + Q8 KV (QAT head) | ~18 s | 729.3 tok/s | **71.4 tok/s** | **29.6 s** | 62.5 tok/s | **91.8% acceptance**; fastest single-stream row |
 | Gemma 4 26B-A4B QAT Q4_0, MTP + Q8 KV (non-QAT head) | ~18 s | 714.4 tok/s | 71.0 tok/s | 29.8 s | 55.6 tok/s | 56.9% acceptance; head-mismatch baseline |
 | Gemma 4 12B QAT Q4_0, plain F16 KV | ~4 s | 666.5 tok/s | 25.7 tok/s | 79.5 s | 47.6 tok/s | slower than 26B-A4B on this stack |
-| Gemma 4 12B QAT Q4_0, MTP + Q8 KV (QAT head) | ~10 s | 539.9 tok/s | **45.6 tok/s** | **46.0 s** | 43.5 tok/s | **78.4% acceptance**; +77% vs plain |
+| Gemma 4 12B QAT Q4_0, MTP + Q8 KV (QAT head) | ~10 s | 539.9 tok/s | **45.6 tok/s** | **46.0 s** | 43.5 tok/s | **78.4% acceptance**; +77% vs plain; single-slot |
+| Gemma 4 12B QAT Q4_0, MTP + Q8 KV (QAT head, PARALLEL=2) | ~8 s | 550.6 tok/s | 38.6 tok/s (48.6 eff.) | 53.9 s | **62.5 tok/s** | **88.6% acceptance**; post-fix; `LLAMA_PIPELINE_DEPTH2=0` required; +31% vs plain 2-slot |
 | Gemma 4 31B QAT Q4_0, plain Q8 KV | ~8 s | 204.2 tok/s | 11.0 tok/s | 187.4 s | 20.0 tok/s | best plain 31B QAT row |
 | Gemma 4 31B QAT Q4_0, MTP F16 KV (QAT head) | ~20 s | 203.6 tok/s | **19.1 tok/s** | **110.4 s** | 18.9 tok/s | **60.4% acceptance**; +73% vs plain |
 | Gemma 4 31B QAT Q4_0, MTP F16 KV (non-QAT head) | ~10 s | 118.0 tok/s | 15.4 tok/s | 139.6 s | 15.9 tok/s | 42.5% acceptance; head-mismatch baseline |

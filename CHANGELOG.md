@@ -8,6 +8,22 @@ guidance, or web-dashboard behavior should be listed.
 
 ## Unreleased
 
+### Gemma 4 MTP PARALLEL=2 Fix + 12B 2-slot Benchmark (2026-06-06)
+
+- Root-caused and fixed the `GGML_ASSERT(ggml_nelements(a) == ne0*ne1*ne2)` crash
+  in `llm_build_gemma4_mtp` that occurred whenever a second slot began its first
+  speculative draft step. Fix: `n_tokens` → `1` in the `Qcur` reshape in
+  `gemma4-assistant.cpp`, plus supporting fixes in `llama-graph.cpp/h` and
+  `llama-context.cpp`. Submitted upstream as
+  [AtomicBot-ai/atomic-llama-cpp-turboquant#26](https://github.com/AtomicBot-ai/atomic-llama-cpp-turboquant/pull/26).
+- `LLAMA_PIPELINE_DEPTH2=0` env var required on Vulkan for 2-slot stability
+  (prevents thread queue deadlocks).
+- **Gemma 4 12B QAT MTP PARALLEL=2 first confirmed bench:**
+  - 2-slot aggregate: `43.5 → 62.5 tok/s` (+43% vs prior single-slot figure; +31% vs plain 2-slot)
+  - MTP acceptance: `78.4% → 88.6%` at 2 slots
+  - Per-slot decode: 38.6 tok/s (resource sharing cost); effective 48.6 tok/s
+- Updated reproducibility matrix, dashboard source notes. 26B-A4B PARALLEL=2 bench pending.
+
 ### Gemma 4 QAT MTP — Matched Head Update (2026-06-06)
 
 - Updated all three Gemma 4 QAT MTP rows to use **QAT-matched assistant heads**
