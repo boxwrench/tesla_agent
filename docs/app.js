@@ -212,15 +212,15 @@ function initModelFinder() {
       rationale: "Use as a large-model quality contender when the task merits spending the 26 t/s tier. Private pairwise favored plain StepFun 6-0 vs gpt-oss-soulfix and 4-0-2 vs 122B, and the MTP lane passed nonce 3/3 plus coding PASS 5/5 E2E. It should not become the public default until an independent judge/calibration pass confirms the pairwise result. Artificial Analysis lists Step 3.7 Flash at Intelligence Index 43."
     },
     'companion': {
-      name: "Gemma 4 26B-A4B IT (UD-Q6_K_XL)",
-      mode: "COMPANION — small-footprint MoE",
-      file: "gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf",
-      size: "21.2 GB",
-      speed: "~44.8 tokens/sec tg128; pp512 ~1003 tokens/sec (Vulkan/RADV)",
-      reasoning: "Off in tested gate; 3/3 nonce with F16 KV",
-      command: "bash scripts/serving/serve_vulkan.sh --model gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf --reasoning off --cache-type-k f16 --cache-type-v f16",
+      name: "Gemma 4 26B-A4B QAT Q4_0",
+      mode: "COMPANION — fast Gemma QAT lane",
+      file: "gemma-4-26B_q4_0-it.gguf",
+      size: "13.45 GiB",
+      speed: "59.4 tokens/sec decode; 1194.4 tokens/sec prefill (Vulkan/RADV b9360). Experimental MTP/Q8 probe reaches 71.0 t/s single-stream.",
+      reasoning: "Off in tested speed rows; use F16 KV for trusted default",
+      command: "bash scripts/serving/serve_vulkan.sh --model gemma-4-26B_q4_0-it.gguf --reasoning off --cache-type-k f16 --cache-type-v f16",
       hermes: "max_tokens: 8192",
-      rationale: "Verified plain-control baseline on Vulkan/RADV. Use it when GPU memory pressure matters, when you want concurrent loads — 26B-A4B + gpt-oss-120B fits where 31B + 120B does not — or when you want the simpler no-spec lane for general reasoning, JSON, and prose. The MTP comparison is opt-in code-speed work, not the default path."
+      rationale: "Official Google QAT Q4_0 GGUF and the fastest general Gemma row measured on this stack. QAT means quantization-aware training: the model was trained/adapted with the low-precision target in mind. The speed row is strong, but quality superiority over ordinary non-QAT Q4/K-quants is still pending. Keep the MTP/Q8 row experimental because the assistant head is not QAT-matched and two-slot throughput drops."
     },
     'arrow': {
       name: "Qwen 3.6 27B Dense (UD-Q4_K_XL)",
@@ -275,13 +275,16 @@ function initBenchmarkChart() {
     { label: 'Qwen 35B MTP', decode: 72.7, prefill: null, intelligence: 43.5, coding: 35.2, source: 'AA Intelligence + AA Coding; local Tesla bench speed', tier: 'code-speed', color: '#0f766e' },
     { label: 'Qwen 35B', decode: 58.5, prefill: 932.1, intelligence: 43.5, coding: 35.2, source: 'AA Intelligence + AA Coding; local Tesla bench speed', tier: 'workhorse', color: '#2b6cb0' },
     { label: 'gpt-oss 120B', decode: 46.0, prefill: null, intelligence: 33.3, coding: 28.6, source: 'AA Intelligence + AA Coding; local Tesla bench speed', tier: 'quality', color: '#14532d' },
-    { label: 'Gemma 26B', decode: 44.8, prefill: 1002.8, intelligence: 27.1, coding: 29.1, source: 'AA non-reasoning Intelligence + Coding; local Tesla bench speed', tier: 'companion', color: '#2563eb' },
+    { label: 'Gemma 26B QAT', decode: 59.4, prefill: 1194.4, intelligence: 27.1, coding: 29.1, source: 'AA Gemma 26B proxy scores; official Google QAT local Tesla bench speed; quality control vs non-QAT Q4 pending', tier: 'companion', color: '#2563eb' },
+    { label: 'Gemma 26B QAT MTP', decode: 71.0, prefill: 714.4, intelligence: 27.1, coding: 29.1, source: 'Experimental local Tesla MTP/Q8 speed probe; assistant head not QAT-matched', tier: 'companion-speed', color: '#1d4ed8' },
+    { label: 'Gemma 26B Q6', decode: 44.8, prefill: 1002.8, intelligence: 27.1, coding: 29.1, source: 'AA non-reasoning Intelligence + Coding; local Tesla bench speed', tier: 'companion-control', color: '#3b82f6' },
     { label: 'Qwen 122B MTP', decode: 28.3, prefill: 324.9, intelligence: 42.0, coding: 34.7, source: 'AA Intelligence + provider-surfaced AA Coding; local Tesla bench speed', tier: 'specialist', color: '#c2410c' },
     { label: 'StepFun 3.7 MTP', decode: 26.0, prefill: 211.2, intelligence: 43.0, coding: 56.3, source: 'AA Intelligence; StepFun SWE-Bench Pro proxy for coding; local Tesla bench speed', tier: 'large-contender', color: '#b45309' },
     { label: 'StepFun 3.7 plain', decode: 20.4, prefill: 212.0, intelligence: 43.0, coding: 56.3, source: 'AA Intelligence; StepFun SWE-Bench Pro proxy for coding; local Tesla bench speed', tier: 'large-contender', color: '#92400e' },
     { label: 'Qwen 122B', decode: 19.4, prefill: 136.0, intelligence: 42.0, coding: 34.7, source: 'AA Intelligence + provider-surfaced AA Coding; local Tesla bench speed', tier: 'specialist', color: '#7c2d12' },
     { label: 'Qwen 27B Dense', decode: 9.6, prefill: null, intelligence: 45.8, coding: 36.5, source: 'AA Intelligence + AA Coding; local Tesla bench speed', tier: 'experimental', color: '#7f1d1d' },
-    { label: 'Gemma 31B', decode: 8.25, prefill: 133.6, intelligence: 39.2, coding: 38.7, source: 'AA reasoning Intelligence + Coding; local Tesla bench speed', tier: 'dense', color: '#553c7b' }
+    { label: 'Gemma 31B QAT', decode: 11.0, prefill: 204.2, intelligence: 39.2, coding: 38.7, source: 'AA Gemma 31B proxy scores; official Google QAT local Tesla bench speed; quality control pending', tier: 'dense', color: '#553c7b' },
+    { label: 'Gemma 31B Q6', decode: 8.25, prefill: 133.6, intelligence: 39.2, coding: 38.7, source: 'AA reasoning Intelligence + Coding; local Tesla bench speed', tier: 'dense-control', color: '#6d28d9' }
   ];
 
   new Chart(ctx, {
@@ -440,14 +443,17 @@ function initBenchmarkChart() {
       { label: 'Qwen 35B Q4 MTP',    wallTime: 25.9,  measured: false, color: '#115e59' },
       { label: 'Qwen 35B MTP',        wallTime: 28.7,  measured: false, color: '#0f766e' },
       { label: 'Qwen 35B',            wallTime: 35.4,  measured: false, color: '#2b6cb0' },
-      { label: 'Gemma 26B MTP',       wallTime: 42.0,  measured: true,  color: '#2563eb' },
-      { label: 'Gemma 26B',           wallTime: 45.8,  measured: false, color: '#3b82f6' },
+      { label: 'Gemma 26B QAT MTP',   wallTime: 29.8,  measured: true,  color: '#1d4ed8' },
+      { label: 'Gemma 26B QAT',       wallTime: 34.6,  measured: true,  color: '#2563eb' },
+      { label: 'Gemma 26B MTP old',   wallTime: 42.0,  measured: true,  color: '#60a5fa' },
+      { label: 'Gemma 26B Q6',        wallTime: 45.8,  measured: false, color: '#3b82f6' },
       { label: 'Qwen3-Coder-Next',    wallTime: 46.6,  measured: true,  color: '#0369a1' },
       { label: 'Qwen 122B MTP',       wallTime: 74.2,  measured: true,  color: '#c2410c' },
       { label: 'StepFun 3.7 MTP',     wallTime: 82.4,  measured: true,  color: '#b45309' },
       { label: 'StepFun 3.7 plain',   wallTime: 103.4, measured: true,  color: '#92400e' },
       { label: 'Qwen 122B',           wallTime: 111.5, measured: false, color: '#7c2d12' },
-      { label: 'Gemma 31B MTP',       wallTime: 129.3, measured: true,  color: '#553c7b' },
+      { label: 'Gemma 31B QAT MTP',   wallTime: 139.6, measured: true,  color: '#553c7b' },
+      { label: 'Gemma 31B MTP old',   wallTime: 129.3, measured: true,  color: '#6d28d9' },
     ].sort((a, b) => a.wallTime - b.wallTime);
 
     new Chart(wallTimeCtx, {

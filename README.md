@@ -74,7 +74,7 @@ Start here and read in order — each chapter builds on the last. Written for wa
 ## 🛠️ Reference Testing Stack
 All benchmarks were run on local consumer hardware with the following configuration:
 * **Hardware (APU):** AMD Ryzen Strix Halo (gfx1151), 128 GB LPDDR5X system RAM (configured via modprobe with **96 GB GTT graphics memory pool**).
-* **Server Backend:** `llama.cpp/llama-server` (stable build `b9247`; opt-in MTP lane reproduced on `b9360`) served via ROCm 7.2.x (HIP) and Mesa/RADV Vulkan (Mesa 25.2.8). The fastest current lanes use the **Vulkan/RADV** backend (see matrix).
+* **Server Backend:** `llama.cpp/llama-server` (stable build `b9247`; opt-in MTP lanes reproduced on `b9360`, with Gemma QAT MTP probes on Atomic `b9019`) served via ROCm 7.2.x (HIP) and Mesa/RADV Vulkan (Mesa 25.2.8). The fastest current lanes use the **Vulkan/RADV** backend (see matrix).
 * **Parameters:** Greedy decoding (temperature = 0), context buffers scaled from 8,192 to 32,768, Flash Attention active.
 
 ## 📊 Model Performance Matrix
@@ -98,6 +98,11 @@ Below are the actual measured results across the different configurations. *Comm
 | **StepFun Step-3.7-Flash MTP (UD-IQ4_XS + Q8_0 draft, Vulkan RADV)** | **88.79 GiB + 3.5 GB draft** | 12,288 | model-native | plain StepFun pairwise: 6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B | **26.0 tok/s**; pp **211.2 tok/s** | **3 / 3 Pass** | **Large-model QUALITY contender**; MTP acceptance 84.7%; independent calibration still needed before public default promotion |
 | **StepFun Step-3.7-Flash plain (UD-IQ4_XS, Vulkan RADV)** | **88.79 GiB** | 16,384 gate / 32,768 coding | model-native | 6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B | **20.4-22.3 tok/s**; pp **212.0 tok/s** | **3 / 3 Pass** | Large QUALITY contender baseline; coding 4/5 E2E |
 | **Gemma 4 26B-A4B IT (UD-Q6_K_XL)** | **21.2 GB** | 32,768 | Off | Pairwise: 2-4 vs Gemma 31B | **44.8 tok/s tg128; pp512 1002.8 tok/s** | **3 / 3 Pass** | **Verified plain-control baseline**; simpler lane for general reasoning/JSON/prose |
+| **Gemma 4 26B-A4B QAT Q4_0** | **13.45 GiB** | 32,768 | Off | quality control vs non-QAT Q4 pending | **59.4 tok/s; pp 1194.4 tok/s** | **3 / 3 Pass** | **Fast Gemma QAT lane**; official Google QAT GGUF, best general Gemma speed row so far |
+| **Gemma 4 26B-A4B QAT Q4_0 + MTP/Q8 KV** | **13.45 GiB + ~310 MiB assistant** | 16,384 | Off | experimental; assistant head is not QAT-matched | **71.0 tok/s; pp 714.4 tok/s** | **3 / 3 Pass** | **Experimental single-stream speed lane**; MTP acceptance 56.9%, lower two-slot throughput |
+| **Gemma 4 12B QAT Q4_0** | **6.50 GiB** | 32,768 | Off | quality control pending | **25.7 tok/s; pp 666.5 tok/s** | not run | Compact QAT row; slower than 26B-A4B on this stack |
+| **Gemma 4 31B QAT Q4_0** | **16.44 GiB** | 32,768 | Off | quality control pending | **11.0 tok/s; pp 204.2 tok/s** | not run | Dense QAT control; faster than prior Q6 but still memory-bound |
+| **Gemma 4 31B QAT Q4_0 + MTP** | **16.44 GiB + ~337 MiB assistant** | 16,384 | Off | experimental; assistant head is not QAT-matched | **15.4 tok/s; pp 118.0 tok/s** | not run | Speed-only probe; MTP acceptance 42.5% |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **On** | 0-6 vs Qwen 122B | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in the stack (see note)* |
 | **Qwen 3.6 27B Dense (UD-Q4_K_XL)** | **16.4 GB** | 32,768 | **Off** | — | **9.6-11.5 tok/s** tested normal decode | **3 / 3 Pass** | *Experimental — not in the stack* |
 | **Qwen3-Coder-Next (UD-Q4_K_XL, Vulkan RADV)** | **49.6 GB** | 32,768 | Off | one orchestrated 4-step coding run: saved grader checks PASS | **44.4 tok/s**; pp **723.2 tok/s** | **3 / 3 Pass recorded** | 128GB Coder Challenger; Vulkan b9360 promoted over ROCm |
@@ -106,6 +111,8 @@ Below are the actual measured results across the different configurations. *Comm
 > **MTP speed options are opt-in.** The Qwen3.6-35B-A3B-MTP GGUFs carry a native next-token prediction head, so recent `llama-server` builds can self-speculate with `--spec-type draft-mtp` and no separate draft model. The workhorse default remains the standard MXFP4 Qwen 3.6 35B lane. The speed technique was surfaced by the community [strix-halo-guide](https://github.com/hogeheer499-commits/strix-halo-guide); see the acknowledgments below and the [MTP case study](research/mtp-speculative-decoding-strix-halo.md).
 
 > **Gemma 4 26B-A4B plain control baseline:** The no-spec Vulkan lane with `--reasoning off` and F16 KV now measures `pp512 ~1003 tok/s` and `tg128 ~44.8 tok/s` with Hermes nonce 3/3. It is the simpler lane for general reasoning, JSON extraction, and prose; the MTP comparison only pays off on heavy code generation.
+
+> **Gemma 4 QAT Q4_0 sweep:** The official Google QAT GGUFs are now measured. QAT means quantization-aware training: the model is trained/adapted while accounting for the low-precision target, with the goal of retaining more behavior at Q4 than a simple post-training quant. The strongest row is 26B-A4B QAT plain Vulkan at **59.4 tok/s decode** and **1194.4 tok/s prefill**; the experimental 26B-A4B MTP/Q8 row reaches **71.0 tok/s** single-stream but gives up prefill and two-slot throughput. Quality comparison against ordinary non-QAT Q4/K-quant controls is still pending.
 
 > **Latest large-model MTP lanes:** Qwen 122B MTP now has a tuned Vulkan profile (`DRAFT_N=1`, `PMIN` unset) at **28.3 tok/s** decode with **81.8%** MTP-probe acceptance. StepFun Step-3.7-Flash MTP reaches **26.0 tok/s** decode with **84.7%** raw timing acceptance, but `bench.json` leaves `mtp.acceptance_pct` null, so the acceptance source is the raw `tg_probe.json` counters.
 

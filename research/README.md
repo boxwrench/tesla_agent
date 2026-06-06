@@ -31,6 +31,9 @@ These are the source-of-record documents. The Model Finder, decision tree, and r
 ### [Gemma 4 26B-A4B Control Baseline vs MTP on Strix Halo](./gemma-4-26b-control-vs-mtp-strix-halo.md)
 *Benchmark note dated June 2026.* The plain Vulkan no-spec baseline for Gemma 26B-A4B, the measured pp512/tg128 numbers, and the control-vs-MTP trade-off on the same reference box. The takeaway is that the plain lane is the cleaner default for general reasoning, JSON extraction, and prose.
 
+### [Gemma 4 QAT Q4_0 Bench on Strix Halo](./gemma-4-qat-q4_0-strix-halo.md)
+*Benchmark note dated June 2026.* The official Google QAT Q4_0 sweep for Gemma 4 12B, 26B-A4B, and 31B: artifact hashes, prefill/decode/wall-time rows, MTP acceptance, and the quality-control caveat for QAT claims.
+
 ### [Comprehensive Agentic LLM Evaluation on AMD Strix Halo (128 GB)](./strix-halo-agentic-evaluation-report.md)
 *Evaluation report dated May 24, 2026.* 7 KB. The methodology piece — what was measured, how, and why each metric matters for local agentic workflows. Companion to the reproducibility matrix.
 

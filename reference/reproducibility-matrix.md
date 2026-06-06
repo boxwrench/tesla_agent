@@ -32,7 +32,7 @@ To ensure reproducibility, all benchmarks, evaluations, and tests were executed 
 * **Operating System:** Linux (Ubuntu 24.04 LTS, Kernel `6.11.0-generic` or newer).
 * **AMD Driver Suite:** ROCm 7.2.x (HIP runtime; 7.1.x also works).
 * **Open Source Graphics Drivers:** Mesa 25.2.8 (RADV Vulkan compiler).
-* **Inference Server:** `llama.cpp` / `llama-server` (stable build `b9247`; opt-in MTP lanes reproduced on `b9360`, commit prefix `6b4e4bd...`).
+* **Inference Server:** `llama.cpp` / `llama-server` (stable build `b9247`; opt-in MTP lanes reproduced on `b9360`, commit prefix `6b4e4bd...`; Gemma QAT MTP probes on Atomic `b9019-0a635dcd9`).
 * **Vulkan shader compiler for MTP lanes:** `glslc` built from source using shaderc `v2026.3-dev`. The distro `glslc` 2023.8 was too old for the reproduced MTP build.
 * **Environment Overrides (`config.env`):**
   ```bash
@@ -61,6 +61,9 @@ The following models are used in the reference tests. Download paths are pinned 
 | **StepFun Step-3.7-Flash** | GGUF (UD-IQ4_XS, 3 shards) | `Step-3.7-Flash-UD-IQ4_XS-00001-of-00003.gguf` | 88.79 GiB | source pin pending in public mirror | *(download verified locally; public checksum pending)* |
 | **StepFun Step-3.7-Flash MTP draft** | GGUF (Q8_0 draft) | `Step-3.7-Flash-MTP-Q8_0.gguf` | 3.5 GB | [notSnix/Step-3.7-Flash-Q4_K_M-MTP-GGUF](https://huggingface.co/notSnix/Step-3.7-Flash-Q4_K_M-MTP-GGUF) | *(download verified locally; public checksum pending)* |
 | **Gemma 4 26B-A4B IT** | GGUF (UD-Q6_K_XL) | `gemma-4-26B-A4B-it-UD-Q6_K_XL.gguf` | 21.2 GB | Unsloth GGUF release | `5cfb7ab424c01388538005f26573f3bd374d3140cc021a1c44249e69928882a4` |
+| **Gemma 4 26B-A4B IT QAT** | GGUF (Q4_0) | `gemma-4-26B_q4_0-it.gguf` | 13.45 GiB | [google/gemma-4-26B-A4B-it-qat-q4_0-gguf](https://huggingface.co/google/gemma-4-26B-A4B-it-qat-q4_0-gguf) | `4c856523d61d77922dbc0b26753a6bf6208e5d69d80db0c04dcd776832d054c5` |
+| **Gemma 4 12B IT QAT** | GGUF (Q4_0) | `gemma-4-12b-it-qat-q4_0.gguf` | 6.50 GiB | [google/gemma-4-12B-it-qat-q4_0-gguf](https://huggingface.co/google/gemma-4-12B-it-qat-q4_0-gguf) | `faff1a63667fac17ac5e777f47114688fcefea96e220e211aaa8d62c2c4561f1` |
+| **Gemma 4 31B IT QAT** | GGUF (Q4_0) | `gemma-4-31B_q4_0-it.gguf` | 16.44 GiB | [google/gemma-4-31B-it-qat-q4_0-gguf](https://huggingface.co/google/gemma-4-31B-it-qat-q4_0-gguf) | `0374ce7b0124db9ba96fc649e835c531223ee224a497ce88a374baaea10932ec` |
 | **Qwen3-Coder-Next** | GGUF (UD-Q4_K_XL) | `Qwen3-Coder-Next-UD-Q4_K_XL.gguf` | 49.6 GB | [unsloth/Qwen3-Coder-Next-GGUF](https://huggingface.co/unsloth/Qwen3-Coder-Next-GGUF) | `4bb93f0a0221ef4ff963ca9094df629c8dfdfabc3b4fdd85c1a2e4c0624fce36` |
 | **Qwen 3.5 35B MoE** | GGUF (MXFP4) | `Qwen3.5-35B-A3B-MXFP4_MOE.gguf` | 21.0 GB | [unsloth/Qwen3.5-35B-A3B-GGUF](https://huggingface.co/unsloth/Qwen3.5-35B-A3B-GGUF) | `0f135a59159030f4710477abc6f9922d2f13552c85bff736deaaef71023cd770` |
 
@@ -119,6 +122,11 @@ Benchmarks are measured in tokens/second (generation/decode speed) and quality s
 | **StepFun Step-3.7-Flash + Q8_0 MTP draft** — large QUALITY contender | **Vulkan RADV, patched llama.cpp b9360** | **Plain StepFun pairwise: 6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B; independent calibration still needed** | **26.0 tok/s** | **211.2 tok/s** | 88.79 GiB + 3.5 GB draft | **3 / 3 Pass; coding PASS 5/5 E2E** |
 | **StepFun Step-3.7-Flash plain** — large QUALITY contender baseline | Vulkan RADV, llama.cpp b9360 | **6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B; do not auto-graduate without independent judge** | **20.4-22.3 tok/s** | **212.0 tok/s** | 88.79 GiB | **3 / 3 Pass; coding 4/5 E2E** |
 | **Gemma 4 26B-A4B IT UD-Q6_K_XL** *(verified plain-control baseline; think-off)* | Vulkan RADV | **Pairwise 2-4 vs Gemma 31B** | **44.76 ± 0.90 tok/s** | **pp512 1002.76 ± 10.29 tok/s** | 21.2 GB | **3 / 3 Pass** |
+| **Gemma 4 26B-A4B QAT Q4_0** *(official Google QAT; think-off)* | Vulkan RADV, llama.cpp b9360 | quality control vs non-QAT Q4 pending | **59.4 tok/s** | **1194.4 tok/s** | 13.45 GiB | **3 / 3 Pass** |
+| **Gemma 4 26B-A4B QAT Q4_0 + MTP/Q8 KV** *(experimental speed probe)* | Atomic Vulkan b9019 | assistant head is not QAT-matched; quality control pending | **71.0 tok/s** | **714.4 tok/s** | 13.45 GiB + ~310 MiB assistant | **3 / 3 Pass** |
+| **Gemma 4 12B QAT Q4_0** | Vulkan RADV, llama.cpp b9360 | quality control pending | **25.7 tok/s** | **666.5 tok/s** | 6.50 GiB | not run |
+| **Gemma 4 31B QAT Q4_0** | Vulkan RADV, llama.cpp b9360 | quality control pending | **11.0 tok/s** | **204.2 tok/s** | 16.44 GiB | not run |
+| **Gemma 4 31B QAT Q4_0 + MTP** *(experimental speed probe)* | Atomic Vulkan b9019 | assistant head is not QAT-matched; quality control pending | **15.4 tok/s** | **118.0 tok/s** | 16.44 GiB + ~337 MiB assistant | not run |
 | **Qwen 3.6 27B Dense (Think-On)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | **0-6 vs Qwen 122B** | **9.6-11.5 tok/s** tested normal decode | not captured in stable run | 16.4 GB | **3 / 3 Pass** (coding 3/3) |
 | **Qwen 3.6 27B Dense (Think-Off)** *(experimental, not in stack)* | ROCm/Vulkan tested (UD-Q4_K_XL) | — | **9.6-11.5 tok/s** tested normal decode | not captured in stable run | 16.4 GB | **3 / 3 Pass** (coding 1/3) |
 | **Qwen 3.6 27B Dense + DFlash spec.** *(experimental)* | Lucebox HIP (Q4_K_M draft) | — | **~31.3 tok/s (2.82×)** | see acceptance table below | ~16 GB | discipline-limited |
@@ -126,7 +134,7 @@ Benchmarks are measured in tokens/second (generation/decode speed) and quality s
 | **Qwen3-Coder-Next (reasoning off)** — Vulkan promoted | **Vulkan RADV, llama.cpp b9360** | **One orchestrated 4-step coding run: all saved grader checks PASS** | **44.4 tok/s** | **723.2 tok/s** | 49.6 GB | **3 / 3 Pass recorded** |
 | **Qwen3-Coder-Next (reasoning off)** — ROCm fallback | ROCm 7.2.x | baseline only | **38.5 tok/s** | **663.4 tok/s** | 49.6 GB | **3 / 3 Pass recorded** |
 
-> **Stable Stack update (2026-06-03):** gpt-oss-120B remains the public general QUALITY baseline after blinded pairwise wins of 5-1 vs Qwen 35B and 4-2 vs Qwen 122B. StepFun Step-3.7-Flash is now a measured large-model QUALITY contender, including an MTP lane at 26.0 tok/s, but it is not silently promoted as the public default until an independent judge/calibration pass confirms the pairwise result. Qwen 122B is retained as a QUALITY spot-specialist for regulatory-currency work and sharp plan reviews; the tuned native-MTP Vulkan lane lifts it from ~19.4 tok/s to 28.3 tok/s with `DRAFT_N=1` and `PMIN` unset. Gemma 4 31B is the cross-family second-opinion lane (coding experiment — quality verification, not throughput); Gemma 26B-A4B is a verified plain-control baseline (think-off, F16 KV) at 44.76 ± 0.90 tok/s tg128 / pp512 1002.76 ± 10.29 tok/s. Qwen3-Coder-Next moved from the old ROCm row to the promoted Vulkan b9360 row at 44.4 tok/s decode / 723.2 tok/s prefill.
+> **Stable Stack update (2026-06-06):** gpt-oss-120B remains the public general QUALITY baseline after blinded pairwise wins of 5-1 vs Qwen 35B and 4-2 vs Qwen 122B. StepFun Step-3.7-Flash is now a measured large-model QUALITY contender, including an MTP lane at 26.0 tok/s, but it is not silently promoted as the public default until an independent judge/calibration pass confirms the pairwise result. Qwen 122B is retained as a QUALITY spot-specialist for regulatory-currency work and sharp plan reviews; the tuned native-MTP Vulkan lane lifts it from ~19.4 tok/s to 28.3 tok/s with `DRAFT_N=1` and `PMIN` unset. Gemma 4 31B Q6 remains the cross-family second-opinion lane (coding experiment — quality verification, not throughput); Gemma 26B-A4B QAT Q4_0 is now the fastest general Gemma lane measured at 59.4 tok/s decode / 1194.4 tok/s prefill, while the older 26B-A4B UD-Q6_K_XL remains the verified non-QAT control at 44.76 ± 0.90 tok/s tg128 / pp512 1002.76 ± 10.29 tok/s. Qwen3-Coder-Next moved from the old ROCm row to the promoted Vulkan b9360 row at 44.4 tok/s decode / 723.2 tok/s prefill.
 >
 > **Speed correction:** a previous draft listed Gemma 31B at 43-48 tok/s, which was a misattribution of the gpt-oss-120B Vulkan speed. Verified Gemma 31B decode is ~8.25 tok/s tg128 / ~7.7 tok/s sustained (dense model; full weights read every token). For tasks where decode speed matters, prefer Qwen 3.6 35B MoE (~58.5 tok/s Vulkan; up to ~81.2 tok/s with opt-in MTP), gpt-oss-120B (~46 tok/s Vulkan), Qwen3-Coder-Next Vulkan (~44.4 tok/s), or the tuned 122B/StepFun MTP large-model lanes when their quality profile is worth the slower tier.
 >
@@ -152,12 +160,31 @@ The table above keeps missing instrumentation explicit. Decode rates are the mai
 | Prefill speed | Qwen3-Coder-Next UD-Q4_K_XL, ROCm | **663.4 tok/s** | fallback baseline |
 | Prefill speed | gpt-oss-120B MXFP4 | not captured | rerun under the same protocol before publishing a value |
 | Prefill speed | Gemma 4 26B-A4B IT Q6_K_XL | **pp512 1002.76 ± 10.29 tok/s** | verified plain-control baseline; reasoning off, F16 KV |
+| Prefill speed | Gemma 4 26B-A4B QAT Q4_0, plain F16 KV | **1194.4 tok/s** | official Google QAT GGUF; llama.cpp b9360 Vulkan/RADV |
+| Prefill speed | Gemma 4 26B-A4B QAT Q4_0, MTP + Q8 KV | **714.4 tok/s** | experimental single-stream speed probe; Atomic b9019 |
+| Prefill speed | Gemma 4 12B QAT Q4_0, plain F16 KV | **666.5 tok/s** | official Google QAT GGUF; llama.cpp b9360 Vulkan/RADV |
+| Prefill speed | Gemma 4 31B QAT Q4_0, plain Q8 KV | **204.2 tok/s** | official Google QAT GGUF; llama.cpp b9360 Vulkan/RADV |
+| Prefill speed | Gemma 4 31B QAT Q4_0, MTP F16 KV | **118.0 tok/s** | experimental speed probe; Atomic b9019 |
 | Prefill speed | Gemma 4 31B IT Q6_K | **pp8192 ~133.6 tok/s** (controlled local GPU benchmark, b9247 57ebaf4e) | verified; decode ~8.25 tok/s tg128, ~7.7 tok/s sustained |
 | Speculative acceptance length | Qwen 3.6 27B Dense + Q4_K_M DFlash draft | AL = 6.67 | HumanEval mean at DDTree budget 22 |
 | Speculative acceptance percentage | Qwen 3.6 27B Dense + Q4_K_M DFlash draft | not captured | do not derive a percent from AL; rerun if acceptance-rate counters are needed |
 | Speculative acceptance length | Qwen 3.6 27B Dense + Q8_0 DFlash draft | not captured | speedup was captured, but AL / acceptance percent were not |
 | MTP draft acceptance | Qwen 3.5 122B-A10B MTP, `DRAFT_N=1`, `PMIN` unset | **81.8%** | from dedicated `mtp_probe.json` sample: 224 accepted / 274 drafted; standard decode run was 80.8% |
 | MTP draft acceptance | StepFun Step-3.7-Flash + Q8_0 MTP draft | **84.7%** | from raw `tg_probe.json` timing counters: 416 accepted / 491 drafted; aggregate `bench.json` field is null |
+| MTP draft acceptance | Gemma 4 26B-A4B QAT Q4_0 + existing 26B assistant head | **56.9%** | experimental; assistant head is not QAT-matched, so treat as a speed probe |
+| MTP draft acceptance | Gemma 4 31B QAT Q4_0 + existing 31B assistant head | **42.5%** | experimental; assistant head is not QAT-matched and acceptance is low |
+
+### Gemma 4 QAT Q4_0 sweep
+
+QAT means quantization-aware training: the model is trained or adapted while accounting for the low-precision target format, with the goal of retaining more behavior at Q4 than a simple post-training quantization. The speed comparison against older Q6 rows mostly shows the benefit of smaller Q4 artifacts; QAT earns its keep only if quality holds against ordinary non-QAT Q4/K-quant controls. Those controls are still pending.
+
+| Lane | Load to listening | Prefill | Decode | Normalized wall, 1150-in/2000-out | Two-slot aggregate | Notes |
+|---|---:|---:|---:|---:|---:|---|
+| Gemma 4 26B-A4B QAT Q4_0, plain F16 KV | ~4 s | 1194.4 tok/s | 59.4 tok/s | 34.6 s | 90.9 tok/s | best general QAT row |
+| Gemma 4 26B-A4B QAT Q4_0, MTP + Q8 KV | ~18 s | 714.4 tok/s | 71.0 tok/s | 29.8 s | 55.6 tok/s | fastest single-stream row; 56.9% MTP acceptance |
+| Gemma 4 12B QAT Q4_0, plain F16 KV | ~4 s | 666.5 tok/s | 25.7 tok/s | 79.5 s | 47.6 tok/s | slower than 26B-A4B on this stack |
+| Gemma 4 31B QAT Q4_0, plain Q8 KV | ~8 s | 204.2 tok/s | 11.0 tok/s | 187.4 s | 20.0 tok/s | best plain 31B QAT row |
+| Gemma 4 31B QAT Q4_0, MTP F16 KV | ~10 s | 118.0 tok/s | 15.4 tok/s | 139.6 s | 15.9 tok/s | speed-only probe; 42.5% MTP acceptance |
 
 DDTree budget sweep for the dense 27B Q4_K_M draft:
 

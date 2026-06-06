@@ -60,6 +60,10 @@ guidance, or web-dashboard behavior should be listed.
 
 ### Benchmark Framing
 
+- Added the official Google Gemma 4 QAT Q4_0 sweep: 26B-A4B plain Vulkan at
+  59.4 tok/s decode / 1194.4 tok/s prefill, experimental 26B-A4B MTP+Q8 KV
+  at 71.0 tok/s decode, 12B QAT at 25.7 tok/s, and 31B QAT at 11.0 tok/s
+  plain / 15.4 tok/s experimental MTP.
 - Reaffirmed `reference/reproducibility-matrix.md` as the canonical public
   benchmark source of truth.
 - Clarified that public speed tables are routing aids, not universal model

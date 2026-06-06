@@ -586,7 +586,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;">
                   <strong style="color: var(--text-primary);"><i class="fa-solid fa-layer-group"></i> Benchmark Stack:</strong><br>
                   • <strong>Hardware:</strong> AMD Ryzen Strix Halo APU (gfx1151), 128 GB LPDDR5X RAM (96-112 GB GTT ceiling depending model)<br>
-                  • <strong>Backend:</strong> llama.cpp/llama-server (<code style="color: var(--accent-cyan); font-weight: 600;">b9247</code>; Vulkan/MTP lanes reproduced on <code style="color: var(--accent-cyan); font-weight: 600;">b9360</code>) served via ROCm 7.2.x / Vulkan (Mesa RADV 25.2.8)<br>
+                  • <strong>Backend:</strong> llama.cpp/llama-server (<code style="color: var(--accent-cyan); font-weight: 600;">b9247</code>; Vulkan/MTP lanes reproduced on <code style="color: var(--accent-cyan); font-weight: 600;">b9360</code>; Gemma QAT MTP probes on Atomic <code style="color: var(--accent-cyan); font-weight: 600;">b9019</code>) served via ROCm 7.2.x / Vulkan (Mesa RADV 25.2.8)<br>
                   • <strong>Parameters:</strong> Temp = 0 (greedy decoding), context budget = 8k-32k, Flash Attention enabled
                 </p>
               </div>
@@ -616,6 +616,41 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                       <td>2-4 vs Gemma 31B</td>
                       <td>44.76 t/s tg128<br><small style="opacity:0.7">pp512 1002.76 t/s; reasoning off, F16 KV</small></td>
                       <td class="pass">3 / 3</td>
+                    </tr>
+                    <tr class="highlighted-row">
+                      <td>Gemma 4 26B-A4B QAT Q4_0 <em>— fast Gemma QAT lane</em></td>
+                      <td>13.45 GiB</td>
+                      <td>quality control vs non-QAT Q4 pending</td>
+                      <td>59.4 t/s<br><small style="opacity:0.7">pp 1194.4 t/s; official Google QAT GGUF</small></td>
+                      <td class="pass">3 / 3</td>
+                    </tr>
+                    <tr class="highlighted-row">
+                      <td>Gemma 4 26B-A4B QAT Q4_0 + MTP/Q8 KV <em>— experimental speed probe</em></td>
+                      <td>13.45 GiB + ~310 MiB</td>
+                      <td>assistant head not QAT-matched</td>
+                      <td>71.0 t/s<br><small style="opacity:0.7">pp 714.4 t/s; MTP acceptance 56.9%</small></td>
+                      <td class="pass">3 / 3</td>
+                    </tr>
+                    <tr>
+                      <td>Gemma 4 12B QAT Q4_0</td>
+                      <td>6.50 GiB</td>
+                      <td>quality control pending</td>
+                      <td>25.7 t/s<br><small style="opacity:0.7">pp 666.5 t/s</small></td>
+                      <td>not run</td>
+                    </tr>
+                    <tr>
+                      <td>Gemma 4 31B QAT Q4_0</td>
+                      <td>16.44 GiB</td>
+                      <td>quality control pending</td>
+                      <td>11.0 t/s<br><small style="opacity:0.7">pp 204.2 t/s</small></td>
+                      <td>not run</td>
+                    </tr>
+                    <tr>
+                      <td>Gemma 4 31B QAT Q4_0 + MTP <em>— experimental speed probe</em></td>
+                      <td>16.44 GiB + ~337 MiB</td>
+                      <td>assistant head not QAT-matched</td>
+                      <td>15.4 t/s<br><small style="opacity:0.7">pp 118.0 t/s; MTP acceptance 42.5%</small></td>
+                      <td>not run</td>
                     </tr>
                     <tr class="highlighted-row">
                       <td>Gemma 4 31B IT Q6_K — second-opinion lane <small style="opacity:0.7">(dense — slow decode)</small></td>
@@ -728,6 +763,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
               <p class="sub-text" style="margin-top:12px;"><strong>Note — MTP speed lanes are opt-in.</strong> The Qwen3.6-35B-A3B-MTP GGUFs carry a native nextn head, so llama-server can self-speculate with <code>--spec-type draft-mtp</code> and no separate draft model. The technique surfaced via the community <a href="https://github.com/hogeheer499-commits/strix-halo-guide" target="_blank" rel="noopener">strix-halo-guide</a>; this repo independently reproduced and quality-gated the MXFP4-MTP and Q4_K_M-MTP lanes. Full audit trail: <a href="https://github.com/boxwrench/tesla_agent/blob/main/reference/reproducibility-matrix.md" target="_blank" rel="noopener">Reproducibility Matrix &amp; Technical Deep-Dive</a>.</p>
               <p class="sub-text" style="margin-top:12px;"><strong>Latest large-model MTP lanes.</strong> Qwen 122B MTP now has a tuned Vulkan profile at <strong>28.3 t/s</strong> decode with <strong>81.8%</strong> MTP-probe acceptance. StepFun Step-3.7-Flash MTP reaches <strong>26.0 t/s</strong> decode with <strong>84.7%</strong> raw timing acceptance; its aggregate <code>bench.json</code> acceptance field is null, so the source is raw timing counters.</p>
               <p class="sub-text" style="margin-top:12px;"><strong>Gemma 4 26B-A4B plain control baseline.</strong> The no-spec Vulkan lane with <code>--reasoning off</code> and F16 KV measures <strong>pp512 1002.76 &plusmn; 10.29 t/s</strong> and <strong>tg128 44.76 &plusmn; 0.90 t/s</strong> with Hermes nonce 3/3. It is the simpler lane for general reasoning, JSON extraction, and prose; the MTP comparison only pays off on heavy code generation.</p>
+              <p class="sub-text" style="margin-top:12px;"><strong>Gemma 4 QAT Q4_0 sweep.</strong> The official Google QAT 26B-A4B row is now the fastest general Gemma lane measured here: <strong>59.4 t/s decode</strong> and <strong>1194.4 t/s prefill</strong>. QAT means quantization-aware training: the model is trained or adapted with the low-precision target in mind. The experimental 26B-A4B MTP/Q8 row reaches <strong>71.0 t/s</strong> single-stream, but uses a non-QAT-matched assistant head and drops two-slot throughput, so it remains a speed probe.</p>
               <p class="sub-text" style="margin-top:12px;"><strong>Note — the dense 27B is benchmarked but NOT in the production stack.</strong> Community discussion often treats Qwen 27B as a strong reasoner, but the local Strix Halo benches did not support that routing choice: blind pairwise was 0&ndash;6 vs the 122B and normal decode tested around 9.6&ndash;11.5 t/s. It is kept as a break-glass option for tough, blocked projects, not a first- or second-line model. <em>Technical aside:</em> DFlash speculative decoding lifts its floor to <strong>~31 t/s (2.82&times;)</strong> with a footprint-minimized Q4_K_M draft.</p>
             </div>
 
