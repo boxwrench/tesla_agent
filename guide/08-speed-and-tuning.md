@@ -91,7 +91,7 @@ source of truth. This chapter explains the speed levers.
 | Qwen3-Coder-Next UD-Q4_K_XL (Vulkan/RADV) | **44.4 tok/s** | hard-coding challenger; `pp 723.2 tok/s`, Vulkan b9360 promoted |
 | Qwen 3.6 35B-A3B MXFP4 (ROCm fallback) | ~44.2 tok/s | CODE baseline ROCm fallback |
 | Qwen 3.5 122B-A10B MTP MXFP4_MOE (Vulkan/RADV) | **28.3 tok/s** | tuned 122B speed lane; `DRAFT_N=1`, `PMIN` unset; 81.8% MTP-probe acceptance |
-| StepFun Step-3.7-Flash MTP (Vulkan/RADV) | **26.0 tok/s** | large-model QUALITY contender; 84.7% raw timing acceptance; independent calibration still needed |
+| StepFun Step-3.7-Flash MTP (Vulkan/RADV) | **27.9 tok/s** (wall std 78.0 s) | large-model QUALITY contender; 89.3% MTP acceptance; ub=256 default (ubatch sweep 2026-06-06); independent calibration still needed |
 | StepFun Step-3.7-Flash plain (Vulkan/RADV) | 20.4-22.3 tok/s | large-model QUALITY contender baseline |
 | Qwen 3.5 122B-A10B MXFP4 (ROCm) | ~19.4 tok/s | QUALITY spot-specialist |
 | Qwen 3.6 27B Dense UD-Q4_K_XL | 9.6–11.5 tok/s normal decode | break-glass only |

@@ -205,11 +205,11 @@ function initModelFinder() {
       mode: "SYNTHESIS — large contender",
       file: "Step-3.7-Flash-UD-IQ4_XS + Step-3.7-Flash-MTP-Q8_0.gguf",
       size: "88.79 GiB main + 3.5 GB draft",
-      speed: "26.0 tokens/sec decode; 211.2 tokens/sec prefill (patched Vulkan b9360)",
+      speed: "27.9 tokens/sec decode; 183.5 tokens/sec prefill; wall std 78.0 s (ub=256, Vulkan b9360)",
       reasoning: "Model-native template; no Qwen-style think toggle",
       command: "bash scripts/serve/stepfun_mtp_vulkan_serve.sh",
       hermes: "max_tokens: 8192\nctx_size: 12288",
-      rationale: "Use as a large-model quality contender when the task merits spending the 26 t/s tier. Private pairwise favored plain StepFun 6-0 vs gpt-oss-soulfix and 4-0-2 vs 122B, and the MTP lane passed nonce 3/3 plus coding PASS 5/5 E2E. It should not become the public default until an independent judge/calibration pass confirms the pairwise result. Artificial Analysis lists Step 3.7 Flash at Intelligence Index 43."
+      rationale: "Use as a large-model quality contender when the task merits spending the 27.9 t/s tier. Private pairwise favored plain StepFun 6-0 vs gpt-oss-soulfix and 4-0-2 vs 122B, and the MTP lane passed nonce 3/3 plus coding PASS 5/5 E2E. Ubatch sweep (2026-06-06) confirmed ub=256 as the optimal config: 89.3% MTP acceptance, 78.0 s wall std. It should not become the public default until an independent judge/calibration pass confirms the pairwise result. Artificial Analysis lists Step 3.7 Flash at Intelligence Index 43."
     },
     'companion': {
       name: "Gemma 4 26B-A4B QAT Q4_0",
@@ -280,7 +280,7 @@ function initBenchmarkChart() {
     { label: 'Gemma 12B QAT MTP', decode: 45.6, prefill: 539.9, intelligence: 22.0, coding: 26.0, source: 'Local Tesla bench; QAT-matched assistant head; 78.4% MTP acceptance single-slot; 88.6% / 62.5 t/s agg at 2-slot post-fix', tier: 'companion-speed', color: '#0284c7' },
     { label: 'Gemma 26B Q6', decode: 44.8, prefill: 1002.8, intelligence: 27.1, coding: 29.1, source: 'AA non-reasoning Intelligence + Coding; local Tesla bench speed', tier: 'companion-control', color: '#3b82f6' },
     { label: 'Qwen 122B MTP', decode: 28.3, prefill: 324.9, intelligence: 42.0, coding: 34.7, source: 'AA Intelligence + provider-surfaced AA Coding; local Tesla bench speed', tier: 'specialist', color: '#c2410c' },
-    { label: 'StepFun 3.7 MTP', decode: 26.0, prefill: 211.2, intelligence: 43.0, coding: 56.3, source: 'AA Intelligence; StepFun SWE-Bench Pro proxy for coding; local Tesla bench speed', tier: 'large-contender', color: '#b45309' },
+    { label: 'StepFun 3.7 MTP', decode: 27.9, prefill: 183.5, intelligence: 43.0, coding: 56.3, source: 'AA Intelligence; StepFun SWE-Bench Pro proxy for coding; local Tesla bench speed (ub=256 sweep 2026-06-06)', tier: 'large-contender', color: '#b45309' },
     { label: 'StepFun 3.7 plain', decode: 20.4, prefill: 212.0, intelligence: 43.0, coding: 56.3, source: 'AA Intelligence; StepFun SWE-Bench Pro proxy for coding; local Tesla bench speed', tier: 'large-contender', color: '#92400e' },
     { label: 'Qwen 122B', decode: 19.4, prefill: 136.0, intelligence: 42.0, coding: 34.7, source: 'AA Intelligence + provider-surfaced AA Coding; local Tesla bench speed', tier: 'specialist', color: '#7c2d12' },
     { label: 'Qwen 27B Dense', decode: 9.6, prefill: null, intelligence: 45.8, coding: 36.5, source: 'AA Intelligence + AA Coding; local Tesla bench speed', tier: 'experimental', color: '#7f1d1d' },
@@ -454,7 +454,7 @@ function initBenchmarkChart() {
       { label: 'Gemma 12B QAT MTP',   wallTime: 46.0,  measured: true,  color: '#0284c7' },   // single-slot; 2-slot post-fix: 53.9s wall, 62.5 t/s agg
       { label: 'Qwen3-Coder-Next',    wallTime: 46.6,  measured: true,  color: '#0369a1' },
       { label: 'Qwen 122B MTP',       wallTime: 74.2,  measured: true,  color: '#c2410c' },
-      { label: 'StepFun 3.7 MTP',     wallTime: 82.4,  measured: true,  color: '#b45309' },
+      { label: 'StepFun 3.7 MTP',     wallTime: 78.0,  measured: true,  color: '#b45309' },
       { label: 'StepFun 3.7 plain',   wallTime: 103.4, measured: true,  color: '#92400e' },
       { label: 'Gemma 31B QAT MTP',   wallTime: 110.4, measured: true,  color: '#553c7b' },
       { label: 'Qwen 122B',           wallTime: 111.5, measured: false, color: '#7c2d12' },
