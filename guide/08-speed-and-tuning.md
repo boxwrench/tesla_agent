@@ -41,21 +41,22 @@ For gpt-oss-120B, the important public-facing rule is simpler: use a system prom
 You can also cap reasoning globally when launching the model server:
 ```bash
 # Set a global cap of 512 tokens per request
-serve_rocm.sh --reasoning-budget 512
+serve_vulkan.sh --reasoning-budget 512
 ```
 
 ---
 
-## 3. Opt-in to Vulkan (RADV) for +15% Speed
+## 3. Vulkan (RADV): the Default Backend (and Why It's Faster)
 
-AMD APUs can run models faster using the open-source **Vulkan (RADV)** driver instead of the default ROCm package.
+Vulkan (RADV) is the default serving backend for this stack — it is the `llama-server` you built in [Chapter 05, Step 4](05-setup.md). On AMD APUs the open-source Vulkan/RADV driver runs MoE decoding **+13% to +19% faster** than the ROCm/HIP fallback, with no measured quality loss. This section recaps the build and explains the speedup.
 
 ### **How to build llama-server with Vulkan support:**
+> The full first-time walkthrough — build prerequisites (`apt install …`) and wiring `TESLA_VULKAN_SERVER` into `scripts/config.env` — is in [Chapter 05, Step 4](05-setup.md). The recap below is just the core build.
 ```bash
-# Clone the llama.cpp project matching the stable release (<LEMONADE_BUILD_TAG>)
+# Clone the llama.cpp project matching the stable release (b9247)
 git clone https://github.com/ggerganov/llama.cpp
 cd llama.cpp
-git checkout <LEMONADE_BUILD_TAG>
+git checkout b9247
 
 # Build using Vulkan cmake flags
 cmake -B build-vulkan -DGGML_VULKAN=ON

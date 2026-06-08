@@ -96,29 +96,56 @@ GPU Environment Configured:
 
 ---
 
-## Step 4: Install Lemonade Server
+## Step 4: Build the Vulkan llama-server
 
-We use the stable ROCm backend served by Lemonade to run `llama-server`.
+We serve on the open-source **Vulkan (RADV)** backend — the fastest lane on Strix Halo and the default for this stack. There is no prebuilt binary for this hardware, so you compile `llama-server` once from source at the pinned stable tag (`b9247`). It takes a few minutes and you only do it once. (A ROCm path is kept as an optional fallback; see [Chapter 08 — Speed and Tuning](08-speed-and-tuning.md).)
+
+**4a. Install the build tools (one time).** These commands are for Ubuntu/Debian — they install the compiler, CMake, and the Vulkan/RADV driver and headers.
 
 ```bash
-# Fetch and install the ROCm-compatible llama.cpp backend
-lemonade backends install llamacpp:rocm
+sudo apt update
+sudo apt install -y git cmake build-essential \
+  libvulkan-dev glslc vulkan-tools mesa-vulkan-drivers
+```
+
+**4b. Clone and build.** This clones into `~/src/llama.cpp` and builds the server target using all your CPU cores.
+
+```bash
+# Clone llama.cpp into a predictable location and pin the stable tag
+mkdir -p ~/src && cd ~/src
+git clone https://github.com/ggerganov/llama.cpp
+cd llama.cpp
+git checkout b9247
+
+# Build only the server target, with Vulkan (RADV) enabled
+cmake -B build-vulkan -DGGML_VULKAN=ON
+cmake --build build-vulkan --config Release --target llama-server -j"$(nproc)"
+```
+
+**4c. Point the config at your new binary.** Run these from the `tesla_agent` repo folder. The first line creates your config; the second writes the binary path into it automatically.
+
+```bash
+cp scripts/config.env.example scripts/config.env
+sed -i "s|^TESLA_VULKAN_SERVER=.*|TESLA_VULKAN_SERVER=\"$HOME/src/llama.cpp/build-vulkan/bin/llama-server\"|" scripts/config.env
 ```
 
 ### **What just happened?**
-Lemonade downloads pre-compiled binary modules and caches them in your user cache directory under `~/.cache/lemonade/bin/llamacpp/rocm-stable/`.
+CMake compiled a Vulkan-enabled `llama-server` at `~/src/llama.cpp/build-vulkan/bin/llama-server`. The `sed` line set `TESLA_VULKAN_SERVER` in `scripts/config.env` to that exact path, so the serve script in Step 6 knows where to find it. Prefer to edit by hand? Open `scripts/config.env` and set `TESLA_VULKAN_SERVER` to that path yourself.
 
 ### **What success looks like:**
 ```bash
-ls -l ~/.cache/lemonade/bin/llamacpp/rocm-stable/llama-server
-# Verify that the llama-server file is present and executable.
+ls -l ~/src/llama.cpp/build-vulkan/bin/llama-server
+# -rwxr-xr-x ... llama-server   (present and executable)
+
+grep TESLA_VULKAN_SERVER scripts/config.env
+# TESLA_VULKAN_SERVER="/home/you/src/llama.cpp/build-vulkan/bin/llama-server"
 ```
 
 ### **What to do if it fails:**
-* **Error: `lemonade: command not found`**
-  Install the Lemonade manager. If you use Python pip, ensure your user binary directory is in your system PATH (typically `~/.local/bin/`).
-* **Error: Connection timeouts during download**
-  Ensure your network connection is active. You can run the install command again; it will automatically resume downloads.
+* **Error: shader compilation fails / `glslc` too old**
+  The Vulkan build needs a current `glslc` shader compiler. The distro `glslc` (2023.x) can be too old; install a newer `shaderc` (or build it from source) and re-run the two `cmake` commands.
+* **Error: `cmake: command not found` or missing Vulkan headers**
+  Re-run step 4a; the `libvulkan-dev` and `mesa-vulkan-drivers` packages must be installed for the Vulkan build to find its headers and driver.
 
 ---
 
@@ -155,15 +182,15 @@ ls -lh ~/models/qwen3.6-35b-a3b/Qwen3.6-35B-A3B-MXFP4_MOE.gguf
 
 ## Step 6: Start the Model Server
 
-Now, launch the inference API server on port 8095.
+Now, launch the inference API server on port 8095 using the Vulkan backend.
 
 ```bash
-# Launch server in foreground to monitor logs
-bash scripts/serving/serve_rocm.sh
+# Make sure TESLA_VULKAN_SERVER is set in scripts/config.env, then launch in foreground to monitor logs
+bash scripts/serving/serve_vulkan.sh
 ```
 
 ### **What just happened?**
-The launcher script starts the compiled `llama-server` on port 8095, configures a 32k context size, turns on Flash Attention, and loads the model into graphics memory.
+The launcher script starts your Vulkan-built `llama-server` on port 8095, configures a 32k context size, turns on Flash Attention, and loads the model into graphics memory. It hides the GPU from ROCm (`HIP_VISIBLE_DEVICES=-1`) and selects the `RADV` Vulkan driver.
 
 ### **What success looks like:**
 Keep the terminal open and check the output log:

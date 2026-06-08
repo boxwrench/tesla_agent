@@ -32,7 +32,7 @@ OUT_DIR="${EVAL_DIR}/results/${LABEL}"
 
 if [ ! -d "${HERMES_HOME}/profiles/${PROFILE}" ]; then
   echo "Error: Hermes profile not found at ${HERMES_HOME}/profiles/${PROFILE}" >&2
-  echo "Run serve_rocm.sh and create_hermes_profile.sh first." >&2
+  echo "Run serve_vulkan.sh and create_hermes_profile.sh first." >&2
   exit 1
 fi
 

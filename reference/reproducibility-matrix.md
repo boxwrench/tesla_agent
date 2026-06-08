@@ -2,6 +2,8 @@
 
 This document compiles the exact methodology, hardware baseline, driver configurations, model checksums, performance metrics, and technical post-mortems of attempts and failures. It is designed to serve as the canonical public benchmark record for researchers and software engineers seeking to replicate, verify, or extend these benchmarks on AMD APU hardware.
 
+**Want to run these benchmarks yourself?** Section 2 below, *How to Reproduce These Results*, is the step-by-step procedure — download and verify a model, serve the lane under test, and run the same nonce-gate, coding, and speed measurements that produced the tables below.
+
 The rest of the repository summarizes this file for different readers:
 
 | Surface | Role |
@@ -43,7 +45,91 @@ To ensure reproducibility, all benchmarks, evaluations, and tests were executed 
 
 ---
 
-## 📦 2. Model Artifact Manifest
+## 🔁 2. How to Reproduce These Results
+
+This is the actual run procedure. Every command below ships in this repo. Where a measurement used in-house tooling that is **not** published in this public mirror, that is called out and a stock `llama.cpp` equivalent is given so the number is still reproducible.
+
+### Step 0 — Build the host and server
+Follow [Chapter 05 — Setup](../guide/05-setup.md) end to end. The short version:
+
+```bash
+bash scripts/setup/check_host.sh          # verify gfx1151, drivers, and GTT visibility
+sudo bash scripts/setup/apply_gtt.sh 96   # reserve 96 GB GTT for the APU, then reboot
+source scripts/setup/set_hsa_env.sh       # load HSA + config.env overrides (re-run in every new shell)
+```
+
+Then build the Vulkan `llama-server` (Chapter 05, Step 4) and set `TESLA_VULKAN_SERVER` in `scripts/config.env`.
+
+### Step 1 — Download and verify a model
+Pick a row from the Model Artifact Manifest (Section 3) and download it, then check the hash:
+
+```bash
+mkdir -p ~/models/qwen3.6-35b-a3b
+huggingface-cli download unsloth/Qwen3.6-35B-A3B-GGUF \
+  Qwen3.6-35B-A3B-MXFP4_MOE.gguf --local-dir ~/models/qwen3.6-35b-a3b
+
+sha256sum ~/models/qwen3.6-35b-a3b/Qwen3.6-35B-A3B-MXFP4_MOE.gguf
+# Compare against the manifest. A mismatch usually means the publisher re-quantized
+# (version drift), not corruption.
+```
+
+Point `TESLA_GGUF_PATH` in `scripts/config.env` at the file you downloaded.
+
+### Step 2 — Serve the lane under test
+Default (workhorse) lane:
+
+```bash
+bash scripts/serving/serve_vulkan.sh
+```
+
+Opt-in MTP speed lane (requires an `-MTP` GGUF and llama.cpp `b9360`+):
+
+```bash
+bash scripts/serving/serve_vulkan.sh \
+  --spec-type draft-mtp --spec-draft-n-max 2 -ub 1024 --poll 100 \
+  -fa on --cache-type-k f16 --cache-type-v f16
+```
+
+ROCm fallback lane: `bash scripts/serving/serve_rocm.sh`. In a second terminal, create the agent profile once:
+
+```bash
+bash scripts/serving/create_hermes_profile.sh
+```
+
+### Step 3 — Nonce Gate (the "3 / 3 Pass" column)
+Verifies tool-call discipline — the model must invoke the terminal tool, echo an exact random nonce, and emit no fenced shell blocks.
+
+```bash
+bash scripts/eval/nonce_gate.sh            # 3 runs by default; add --verbose to print each body
+```
+
+Pass = all three checks on every run; the script exits 0 on a clean sweep.
+
+### Step 4 — 4-Stage Coding Evaluation (the coding PASS rows)
+```bash
+bash scripts/eval/run_coding_eval.sh myrun     # runs the agent, then grades automatically
+```
+
+This stages the fixtures from `eval/coding/fixtures/`, runs the four chained tasks, and grades the JSON output against `eval/coding/ground-truth.json` using `eval/coding/grade.py`. To re-grade an existing run without re-running the agent:
+
+```bash
+python3 eval/coding/grade.py eval/coding/results/myrun
+```
+
+### Step 5 — Decode / prefill speed (the tok/s columns)
+> **Tooling note.** The decode/prefill and MTP-acceptance figures in this matrix were captured with an in-house `full_bench.sh` / `mtp_probe.json` harness that is **not** part of this public mirror. To reproduce the same quantities with stock tooling, use llama.cpp's `llama-bench`, which reports `tg` (decode) and `pp` (prefill) tok/s directly:
+
+```bash
+# tg128 = decode tok/s; pp512 / pp8192 = prefill tok/s.
+~/src/llama.cpp/build-vulkan/bin/llama-bench \
+  -m "$TESLA_GGUF_PATH" -p 512 -n 128 -fa 1 -ngl 999
+```
+
+Run it under the same backend (Vulkan vs ROCm), context size, and KV-cache settings as the serve lane you are characterizing; greedy decoding (temperature 0) was used throughout. Expect a few percent of run-to-run variance — the `±` figures in the tables below are sample standard deviations across repeated runs.
+
+---
+
+## 📦 3. Model Artifact Manifest
 
 The following models are used in the reference tests. Download paths are pinned to public Hugging Face repositories.
 
@@ -88,7 +174,7 @@ The Q4_K_M-MTP SHA matches the artifact published by the community [strix-halo-g
 
 ---
 
-## 📊 3. Performance & Quality Evaluation Metrics
+## 📊 4. Performance & Quality Evaluation Metrics
 
 ### A. Nonce Gate Verification Methodology
 The Nonce Gate tests the model's tool-calling reliability. The harness performs three checks:
@@ -211,7 +297,7 @@ DDTree budget sweep for the dense 27B Q4_K_M draft:
 
 ---
 
-## 🛠️ 4. Technical Post-Mortems: What Failed & Why
+## 🛠️ 5. Technical Post-Mortems: What Failed & Why
 
 In developing this reference setup, several highly recommended ML pipelines failed on Strix Halo APU systems. Seasoned developers should review these post-mortems to avoid repeating identical dead ends.
 

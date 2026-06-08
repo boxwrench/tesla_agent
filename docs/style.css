@@ -653,6 +653,13 @@ body {
   margin-bottom: 24px;
 }
 
+.step-detail {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 18px;
+  margin-bottom: 10px;
+}
+
 /* Console terminal output block */
 .console-box {
   background-color: #05070c;

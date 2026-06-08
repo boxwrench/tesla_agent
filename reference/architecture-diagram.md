@@ -17,7 +17,7 @@ graph TD
     end
     
     subgraph "Inference Server Layer"
-        LLM_API <==>|HTTP /v1/chat/completions| LlamaServer["llama-server (<LEMONADE_BUILD_TAG> Stable)"]
+        LLM_API <==>|HTTP /v1/chat/completions| LlamaServer["llama-server (b9247 Stable)"]
         LlamaServer -->|Quantized Model Weights| RAM_Model["Qwen / Gemma / gpt-oss GGUF models"]
     end
     

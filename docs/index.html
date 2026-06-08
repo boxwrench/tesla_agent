@@ -208,7 +208,7 @@
                   <span class="step-num">3</span> Driver Environment
                 </button>
                 <button class="setup-step-btn" data-step="4" id="step-btn-4">
-                  <span class="step-num">4</span> Server Install
+                  <span class="step-num">4</span> Server Build
                 </button>
                 <button class="setup-step-btn" data-step="5" id="step-btn-5">
                   <span class="step-num">5</span> Model Download
@@ -332,33 +332,64 @@ source scripts/setup/set_hsa_env.sh</code></pre>
 
               <!-- STEP 4 -->
               <div class="setup-step-content" id="setup-step-4">
-                <h2>Step 4: Install Lemonade Server</h2>
-                <p class="step-intro">We serve our models using a custom stable version of llama.cpp packaged by Lemonade, which provides pre-compiled ROCm support for unified graphics setups.</p>
-                
+                <h2>Step 4: Build the Vulkan llama-server</h2>
+                <p class="step-intro">We serve on the open-source <strong>Vulkan (RADV)</strong> backend — the fastest lane on Strix Halo and the default for this stack. There is no prebuilt binary for this hardware, so you compile <code>llama-server</code> once from source at the pinned stable tag (<code>b9247</code>). This takes a few minutes and you only do it once. (A ROCm path is kept as an optional fallback — see <a href="guide/08-speed-and-tuning.html">Chapter 08</a>.)</p>
+
+                <p class="step-detail"><strong>4a. Install the build tools (one time).</strong> These commands are for Ubuntu/Debian. They install the compiler, CMake, and the Vulkan/RADV driver and headers.</p>
                 <div class="console-box">
                   <div class="console-header">
                     <span>Terminal</span>
                   </div>
-                  <pre><code># Install the ROCm stable backend via Lemonade
-# (This downloads the server binaries and supporting HIP libraries)
-lemonade backends install llamacpp:rocm</code></pre>
+                  <pre><code>sudo apt update
+sudo apt install -y git cmake build-essential \
+  libvulkan-dev glslc vulkan-tools mesa-vulkan-drivers</code></pre>
                 </div>
-                
+
+                <p class="step-detail"><strong>4b. Clone and build.</strong> This clones into <code>~/src/llama.cpp</code> and builds the server using all your CPU cores.</p>
+                <div class="console-box">
+                  <div class="console-header">
+                    <span>Terminal</span>
+                  </div>
+                  <pre><code># Clone llama.cpp into a predictable location and pin the stable tag
+mkdir -p ~/src &amp;&amp; cd ~/src
+git clone https://github.com/ggerganov/llama.cpp
+cd llama.cpp
+git checkout b9247
+
+# Build only the server target, with Vulkan (RADV) enabled
+cmake -B build-vulkan -DGGML_VULKAN=ON
+cmake --build build-vulkan --config Release --target llama-server -j"$(nproc)"</code></pre>
+                </div>
+
+                <p class="step-detail"><strong>4c. Point the config at your new binary.</strong> Run these from the <code>tesla_agent</code> repo folder. The first line creates your config; the second writes the binary path into it automatically.</p>
+                <div class="console-box">
+                  <div class="console-header">
+                    <span>Terminal</span>
+                  </div>
+                  <pre><code>cp scripts/config.env.example scripts/config.env
+sed -i "s|^TESLA_VULKAN_SERVER=.*|TESLA_VULKAN_SERVER=\"$HOME/src/llama.cpp/build-vulkan/bin/llama-server\"|" scripts/config.env</code></pre>
+                </div>
+
                 <div class="explainer-box">
                   <h4><i class="fa-solid fa-circle-question"></i> What just happened?</h4>
-                  <p>Lemonade fetches the compiled ROCm-compatible <code>llama-server</code> and caches it inside <code>~/.cache/lemonade/bin/llamacpp/rocm-stable/</code>, ready to run.</p>
+                  <p>CMake compiled a Vulkan-enabled <code>llama-server</code> at <code>~/src/llama.cpp/build-vulkan/bin/llama-server</code>. The <code>sed</code> line set <code>TESLA_VULKAN_SERVER</code> in <code>scripts/config.env</code> to that exact path, so the serve script in Step 6 knows where to find it. (Prefer to edit by hand? Open <code>scripts/config.env</code> and set <code>TESLA_VULKAN_SERVER</code> to that path yourself.)</p>
                 </div>
 
                 <div class="success-box">
                   <h4><i class="fa-solid fa-circle-check"></i> What success looks like</h4>
-                  <pre><code>ls -l ~/.cache/lemonade/bin/llamacpp/rocm-stable/llama-server
-# Outputs details showing the file is present and executable.</code></pre>
+                  <pre><code>ls -l ~/src/llama.cpp/build-vulkan/bin/llama-server
+# -rwxr-xr-x ... llama-server   (present and executable)
+
+grep TESLA_VULKAN_SERVER scripts/config.env
+# TESLA_VULKAN_SERVER="/home/you/src/llama.cpp/build-vulkan/bin/llama-server"</code></pre>
                 </div>
 
                 <div class="failure-box">
                   <h4><i class="fa-solid fa-triangle-exclamation"></i> What if it fails?</h4>
-                  <p><strong>Common issue: network connection timeouts or dependency blocks.</strong><br>
-                  Ensure your internet connection is active. If python dependency conflicts occur, ensure Lemonade is running in an isolated environment (or run it via <code>pipx run lemonade</code>).</p>
+                  <p><strong>Shader compilation error / <code>glslc</code> too old.</strong><br>
+                  The Vulkan build needs a current <code>glslc</code> shader compiler. If CMake errors during shader compilation, the distro <code>glslc</code> (2023.x) may be too old — install a newer <code>shaderc</code> or build it from source, then re-run the two <code>cmake</code> commands.<br><br>
+                  <strong><code>cmake: command not found</code> or missing Vulkan headers.</strong><br>
+                  Re-run step 4a; the <code>libvulkan-dev</code> and <code>mesa-vulkan-drivers</code> packages must be installed for the Vulkan build to find its headers and driver.</p>
                 </div>
               </div>
 
@@ -402,32 +433,32 @@ huggingface-cli download unsloth/Qwen3.6-35B-A3B-GGUF \
               <!-- STEP 6 -->
               <div class="setup-step-content" id="setup-step-6">
                 <h2>Step 6: Start the Model Server</h2>
-                <p class="step-intro">With the GTT configuration applied and environment sourced, launch the server using ROCm. We run it with a 32,768 context window and optimized memory parameters.</p>
-                
+                <p class="step-intro">With the GTT configuration applied and environment sourced, launch the Vulkan server. We run it with a 32,768 context window and optimized memory parameters.</p>
+
                 <div class="console-box">
                   <div class="console-header">
                     <span>Terminal</span>
                   </div>
-                  <pre><code># Start serving in the foreground
-bash scripts/serving/serve_rocm.sh</code></pre>
+                  <pre><code># Make sure TESLA_VULKAN_SERVER is set in scripts/config.env, then:
+bash scripts/serving/serve_vulkan.sh</code></pre>
                 </div>
-                
+
                 <div class="explainer-box">
                   <h4><i class="fa-solid fa-circle-question"></i> What just happened?</h4>
-                  <p>The script launches `llama-server` on port 8095. It binds memory layers to the GPU, enables Flash Attention, and loads the active context space.</p>
+                  <p>The script launches <code>llama-server</code> on port 8095 via Vulkan. It exports <code>HIP_VISIBLE_DEVICES=-1</code> to hide the GPU from ROCm (forcing the Vulkan route) and sets the <code>RADV</code> ICD, binds memory layers to the GPU, enables Flash Attention, and loads the active context space.</p>
                 </div>
 
                 <div class="success-box">
                   <h4><i class="fa-solid fa-circle-check"></i> What success looks like</h4>
-                  <p>Look for lines indicating successful model compilation and socket binds in the server log:</p>
+                  <p>Look for lines indicating successful model load and socket binds in the server log:</p>
                   <pre><code>llama_new_context_with_model: n_ctx = 32768, total VRAM = 21.7 GB
 llama_server_listening: http://127.0.0.1:8095</code></pre>
                 </div>
 
                 <div class="failure-box">
                   <h4><i class="fa-solid fa-triangle-exclamation"></i> What if it fails?</h4>
-                  <p><strong>Common issue: ROCm allocation failed / Segment core dump.</strong><br>
-                  Ensure you sourced <code>set_hsa_env.sh</code> in the active terminal. If you get a kernel memory allocation error, verify that your GTT size has been adjusted and applied (Step 2).</p>
+                  <p><strong>Common issue: <code>TESLA_VULKAN_SERVER path is empty</code>.</strong><br>
+                  <code>serve_vulkan.sh</code> exits if <code>scripts/config.env</code> doesn't point at your Vulkan <code>llama-server</code> binary (Step 4). Also ensure you sourced <code>set_hsa_env.sh</code> in the active terminal and that your GTT size was applied (Step 2).</p>
                 </div>
               </div>
 
@@ -516,7 +547,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="synthesis-stepfun">
                     <span class="radio-title">SYNTHESIS — large contender</span>
-                    <span class="radio-desc">StepFun Step-3.7-Flash MTP. 26.0 t/s local decode, AA Intelligence 43, strong private pairwise; independent calibration still needed.</span>
+                    <span class="radio-desc">StepFun Step-3.7-Flash MTP. 27.9 t/s local decode, AA Intelligence 43, strong private pairwise; independent calibration still needed.</span>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="companion">
@@ -726,7 +757,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                        <td>StepFun Step-3.7-Flash MTP — large QUALITY contender</td>
                        <td>88.79 GiB + 3.5 GB draft</td>
                        <td>plain StepFun: 6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B</td>
-                       <td>26.0 t/s<br><small style="opacity:0.7">pp 211.2 t/s; 84.7% raw MTP acceptance</small></td>
+                       <td>27.9 t/s<br><small style="opacity:0.7">pp 183.5 t/s; 89.3% MTP acceptance (ub=256)</small></td>
                        <td class="pass">3 / 3</td>
                      </tr>
                      <tr>
@@ -761,7 +792,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 </table>
               </div>
               <p class="sub-text" style="margin-top:12px;"><strong>Note — MTP speed lanes are opt-in.</strong> The Qwen3.6-35B-A3B-MTP GGUFs carry a native nextn head, so llama-server can self-speculate with <code>--spec-type draft-mtp</code> and no separate draft model. The technique surfaced via the community <a href="https://github.com/hogeheer499-commits/strix-halo-guide" target="_blank" rel="noopener">strix-halo-guide</a>; this repo independently reproduced and quality-gated the MXFP4-MTP and Q4_K_M-MTP lanes. Full audit trail: <a href="https://github.com/boxwrench/tesla_agent/blob/main/reference/reproducibility-matrix.md" target="_blank" rel="noopener">Reproducibility Matrix &amp; Technical Deep-Dive</a>.</p>
-              <p class="sub-text" style="margin-top:12px;"><strong>Latest large-model MTP lanes.</strong> Qwen 122B MTP now has a tuned Vulkan profile at <strong>28.3 t/s</strong> decode with <strong>81.8%</strong> MTP-probe acceptance. StepFun Step-3.7-Flash MTP reaches <strong>26.0 t/s</strong> decode with <strong>84.7%</strong> raw timing acceptance; its aggregate <code>bench.json</code> acceptance field is null, so the source is raw timing counters.</p>
+              <p class="sub-text" style="margin-top:12px;"><strong>Latest large-model MTP lanes.</strong> Qwen 122B MTP now has a tuned Vulkan profile at <strong>28.3 t/s</strong> decode with <strong>81.8%</strong> MTP-probe acceptance. StepFun Step-3.7-Flash MTP reaches <strong>27.9 t/s</strong> decode (wall std <strong>78.0 s</strong>) with <strong>89.3%</strong> acceptance using <code>ub=256</code> — a ubatch sweep (2026-06-06) showed smaller micro-batches cut per-speculative-step latency and compound over long outputs (+7% tg, −5% wall std vs the prior <code>ub=512</code> default).</p>
               <p class="sub-text" style="margin-top:12px;"><strong>Gemma 4 26B-A4B plain control baseline.</strong> The no-spec Vulkan lane with <code>--reasoning off</code> and F16 KV measures <strong>pp512 1002.76 &plusmn; 10.29 t/s</strong> and <strong>tg128 44.76 &plusmn; 0.90 t/s</strong> with Hermes nonce 3/3. It is the simpler lane for general reasoning, JSON extraction, and prose; the MTP comparison only pays off on heavy code generation.</p>
               <p class="sub-text" style="margin-top:12px;"><strong>Gemma 4 QAT Q4_0 sweep.</strong> The official Google QAT 26B-A4B row is now the fastest general Gemma lane measured here: <strong>59.4 t/s decode</strong> and <strong>1194.4 t/s prefill</strong>. QAT means quantization-aware training: the model is trained or adapted with the low-precision target in mind. The experimental 26B-A4B MTP/Q8 row reaches <strong>71.0 t/s</strong> single-stream, but uses a non-QAT-matched assistant head and drops two-slot throughput, so it remains a speed probe.</p>
               <p class="sub-text" style="margin-top:12px;"><strong>Note — the dense 27B is benchmarked but NOT in the production stack.</strong> Community discussion often treats Qwen 27B as a strong reasoner, but the local Strix Halo benches did not support that routing choice: blind pairwise was 0&ndash;6 vs the 122B and normal decode tested around 9.6&ndash;11.5 t/s. It is kept as a break-glass option for tough, blocked projects, not a first- or second-line model. <em>Technical aside:</em> DFlash speculative decoding lifts its floor to <strong>~31 t/s (2.82&times;)</strong> with a footprint-minimized Q4_K_M draft.</p>

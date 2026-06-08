@@ -73,10 +73,15 @@ The public setup guide starts with the 35B-class CODE baseline because it is the
 ### **Inference Server Backend**
 * **Inference Engine:** `llama.cpp` stable build `b9247`
 * **Git Commit Hash:** `57ebaf4ed`
-* **ROCm Stable Binary Package:** Downloaded via Lemonade backend manager:
+* **Primary backend (Vulkan/RADV):** built from source at tag `b9247` with Vulkan enabled — the default serving lane on Strix Halo:
   ```bash
-  lemonade backends install llamacpp:rocm
+  git clone https://github.com/ggerganov/llama.cpp
+  cd llama.cpp && git checkout b9247
+  cmake -B build-vulkan -DGGML_VULKAN=ON
+  cmake --build build-vulkan --config Release --target llama-server
   ```
+  Point `TESLA_VULKAN_SERVER` in `scripts/config.env` at `build-vulkan/bin/llama-server` and serve with `scripts/serving/serve_vulkan.sh`.
+* **ROCm/HIP fallback:** the ROCm backend is retained as a tested fallback (`serve_rocm.sh`); build or supply a ROCm `llama-server` and set `TESLA_LLAMA_SERVER`.
 
 ---
 
