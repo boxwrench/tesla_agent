@@ -81,22 +81,22 @@ source of truth. This chapter explains the speed levers.
 
 **Verified stack entries:**
 
-| Model | Decode speed | Quality lane |
-|---|---:|---|
-| Qwen 3.6 35B-A3B Q4_K_M-MTP (Vulkan/RADV) | **~81.2 tok/s** | opt-in speed lane; won quality pairwise 4-2; human-check regulatory figures |
-| Qwen 3.6 35B-A3B MXFP4-MTP (Vulkan/RADV) | **~72.7 tok/s** | opt-in speed lane; same production quant |
-| Qwen 3.6 35B-A3B MXFP4 (Vulkan/RADV) | **~58.5 tok/s** | CODE/general workhorse (default) |
-| Qwen 3.5 35B-A3B MXFP4 (ROCm) | 47.3 tok/s | PLAN/AGENTIC baseline |
-| gpt-oss-120B MXFP4 (Vulkan/RADV) | **~46 tok/s** | AMERICAN-ONLY quality/speed (US-origin, OpenAI) |
-| Gemma 4 26B-A4B plain control (Vulkan/RADV) | **~44.8 tok/s tg128** | verified plain-control baseline; `pp512 1002.76 ± 10.29 tok/s`, reasoning off, F16 KV |
-| Qwen3-Coder-Next UD-Q4_K_XL (Vulkan/RADV) | **44.4 tok/s** | hard-coding challenger; `pp 723.2 tok/s`, Vulkan b9360 promoted |
-| Qwen 3.6 35B-A3B MXFP4 (ROCm fallback) | ~44.2 tok/s | CODE baseline ROCm fallback |
-| Qwen 3.5 122B-A10B MTP MXFP4_MOE (Vulkan/RADV) | **28.3 tok/s** | *retired 2026-06-02* (tuned lane; `DRAFT_N=1`, `PMIN` unset; 81.8% MTP-probe acceptance; kept as record) |
-| StepFun Step-3.7-Flash MTP (Vulkan/RADV) | **27.9 tok/s** (wall std 78.0 s) | QUALITY champion (graduated 2026-06-02); 89.3% MTP acceptance; ub=256 default (ubatch sweep 2026-06-06) |
-| StepFun Step-3.7-Flash plain (Vulkan/RADV) | 20.4-22.3 tok/s | QUALITY champion — plain (no-draft) lane |
-| Qwen 3.5 122B-A10B MXFP4 (ROCm) | ~19.4 tok/s | *retired 2026-06-02* |
-| Qwen 3.6 27B Dense UD-Q4_K_XL | 9.6–11.5 tok/s normal decode | break-glass only |
-| **Gemma 4 31B IT Q6_K (Vulkan/RADV)** | **~8.25 tok/s tg128; ~7.7 tok/s sustained** | AMERICAN-ONLY coding second-opinion (dense — see note) |
+| Model                                          |                                Decode speed | Quality lane                                                                                             |
+| ---------------------------------------------- | ------------------------------------------: | -------------------------------------------------------------------------------------------------------- |
+| Qwen 3.6 35B-A3B Q4_K_M-MTP (Vulkan/RADV)      |                             **~81.2 tok/s** | opt-in speed lane; won quality pairwise 4-2; human-check regulatory figures                              |
+| Qwen 3.6 35B-A3B MXFP4-MTP (Vulkan/RADV)       |                             **~72.7 tok/s** | opt-in speed lane; same production quant                                                                 |
+| Qwen 3.6 35B-A3B MXFP4 (Vulkan/RADV)           |                             **~58.5 tok/s** | CODE/general workhorse (default)                                                                         |
+| Qwen 3.5 35B-A3B MXFP4 (ROCm)                  |                                  47.3 tok/s | PLAN/AGENTIC baseline                                                                                    |
+| gpt-oss-120B MXFP4 (Vulkan/RADV)               |                               **~46 tok/s** | AMERICAN-ONLY quality/speed (US-origin, OpenAI)                                                          |
+| Gemma 4 26B-A4B plain control (Vulkan/RADV)    |                       **~44.8 tok/s tg128** | verified plain-control baseline; `pp512 1002.76 ± 10.29 tok/s`, reasoning off, F16 KV                    |
+| Qwen3-Coder-Next UD-Q4_K_XL (Vulkan/RADV)      |                              **44.4 tok/s** | hard-coding challenger; `pp 723.2 tok/s`, Vulkan b9360 promoted                                          |
+| Qwen 3.6 35B-A3B MXFP4 (ROCm fallback)         |                                 ~44.2 tok/s | CODE baseline ROCm fallback                                                                              |
+| Qwen 3.5 122B-A10B MTP MXFP4_MOE (Vulkan/RADV) |                              **28.3 tok/s** | *retired 2026-06-02* (tuned lane; `DRAFT_N=1`, `PMIN` unset; 81.8% MTP-probe acceptance; kept as record) |
+| StepFun Step-3.7-Flash MTP (Vulkan/RADV)       |            **27.9 tok/s** (wall std 78.0 s) | QUALITY champion (graduated 2026-06-02); 89.3% MTP acceptance; ub=256 default (ubatch sweep 2026-06-06)  |
+| StepFun Step-3.7-Flash plain (Vulkan/RADV)     |                             20.4-22.3 tok/s | QUALITY champion — plain (no-draft) lane                                                                 |
+| Qwen 3.5 122B-A10B MXFP4 (ROCm)                |                                 ~19.4 tok/s | *retired 2026-06-02*                                                                                     |
+| Qwen 3.6 27B Dense UD-Q4_K_XL                  |                9.6–11.5 tok/s normal decode | break-glass only                                                                                         |
+| **Gemma 4 31B IT Q6_K (Vulkan/RADV)**          | **~8.25 tok/s tg128; ~7.7 tok/s sustained** | AMERICAN-ONLY coding second-opinion (dense — see note)                                                   |
 
 > [!NOTE]
 > **Why is Gemma 4 31B the slowest model in the verified stack?** Both Gemma 31B and Qwen 35B are roughly 25 GB in size, yet Qwen 35B runs roughly 7× faster on the same hardware before any MTP opt-in. The reason is architecture: Qwen 35B is a Mixture-of-Experts model that activates only ~3B parameters per token, so each decode step reads far less weight data from memory. Gemma 31B is a **dense** model: every token requires reading all 31B parameters from the same bandwidth-constrained unified memory. On a memory-bandwidth-bound APU like Strix Halo, that difference collapses decode speed from ~58.5 tok/s (MoE workhorse) to ~8 tok/s (dense). Gemma 31B earns its place in the stack as the AMERICAN-ONLY coding second-opinion lane (US-origin) for quality verification and cross-family comparison — not as a throughput model. Use it on the orchestrated path where quality of each step matters more than wall-clock time.
