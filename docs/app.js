@@ -158,14 +158,14 @@ function initModelFinder() {
     },
     'code-peer': {
       name: "Gemma 4 31B IT (Q6_K)",
-      mode: "EXPERIMENT — Gemma dense (orchestrated; ~8 tok/s decode)",
+      mode: "AMERICAN-ONLY — Gemma dense coding second-opinion (orchestrated; ~8 tok/s decode)",
       file: "gemma-4-31B-it-Q6_K.gguf",
       size: "25.2 GB",
       speed: "~8.25 tok/s tg128; ~7.7 tok/s sustained (Vulkan/RADV) — pp8192 prefill ~133.6 tok/s",
       reasoning: "On for coding; use orchestrated multi-step pattern",
       command: "bash scripts/serving/serve_vulkan.sh --model gemma-4-31B-it-Q6_K.gguf --cache-type-k f16 --cache-type-v f16",
       hermes: "max_tokens: 8192",
-      rationale: "Cross-family second opinion when a single long coding episode degrades, or for tasks where Qwen's style has plateaued. Cleared nonce 3/3 (think-off and think-on) and orchestrated coding 3/3 E2E; the orchestrated/staged path is what graduated, not single-episode. Won 4-2 quality pairwise vs Gemma 4 26B-A4B. SPEED NOTE: Gemma 31B is a dense model — every token reads all 31B parameters. Decode is ~8 tok/s, far slower than Qwen 35B MoE (~58.5 tok/s workhorse) or gpt-oss-120B (~46 tok/s). Prefill is fast (~133.6 tok/s pp8192). Use on the orchestrated path for quality verification, not as a speed-first workhorse."
+      rationale: "AMERICAN-ONLY tier: US-origin (Google) coding second-opinion for agencies that may require domestic-only model provenance, and a cross-family check when a single long coding episode degrades. Cleared nonce 3/3 (think-off and think-on) and orchestrated coding 3/3 E2E; the orchestrated/staged path is what graduated, not single-episode. Won 4-2 quality pairwise vs Gemma 4 26B-A4B. SPEED NOTE: Gemma 31B is a dense model — every token reads all 31B parameters. Decode is ~8 tok/s, far slower than Qwen 35B MoE (~58.5 tok/s workhorse) or gpt-oss-120B (~46 tok/s). Prefill is fast (~133.6 tok/s pp8192). Use on the orchestrated path for quality verification, not as a speed-first workhorse."
     },
     'extract': {
       name: "Qwen 3.6 35B Mixture-of-Experts (MXFP4 Quant)",
@@ -174,42 +174,42 @@ function initModelFinder() {
       size: "21.7 GB",
       speed: "~43.7 tokens/sec (faster wall-time by avoiding reasoning decode)",
       reasoning: "Disabled via server reasoning flag (--reasoning off)",
-      command: "bash scripts/serving/serve_rocm.sh --reasoning off",
+      command: "bash scripts/serving/serve_vulkan.sh --reasoning off",
       hermes: "max_tokens: 4096",
       rationale: "Simple telemetry extraction and log parsing do not require reasoning. Disabling thinking using --reasoning off on current builds saves 50%+ wall-clock time and guarantees tool-use calls fire directly. Note: --reasoning-budget 0 is broken upstream and must not be used (causes empty responses). The older template-kwarg method ('enable_thinking: false') is deprecated and prints warnings."
     },
     'synthesis-baseline': {
       name: "gpt-oss-120B (MXFP4, 3 shards)",
-      mode: "SYNTHESIS — quality baseline",
+      mode: "AMERICAN-ONLY — quality/speed (US-origin)",
       file: "gpt-oss-120b-mxfp4-0000{1..3}-of-00003.gguf",
       size: "~63 GB",
       speed: "~46 tokens/sec (Vulkan/RADV)",
       reasoning: "High reasoning, draft-with-illustrative-assumptions system prompt",
       command: "Configure the local server for the gpt-oss-120B shard set",
       hermes: "max_tokens: 8192\nsystem prompt: draft with labeled assumptions",
-      rationale: "The current general quality baseline after blinded pairwise wins of 5-1 vs Qwen 35B and 4-2 vs Qwen 122B (single judge, seed-fixed A/B order). Requires the 'draft with illustrative assumptions' system prompt; pre-prompt behavior was deflection-with-checklist (the 3-3 pre-fix pairwise vs 35B measured the prompt bug, not the model). Use for master-plan reports, research synthesis, multi-document summarization."
+      rationale: "AMERICAN-ONLY tier: US-origin (OpenAI) quality/speed lane for agencies that may require domestic-only model provenance — the general champion (StepFun) and the Qwen workhorses are non-US in origin. Blinded pairwise wins of 5-1 vs Qwen 35B and 4-2 vs Qwen 122B (single judge, seed-fixed A/B order). Requires the 'draft with illustrative assumptions' system prompt; pre-prompt behavior was deflection-with-checklist (the 3-3 pre-fix pairwise vs 35B measured the prompt bug, not the model). Use for master-plan reports, research synthesis, multi-document summarization."
     },
     'synthesis-specialist': {
-      name: "Qwen 3.5 122B-A10B MTP (MXFP4_MOE)",
-      mode: "SYNTHESIS — regulatory specialist",
-      file: "Qwen3.5-122B-A10B-MTP-MXFP4_MOE.gguf",
-      size: "~70 GB (ctx 12,288 safe cap)",
-      speed: "28.3 tokens/sec decode; 324.9 tokens/sec prefill (Vulkan/RADV b9360)",
-      reasoning: "Deep reasoning active; tuned MTP uses DRAFT_N=1 and PMIN unset",
-      command: "DRAFT_N=1 PORT=8098 bash scripts/qwen122b_mtp_vulkan_serve.sh",
-      hermes: "max_tokens: 8192\nctx_size: 12288",
-      rationale: "Reserved as a QUALITY spot-specialist for regulatory-currency tasks and incisive plan review. The tuned native-MTP Vulkan lane lifts the old 19.4 t/s ROCm route to 28.3 t/s with 81.8% MTP-probe acceptance and coding PASS 5/5 E2E. DRAFT_N=2 remains slightly better for two-slot aggregate, but DRAFT_N=1 wins single-stream responsiveness."
+      name: "Qwen 3.5 35B-A3B MoE (MXFP4)",
+      mode: "PLAN / AGENTIC — baseline",
+      file: "Qwen3.5-35B-A3B-MXFP4_MOE.gguf",
+      size: "21.0 GB",
+      speed: "~47.3 tokens/sec decode (ROCm); ~562.9 tokens/sec prefill",
+      reasoning: "On for planning/agentic loops",
+      command: "bash scripts/serving/serve_vulkan.sh --model Qwen3.5-35B-A3B-MXFP4_MOE.gguf",
+      hermes: "max_tokens: 8192",
+      rationale: "The PLAN/AGENTIC baseline in the stable set: Qwen 3.5 35B-A3B MoE, proven nonce 3/3 on the planning route at ~47.3 t/s. Pairs with the Qwen 3.6 35B CODE workhorse. (The prior occupant of this slot, Qwen 3.5 122B, was retired 2026-06-02 — the StepFun champion replaced it at the same decode speed with higher quality.)"
     },
     'synthesis-stepfun': {
       name: "StepFun Step-3.7-Flash MTP",
-      mode: "SYNTHESIS — large contender",
+      mode: "SYNTHESIS — QUALITY champion (graduated 2026-06-02)",
       file: "Step-3.7-Flash-UD-IQ4_XS + Step-3.7-Flash-MTP-Q8_0.gguf",
       size: "88.79 GiB main + 3.5 GB draft",
       speed: "27.9 tokens/sec decode; 183.5 tokens/sec prefill; wall std 78.0 s (ub=256, Vulkan b9360)",
       reasoning: "Model-native template; no Qwen-style think toggle",
-      command: "bash scripts/serve/stepfun_mtp_vulkan_serve.sh",
+      command: "bash scripts/serving/serve_vulkan.sh (StepFun UD-IQ4_XS + Q8_0 MTP draft)",
       hermes: "max_tokens: 8192\nctx_size: 12288",
-      rationale: "Use as a large-model quality contender when the task merits spending the 27.9 t/s tier. Private pairwise favored plain StepFun 6-0 vs gpt-oss-soulfix and 4-0-2 vs 122B, and the MTP lane passed nonce 3/3 plus coding PASS 5/5 E2E. Ubatch sweep (2026-06-06) confirmed ub=256 as the optimal config: 89.3% MTP acceptance, 78.0 s wall std. It should not become the public default until an independent judge/calibration pass confirms the pairwise result. Artificial Analysis lists Step 3.7 Flash at Intelligence Index 43."
+      rationale: "The graduated QUALITY champion (2026-06-02) — use it for formal synthesis and plan review. It replaced Qwen 3.5 122B at the same decode speed with higher quality. Private pairwise favored plain StepFun 6-0 vs gpt-oss-soulfix and 4-0-2 vs 122B, and the MTP lane passed nonce 3/3 plus coding PASS 5/5 E2E. Ubatch sweep (2026-06-06) confirmed ub=256 as the optimal config: 89.3% MTP acceptance, 78.0 s wall std. Artificial Analysis lists Step 3.7 Flash at Intelligence Index 43. Public-mirror note: StepFun's source/checksum pins are not yet complete in the public repo, so it is measured but not yet turnkey-reproducible from the public mirror alone."
     },
     'companion': {
       name: "Gemma 4 26B-A4B QAT Q4_0",

@@ -170,8 +170,8 @@ Common quantization labels in this repo:
 * **Analogy:** An appliance wrapper around the engine: easier controls, less manual wiring.
 
 ### **gpt-oss-120B**
-* **ELI5 Explanation:** A large open-weight model family used here as the new general quality baseline after local pairwise testing.
-* **Analogy:** The slow, careful senior reviewer lane became faster than expected on Strix Halo, so it moved from "special escalation" into the main quality chair.
+* **ELI5 Explanation:** A large open-weight model family (OpenAI). In this stack it is the AMERICAN-ONLY quality/speed lane — the US-origin pick for agencies that may require domestic-only model provenance (the general QUALITY champion, StepFun, is non-US in origin).
+* **Analogy:** The trusted domestic-supplier option you keep on hand for the customers whose rules say "buy American," even when another vendor tops the leaderboard.
 
 ### **Gemma 4**
 * **ELI5 Explanation:** A separate model family from Google. In this stack, Gemma 4 31B is a cross-family coding experiment used for quality verification — not a throughput model. As a dense model (all 31B parameters read every token), it runs at ~8 tok/s on Strix Halo, much slower than the faster MoE lanes. Its value is a different "working style" for catching mistakes, not speed.

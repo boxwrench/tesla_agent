@@ -396,7 +396,7 @@ grep TESLA_VULKAN_SERVER scripts/config.env
               <!-- STEP 5 -->
               <div class="setup-step-content" id="setup-step-5">
                 <h2>Step 5: Download the Recommended Model</h2>
-                <p class="step-intro">The starter setup uses the 21.7 GB Qwen 3.6 35B Mixture-of-Experts (MoE) model because it is compact, fast, and still the CODE/general baseline. The full ladder now also includes gpt-oss-120B for quality synthesis and Gemma 4 31B as a cross-family coding experiment (dense model — slow decode at ~8 tok/s; use on orchestrated path for a second opinion, not as a throughput replacement). Use the Model Finder after this baseline is working.</p>
+                <p class="step-intro">The starter setup uses the 21.7 GB Qwen 3.6 35B Mixture-of-Experts (MoE) model because it is compact, fast, and the CODE/general workhorse. The full ladder also includes Qwen 3.5 35B as the PLAN/AGENTIC baseline, StepFun Step-3.7-Flash as the QUALITY champion, and an AMERICAN-ONLY tier (gpt-oss-120B and Gemma 4 31B — US-origin models for agencies that may require domestic-only provenance). Use the Model Finder after this baseline is working.</p>
                 
                 <div class="console-box">
                   <div class="console-header">
@@ -526,8 +526,8 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="code-peer">
-                    <span class="radio-title">EXPERIMENT — Gemma dense (orchestrated, slow decode)</span>
-                    <span class="radio-desc">Cross-family second opinion; orchestrated multi-step pattern required. Gemma 4 31B IT. ~8.25 tok/s decode (dense model — slow; prefill ~133.6 tok/s).</span>
+                    <span class="radio-title">AMERICAN-ONLY — Gemma dense coding second-opinion</span>
+                    <span class="radio-desc">US-origin (Google) coding second-opinion for agencies that may require domestic models. Orchestrated multi-step pattern required. Gemma 4 31B IT. ~8.25 tok/s decode (dense — slow; prefill ~133.6 tok/s).</span>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="extract">
@@ -535,19 +535,19 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                     <span class="radio-desc">Telemetry, log parsing, structured extraction. Qwen 3.6 35B MoE with thinking disabled. 43.7 t/s.</span>
                   </label>
                   <label class="radio-card">
+                    <input type="radio" name="finder-priority" value="synthesis-stepfun">
+                    <span class="radio-title">SYNTHESIS — quality champion</span>
+                    <span class="radio-desc">Formal reports, master-plan synthesis, plan review. StepFun Step-3.7-Flash MTP — graduated QUALITY champion (2026-06-02). 27.9 t/s decode, coding 5/5 E2E; replaced Qwen 122B.</span>
+                  </label>
+                  <label class="radio-card">
                     <input type="radio" name="finder-priority" value="synthesis-baseline">
-                    <span class="radio-title">SYNTHESIS — quality baseline</span>
-                    <span class="radio-desc">General planning, master-plan drafts. gpt-oss-120B MXFP4 (3 shards). Pairwise 5-1 vs Qwen 35B, 4-2 vs Qwen 122B.</span>
+                    <span class="radio-title">AMERICAN-ONLY — quality/speed (US-origin)</span>
+                    <span class="radio-desc">For agencies that may require US-origin models. gpt-oss-120B MXFP4 (OpenAI, 3 shards). ~46 t/s; pairwise 5-1 vs Qwen 35B, 4-2 vs Qwen 122B.</span>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="synthesis-specialist">
-                    <span class="radio-title">SYNTHESIS — regulatory specialist</span>
-                    <span class="radio-desc">Regulatory currency and incisive plan reviews. Qwen 3.5 122B-A10B MTP. 28.3 t/s tuned Vulkan, 81.8% MTP-probe acceptance.</span>
-                  </label>
-                  <label class="radio-card">
-                    <input type="radio" name="finder-priority" value="synthesis-stepfun">
-                    <span class="radio-title">SYNTHESIS — large contender</span>
-                    <span class="radio-desc">StepFun Step-3.7-Flash MTP. 27.9 t/s local decode, AA Intelligence 43, strong private pairwise; independent calibration still needed.</span>
+                    <span class="radio-title">PLAN / AGENTIC — Qwen 3.5 35B baseline</span>
+                    <span class="radio-desc">Planning and agentic loops. Qwen 3.5 35B-A3B MoE (MXFP4). ~47.3 t/s, nonce 3/3.</span>
                   </label>
                   <label class="radio-card">
                     <input type="radio" name="finder-priority" value="companion">
@@ -635,7 +635,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                   </thead>
                   <tbody>
                     <tr class="highlighted-row">
-                      <td>gpt-oss-120B MXFP4 — QUALITY baseline</td>
+                      <td>gpt-oss-120B MXFP4 — AMERICAN-ONLY quality/speed <small style="opacity:0.7">(US-origin)</small></td>
                       <td>~63 GB</td>
                       <td>5-1 vs Qwen 35B; 4-2 vs Qwen 122B</td>
                       <td>~46 t/s</td>
@@ -684,7 +684,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                       <td>not run</td>
                     </tr>
                     <tr class="highlighted-row">
-                      <td>Gemma 4 31B IT Q6_K — second-opinion lane <small style="opacity:0.7">(dense — slow decode)</small></td>
+                      <td>Gemma 4 31B IT Q6_K — AMERICAN-ONLY coding second-opinion <small style="opacity:0.7">(US-origin, dense — slow decode)</small></td>
                       <td>25.2 GB</td>
                       <td>4-2 vs Gemma 26B-A4B</td>
                       <td>~8.25 tok/s tg128; ~7.7 tok/s sustained<br><small style="opacity:0.7">(dense; pp8192 ~133.6 tok/s)</small></td>
@@ -726,42 +726,42 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                       <td class="fail">1 / 3</td>
                     </tr>
                     <tr>
-                      <td>Qwen 3.5 35B (MXFP4, Think-On)</td>
+                      <td>Qwen 3.5 35B (MXFP4, Think-On) — PLAN/AGENTIC baseline</td>
                       <td>21 GB</td>
                       <td>79 / 84</td>
                       <td>47.3 t/s</td>
                       <td class="pass">3 / 3</td>
                     </tr>
                     <tr>
-                       <td>Qwen 3.5 122B (MXFP4, Think-On) — QUALITY spot-specialist</td>
+                       <td>Qwen 3.5 122B (MXFP4, Think-On) — <em>retired 2026-06-02</em></td>
                        <td>70 GB</td>
                        <td>80 / 84</td>
                        <td>19.4 t/s</td>
                        <td class="pass">3 / 3</td>
                      </tr>
                      <tr>
-                       <td>Qwen 3.5 122B (MXFP4, Think-Off)</td>
+                       <td>Qwen 3.5 122B (MXFP4, Think-Off) — <em>retired 2026-06-02</em></td>
                        <td>70 GB</td>
                        <td>81 / 84</td>
                        <td>19.5 t/s</td>
                        <td class="pass">3 / 3</td>
                      </tr>
                      <tr class="highlighted-row">
-                       <td>Qwen 3.5 122B MTP (MXFP4_MOE, Vulkan RADV) — tuned speed lane</td>
+                       <td>Qwen 3.5 122B MTP (MXFP4_MOE, Vulkan RADV) — <em>retired 2026-06-02 (tuned lane, kept as record)</em></td>
                        <td>~70 GB</td>
                        <td>3-3 quality tie vs previous MTP config</td>
                        <td>28.3 t/s<br><small style="opacity:0.7">pp 324.9 t/s; DRAFT_N=1, PMIN unset</small></td>
                        <td class="pass">3 / 3</td>
                      </tr>
                      <tr class="highlighted-row">
-                       <td>StepFun Step-3.7-Flash MTP — large QUALITY contender</td>
+                       <td>StepFun Step-3.7-Flash MTP — QUALITY champion <small style="opacity:0.7">(graduated 2026-06-02)</small></td>
                        <td>88.79 GiB + 3.5 GB draft</td>
                        <td>plain StepFun: 6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B</td>
                        <td>27.9 t/s<br><small style="opacity:0.7">pp 183.5 t/s; 89.3% MTP acceptance (ub=256)</small></td>
                        <td class="pass">3 / 3</td>
                      </tr>
                      <tr>
-                       <td>StepFun Step-3.7-Flash plain — large contender baseline</td>
+                       <td>StepFun Step-3.7-Flash plain — QUALITY champion (plain lane)</td>
                        <td>88.79 GiB</td>
                        <td>6-0 vs gpt-oss-soulfix; 4-0-2 vs 122B</td>
                        <td>20.4-22.3 t/s<br><small style="opacity:0.7">pp 212.0 t/s; coding 4/5 E2E</small></td>
@@ -792,7 +792,7 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 </table>
               </div>
               <p class="sub-text" style="margin-top:12px;"><strong>Note — MTP speed lanes are opt-in.</strong> The Qwen3.6-35B-A3B-MTP GGUFs carry a native nextn head, so llama-server can self-speculate with <code>--spec-type draft-mtp</code> and no separate draft model. The technique surfaced via the community <a href="https://github.com/hogeheer499-commits/strix-halo-guide" target="_blank" rel="noopener">strix-halo-guide</a>; this repo independently reproduced and quality-gated the MXFP4-MTP and Q4_K_M-MTP lanes. Full audit trail: <a href="https://github.com/boxwrench/tesla_agent/blob/main/reference/reproducibility-matrix.md" target="_blank" rel="noopener">Reproducibility Matrix &amp; Technical Deep-Dive</a>.</p>
-              <p class="sub-text" style="margin-top:12px;"><strong>Latest large-model MTP lanes.</strong> Qwen 122B MTP now has a tuned Vulkan profile at <strong>28.3 t/s</strong> decode with <strong>81.8%</strong> MTP-probe acceptance. StepFun Step-3.7-Flash MTP reaches <strong>27.9 t/s</strong> decode (wall std <strong>78.0 s</strong>) with <strong>89.3%</strong> acceptance using <code>ub=256</code> — a ubatch sweep (2026-06-06) showed smaller micro-batches cut per-speculative-step latency and compound over long outputs (+7% tg, −5% wall std vs the prior <code>ub=512</code> default).</p>
+              <p class="sub-text" style="margin-top:12px;"><strong>Latest large-model MTP lanes.</strong> Qwen 122B MTP (now <strong>retired</strong> as of 2026-06-02, kept only as a record) reached a tuned Vulkan profile at <strong>28.3 t/s</strong> decode with <strong>81.8%</strong> MTP-probe acceptance; its quality role is now held by the StepFun champion. StepFun Step-3.7-Flash MTP reaches <strong>27.9 t/s</strong> decode (wall std <strong>78.0 s</strong>) with <strong>89.3%</strong> acceptance using <code>ub=256</code> — a ubatch sweep (2026-06-06) showed smaller micro-batches cut per-speculative-step latency and compound over long outputs (+7% tg, −5% wall std vs the prior <code>ub=512</code> default).</p>
               <p class="sub-text" style="margin-top:12px;"><strong>Gemma 4 26B-A4B plain control baseline.</strong> The no-spec Vulkan lane with <code>--reasoning off</code> and F16 KV measures <strong>pp512 1002.76 &plusmn; 10.29 t/s</strong> and <strong>tg128 44.76 &plusmn; 0.90 t/s</strong> with Hermes nonce 3/3. It is the simpler lane for general reasoning, JSON extraction, and prose; the MTP comparison only pays off on heavy code generation.</p>
               <p class="sub-text" style="margin-top:12px;"><strong>Gemma 4 QAT Q4_0 sweep.</strong> The official Google QAT 26B-A4B row is now the fastest general Gemma lane measured here: <strong>59.4 t/s decode</strong> and <strong>1194.4 t/s prefill</strong>. QAT means quantization-aware training: the model is trained or adapted with the low-precision target in mind. The experimental 26B-A4B MTP/Q8 row reaches <strong>71.0 t/s</strong> single-stream, but uses a non-QAT-matched assistant head and drops two-slot throughput, so it remains a speed probe.</p>
               <p class="sub-text" style="margin-top:12px;"><strong>Note — the dense 27B is benchmarked but NOT in the production stack.</strong> Community discussion often treats Qwen 27B as a strong reasoner, but the local Strix Halo benches did not support that routing choice: blind pairwise was 0&ndash;6 vs the 122B and normal decode tested around 9.6&ndash;11.5 t/s. It is kept as a break-glass option for tough, blocked projects, not a first- or second-line model. <em>Technical aside:</em> DFlash speculative decoding lifts its floor to <strong>~31 t/s (2.82&times;)</strong> with a footprint-minimized Q4_K_M draft.</p>
@@ -1145,8 +1145,8 @@ To run the agent, use:  qwen36_mxfp4 -t "your task"</code></pre>
                 <div class="glossary-item">
                   <dt>gpt-oss-120B</dt>
                   <dd>
-                    <p><strong>ELI5:</strong> A large open-weight model that became this stack's general quality baseline after local pairwise testing.</p>
-                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> The senior reviewer lane became fast enough and useful enough to become the default for formal synthesis.</p>
+                    <p><strong>ELI5:</strong> A large open-weight model (OpenAI). In this stack it is the AMERICAN-ONLY quality/speed lane — the US-origin pick for agencies that may require domestic-only model provenance (the general QUALITY champion, StepFun, is non-US in origin).</p>
+                    <p class="analogy"><i class="fa-solid fa-lightbulb"></i> <em>Analogy:</em> The trusted domestic-supplier option you keep on hand for customers whose rules say "buy American," even when another vendor tops the leaderboard.</p>
                   </dd>
                 </div>
               </div>

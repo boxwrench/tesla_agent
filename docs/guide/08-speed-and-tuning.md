@@ -35,7 +35,7 @@ This forces the model to wrap up its thinking trace and output its final answer 
 > [!WARNING]
 > **Do not cap thinking on stateful, multi-step tasks.** In our testing, *any* budget cap caused the model to drop details it needed to carry between steps and fail the multi-step coding gate — only uncapped thinking held the result. Reasoning budgets are a latency win for single-shot planning and prose, not for chained agent loops. When in doubt, leave it uncapped.
 
-For gpt-oss-120B, the important public-facing rule is simpler: use a system prompt that asks for a draft with clearly labeled assumptions. Before that prompt fix, the model often deflected into a checklist of missing inputs; after it, the same model became the measured quality baseline.
+For gpt-oss-120B, the important public-facing rule is simpler: use a system prompt that asks for a draft with clearly labeled assumptions. Before that prompt fix, the model often deflected into a checklist of missing inputs; after it, the same model became the measured AMERICAN-ONLY quality/speed pick (the US-origin lane for agencies that may require domestic-only model provenance).
 
 ### **The Global Server Lever: `--reasoning-budget N`**
 You can also cap reasoning globally when launching the model server:
@@ -85,21 +85,21 @@ source of truth. This chapter explains the speed levers.
 |---|---:|---|
 | Qwen 3.6 35B-A3B Q4_K_M-MTP (Vulkan/RADV) | **~81.2 tok/s** | opt-in speed lane; won quality pairwise 4-2; human-check regulatory figures |
 | Qwen 3.6 35B-A3B MXFP4-MTP (Vulkan/RADV) | **~72.7 tok/s** | opt-in speed lane; same production quant |
-| Qwen 3.6 35B-A3B MXFP4 (Vulkan/RADV) | **~58.5 tok/s** | CODE/general baseline; workhorse default unchanged |
-| Qwen 3.5 35B-A3B MXFP4 (ROCm) | 47.3 tok/s | retained for regression tests |
-| gpt-oss-120B MXFP4 (Vulkan/RADV) | **~46 tok/s** | QUALITY baseline |
+| Qwen 3.6 35B-A3B MXFP4 (Vulkan/RADV) | **~58.5 tok/s** | CODE/general workhorse (default) |
+| Qwen 3.5 35B-A3B MXFP4 (ROCm) | 47.3 tok/s | PLAN/AGENTIC baseline |
+| gpt-oss-120B MXFP4 (Vulkan/RADV) | **~46 tok/s** | AMERICAN-ONLY quality/speed (US-origin, OpenAI) |
 | Gemma 4 26B-A4B plain control (Vulkan/RADV) | **~44.8 tok/s tg128** | verified plain-control baseline; `pp512 1002.76 ± 10.29 tok/s`, reasoning off, F16 KV |
 | Qwen3-Coder-Next UD-Q4_K_XL (Vulkan/RADV) | **44.4 tok/s** | hard-coding challenger; `pp 723.2 tok/s`, Vulkan b9360 promoted |
 | Qwen 3.6 35B-A3B MXFP4 (ROCm fallback) | ~44.2 tok/s | CODE baseline ROCm fallback |
-| Qwen 3.5 122B-A10B MTP MXFP4_MOE (Vulkan/RADV) | **28.3 tok/s** | tuned 122B speed lane; `DRAFT_N=1`, `PMIN` unset; 81.8% MTP-probe acceptance |
-| StepFun Step-3.7-Flash MTP (Vulkan/RADV) | **27.9 tok/s** (wall std 78.0 s) | large-model QUALITY contender; 89.3% MTP acceptance; ub=256 default (ubatch sweep 2026-06-06); independent calibration still needed |
-| StepFun Step-3.7-Flash plain (Vulkan/RADV) | 20.4-22.3 tok/s | large-model QUALITY contender baseline |
-| Qwen 3.5 122B-A10B MXFP4 (ROCm) | ~19.4 tok/s | QUALITY spot-specialist |
+| StepFun Step-3.7-Flash MTP (Vulkan/RADV) | **27.9 tok/s** (wall std 78.0 s) | QUALITY champion (graduated 2026-06-02); 89.3% MTP acceptance; ub=256 default (ubatch sweep 2026-06-06) |
+| StepFun Step-3.7-Flash plain (Vulkan/RADV) | 20.4-22.3 tok/s | QUALITY champion — plain (no-draft) lane |
+| Qwen 3.5 122B-A10B MTP MXFP4_MOE (Vulkan/RADV) | **28.3 tok/s** | *retired 2026-06-02* (tuned lane; `DRAFT_N=1`, `PMIN` unset; 81.8% MTP-probe acceptance; kept as record) |
+| Qwen 3.5 122B-A10B MXFP4 (ROCm) | ~19.4 tok/s | *retired 2026-06-02* |
 | Qwen 3.6 27B Dense UD-Q4_K_XL | 9.6–11.5 tok/s normal decode | break-glass only |
-| **Gemma 4 31B IT Q6_K (Vulkan/RADV)** | **~8.25 tok/s tg128; ~7.7 tok/s sustained** | second-opinion lane (dense — see note) |
+| **Gemma 4 31B IT Q6_K (Vulkan/RADV)** | **~8.25 tok/s tg128; ~7.7 tok/s sustained** | AMERICAN-ONLY coding second-opinion (dense — see note) |
 
 > [!NOTE]
-> **Why is Gemma 4 31B the slowest model in the verified stack?** Both Gemma 31B and Qwen 35B are roughly 25 GB in size, yet Qwen 35B runs roughly 7× faster on the same hardware before any MTP opt-in. The reason is architecture: Qwen 35B is a Mixture-of-Experts model that activates only ~3B parameters per token, so each decode step reads far less weight data from memory. Gemma 31B is a **dense** model: every token requires reading all 31B parameters from the same bandwidth-constrained unified memory. On a memory-bandwidth-bound APU like Strix Halo, that difference collapses decode speed from ~58.5 tok/s (MoE workhorse) to ~8 tok/s (dense). Gemma 31B earns its place in the stack as a second-opinion lane for quality verification and cross-family comparison — not as a throughput model. Use it on the orchestrated path where quality of each step matters more than wall-clock time.
+> **Why is Gemma 4 31B the slowest model in the verified stack?** Both Gemma 31B and Qwen 35B are roughly 25 GB in size, yet Qwen 35B runs roughly 7× faster on the same hardware before any MTP opt-in. The reason is architecture: Qwen 35B is a Mixture-of-Experts model that activates only ~3B parameters per token, so each decode step reads far less weight data from memory. Gemma 31B is a **dense** model: every token requires reading all 31B parameters from the same bandwidth-constrained unified memory. On a memory-bandwidth-bound APU like Strix Halo, that difference collapses decode speed from ~58.5 tok/s (MoE workhorse) to ~8 tok/s (dense). Gemma 31B earns its place in the stack as the AMERICAN-ONLY coding second-opinion lane (US-origin) for quality verification and cross-family comparison — not as a throughput model. Use it on the orchestrated path where quality of each step matters more than wall-clock time.
 
 ### **Gemma 4 26B-A4B plain Vulkan control baseline**
 

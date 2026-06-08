@@ -8,6 +8,44 @@ guidance, or web-dashboard behavior should be listed.
 
 ## Unreleased
 
+### Model Ladder Reconciled to `tesla` Source of Truth (2026-06-07)
+
+- Propagated the `stable/2026-06-02` model ladder from the private `tesla` repo
+  to all public surfaces (README, guide chapters 04/07/08, reference README,
+  decision tree, reproducibility matrix, and the docs dashboard + model finder):
+  - **StepFun Step-3.7-Flash** is now the **QUALITY champion** (graduated
+    2026-06-02), no longer framed as an unproven contender. It replaced Qwen 122B
+    at the same decode speed with higher quality.
+  - **Qwen 3.5 122B retired** (kept on disk for regression only); all "QUALITY
+    spot-specialist" framing removed.
+  - **gpt-oss-120B (OpenAI) and Gemma 4 31B (Google)** reclassified as the
+    **AMERICAN-ONLY tier** — US-origin models for agencies that may require
+    domestic-only model provenance.
+  - **Qwen 3.5 35B-A3B** surfaced as the **PLAN/AGENTIC baseline**;
+    **Qwen 3.6 35B** clarified as the **CODE/general workhorse (default)**.
+- StepFun public-mirror caveat retained: source/checksum pins are not yet complete
+  in the public mirror, so it is measured but not yet turnkey-reproducible here.
+- Note: the private `KNOWN-GOOD` pin lists older decode figures (Qwen 35B 50.1,
+  StepFun 26.0) that predate the 2026-06-06 numbers already published here
+  (58.5, 27.9); the newer figures were kept and the skew flagged for verification.
+
+### Serving Default Switched to Vulkan + Reproduction Procedure (2026-06-07)
+
+- Setup now builds and serves on the **Vulkan (RADV)** backend by default
+  (from llama.cpp source at tag `b9247`), replacing the Lemonade-ROCm install
+  path; ROCm retained as a documented fallback. Updated `docs/index.html`,
+  `guide/05-setup.md`, `reference/README.md`, `scripts/config.env.example`,
+  and `serve_vulkan.sh` examples across the guide; resolved `<LEMONADE_BUILD_TAG>`
+  placeholders to `b9247`.
+- Setup Step 4 rewritten for first-time users: apt prerequisites, predictable
+  clone dir, parallel build, and auto-wired `TESLA_VULKAN_SERVER`.
+- Corrected stale StepFun dashboard figures (27.9 t/s, pp 183.5, 89.3%
+  acceptance, ub=256).
+- Reproducibility matrix gained a **"How to Reproduce These Results"** section
+  (download + verify, serve per lane, nonce gate, coding eval, `llama-bench`
+  speed), and now flags that the in-house `full_bench.sh` harness is not shipped
+  in the public mirror, with a stock `llama-bench` equivalent.
+
 ### Gemma 4 MTP PARALLEL=2 Fix + 12B 2-slot Benchmark (2026-06-06)
 
 - Root-caused and fixed the `GGML_ASSERT(ggml_nelements(a) == ne0*ne1*ne2)` crash
