@@ -32,8 +32,8 @@ To ensure reproducibility, all benchmarks, evaluations, and tests were executed 
 
 ### B. Software Configuration
 * **Operating System:** Linux (Ubuntu 24.04 LTS, Kernel `6.11.0-generic` or newer).
-* **AMD Driver Suite:** ROCm 7.2.x (HIP runtime; 7.1.x also works).
-* **Open Source Graphics Drivers:** Mesa 25.2.8 (RADV Vulkan compiler).
+* **Primary serving backend (default):** **Vulkan / RADV** via Mesa 25.2.8 (RADV Vulkan compiler). This is the default backend for the stack and the one most rows below were measured on.
+* **Fallback backend:** **ROCm 7.2.x** (HIP runtime; 7.1.x also works), retained as a tested fallback. Rows explicitly marked *(ROCm)* below — e.g. the Qwen 3.5 35B PLAN baseline, the Qwen 3.6 35B CODE fallback, and the retired 122B — were measured on this path. The ROCm runtime is also what the host HSA override variables target during setup, so it is installed even when you serve on Vulkan.
 * **Inference Server:** `llama.cpp` / `llama-server` (stable build `b9247`; opt-in MTP lanes reproduced on `b9360`, commit prefix `6b4e4bd...`; Gemma QAT MTP probes on Atomic `b9019-0a635dcd9`).
 * **Vulkan shader compiler for MTP lanes:** `glslc` built from source using shaderc `v2026.3-dev`. The distro `glslc` 2023.8 was too old for the reproduced MTP build.
 * **Environment Overrides (`config.env`):**

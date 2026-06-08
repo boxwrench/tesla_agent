@@ -74,7 +74,7 @@ Start here and read in order — each chapter builds on the last. Written for wa
 ## 🛠️ Reference Testing Stack
 All benchmarks were run on local consumer hardware with the following configuration:
 * **Hardware (APU):** AMD Ryzen Strix Halo (gfx1151), 128 GB LPDDR5X system RAM (configured via modprobe with **96 GB GTT graphics memory pool**).
-* **Server Backend:** `llama.cpp/llama-server` (stable build `b9247`; opt-in MTP lanes reproduced on `b9360`, with Gemma QAT MTP probes on Atomic `b9019`) served via ROCm 7.2.x (HIP) and Mesa/RADV Vulkan (Mesa 25.2.8). The fastest current lanes use the **Vulkan/RADV** backend (see matrix).
+* **Server Backend:** `llama.cpp/llama-server` (stable build `b9247`; opt-in MTP lanes reproduced on `b9360`, with Gemma QAT MTP probes on Atomic `b9019`). The **default backend is Vulkan/RADV** (Mesa 25.2.8); **ROCm 7.2.x (HIP)** is the retained fallback and the path some rows are measured on (see matrix).
 * **Parameters:** Greedy decoding (temperature = 0), context buffers scaled from 8,192 to 32,768, Flash Attention active.
 
 ## 📊 Model Performance Matrix
