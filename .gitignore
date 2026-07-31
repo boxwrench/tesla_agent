@@ -15,3 +15,6 @@ __pycache__/
 
 # Tool-specific local state (not project content)
 .antigravitycli/
+
+*.exe
+scripts/eval/
